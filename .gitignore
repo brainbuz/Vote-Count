@@ -1,2 +1,4 @@
 startlib
 .*
+*ERR
+*LOG
