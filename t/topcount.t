@@ -16,6 +16,8 @@ use Vote::Count::ReadBallots 'read_ballots';
 my $VC1 = Vote::Count->new( ballotset => read_ballots('t/data/data2.txt'), );
 
 my $tc1       = $VC1->TopCount();
+# p $tc1->RawCount();
+
 my $expecttc1 = {
   CARAMEL    => 0,
   CHOCOLATE  => 1,
@@ -26,16 +28,16 @@ my $expecttc1 = {
   STRAWBERRY => 0,
   VANILLA    => 7
 };
-is_deeply( $tc1, $expecttc1,
-  "Topcounted a small set with no active list as expected" );
 
+is_deeply( $tc1->RawCount(), $expecttc1,
+  "Topcounted a small set with no active list as expected" );
 
 my $tc2 = $VC1->TopCount(
   {
     'VANILLA'   => 1,
     'CHOCOLATE' => 1,
     'CARAMEL'   => 1,
-    'PISTACHIO' => 0
+    'PISTACHIO' => 1
   }
 );
 my $expecttc2 = {
@@ -44,18 +46,27 @@ my $expecttc2 = {
   PISTACHIO => 2,
   VANILLA   => 7
 };
+is_deeply( $tc2->RawCount(), $expecttc2,
+  "Check rawcount to confirm Topcounted a small set with AN active list" ) ;
 
-is_deeply( $tc2, $expecttc2,
-  "Topcounted a small set with AN active list as expected" );
 
-subtest 'TopCountMajority from the same data' => sub {
+
+
   is_deeply( $VC1->TopCountMajority( ),
     { thresshold => 8, votes => 15 },
     'With full ballot TopCountMajority returns only votes and thresshold');
   is_deeply( $VC1->TopCountMajority( $tc2 ),
     { thresshold => 6, votes => 11, winner => 'VANILLA', winvotes => 7 },
     'Topcount from saved subset topcount TopCountMajority also gives winner info');
-};
+# todo "refactoring tests" => sub {
+# };
+
+
+done_testing;
+=pod
+
+is_deeply( $tc2, $expecttc2,
+  "Topcounted a small set with AN active list as expected" );
 
 subtest 'Topcount ranking' => sub {
   #  my @rankedtc1 = ;
@@ -68,15 +79,15 @@ subtest 'Topcount ranking' => sub {
   my %xbyrank = $x->hashbyrank();
   my @xtop = $x->arraytop();
   my @xbottom = $x->arraybottom();
-  p %xwithorder;
-  p %xbyrank;
-  p @xtop;
-  p @xbottom;
+  # p %xwithorder;
+  # p %xbyrank;
+  # p @xtop;
+  # p @xbottom;
   # is( , 'coffi');
 
    };
 
 
-
+};
 
 done_testing();

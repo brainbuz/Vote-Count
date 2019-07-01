@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use 5.026;
 
-use feature qw /postderef signatures/;
-
 package Vote::Count::RankCount;
+
+use feature qw /postderef signatures/;
 no warnings 'experimental';
 use List::Util qw( min max );
 use boolean;
@@ -40,8 +40,10 @@ sub _RankResult ( $rawcount ) {
   # $pos still has last position filled, %byrank{$pos} is the last place.
   # sometimes byranks came in as var{byrank...} deref and reref fixes this
   # although it would be better if I understood why it happened.
-  my @top = @{$byrank{1}} ;
-  my @bottom = @{$byrank{ $pos }};
+  # It is useful to sort the arrays anyway, for display they would likely be
+  # sorted anyway. For testing it makes the element order predictable.
+  my @top = sort @{$byrank{1}} ;
+  my @bottom = sort @{$byrank{ $pos }};
   return {
     'rawcount' => $rawcount,
     'ordered' => \%ordered,
@@ -57,10 +59,12 @@ sub Rank ( $class, $rawcount ) {
   return bless $I, $class;
 }
 
-sub RawCount ( $I ) { return $I->{'rawcount'}->%* }
-sub HashWithOrder ( $I ) { return $I->{'ordered'}->%* }
-sub HashByRank ( $I ) { return $I->{'byrank'}->%* }
-sub ArrayTop ( $I ) { return sort $I->{'top'}->@* }
-sub ArrayBottom ( $I ) { return sort $I->{'bottom'}->@* }
+sub RawCount ( $I ) { return $I->{'rawcount'} }
+sub HashWithOrder ( $I ) { return $I->{'ordered'} }
+sub HashByRank ( $I ) { return $I->{'byrank'} }
+sub ArrayTop ( $I ) { return  $I->{'top'} }
+sub ArrayBottom ( $I ) { return $I->{'bottom'} }
+# sub ArrayTop ( $I ) { return [sort $I->{'top'}->@* ] }
+# sub ArrayBottom ( $I ) { return [sort $I->{'bottom'}->@* ] }
 
 1;

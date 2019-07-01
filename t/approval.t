@@ -6,7 +6,7 @@ use 5.026;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-use Data::Printer;
+# use Data::Printer;
 
 use Path::Tiny;
 
