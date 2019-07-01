@@ -3,7 +3,7 @@ use warnings;
 use 5.026;
 use feature qw /postderef signatures/;
 
-package VoteCount;
+package Vote::Count;
 use namespace::autoclean;
 use Moose;
 
@@ -31,7 +31,7 @@ sub __builder_ballotsettype__ ( $self ) {
 }
 
 
-with 'VoteCount::Approval', 'VoteCount::TopCount';
+with 'Vote::Count::Approval', 'Vote::Count::TopCount';
 
 __PACKAGE__->meta->make_immutable;
 1;

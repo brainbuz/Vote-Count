@@ -4,7 +4,7 @@ use 5.026;
 
 use feature qw /postderef signatures/;
 
-package VoteCount::TopCount::Rank;
+package Vote::Count::TopCount::Rank;
 no warnings 'experimental';
 
 # RankTopCount Method returns an object
@@ -24,11 +24,11 @@ sub new ( $class, $ordered, $byrank, $top, $bottom ) {
 
 sub hashwithorder ( $I ) { return $I->{'ordered'}->%* }
 sub hashbyrank ( $I ) { return $I->{'byrank'}->%* }
-sub arraytop ( $I ) { return $I->{'top'}->@* }
-sub arraybottom ( $I ) { return $I->{'bottom'}->@* }
+sub arraytop ( $I ) { return sort $I->{'top'}->@* }
+sub arraybottom ( $I ) { return sort $I->{'bottom'}->@* }
 
 
-package VoteCount::TopCount;
+package Vote::Count::TopCount;
 use Moose::Role;
 
 no warnings 'experimental';
@@ -111,7 +111,7 @@ sub RankTopCount ( $self, $topcount = undef, $active = undef ) {
   # %byrank[1] is arrayref of 1st position,
   # $pos still has last position filled, %byrank{$pos} is the last place.
 
-  return VoteCount::TopCount::Rank->new(
+  return Vote::Count::TopCount::Rank->new(
     \%ordered, \%byrank, $byrank{1}, $byrank{ $pos} );
 }
 

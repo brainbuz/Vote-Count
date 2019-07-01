@@ -1,4 +1,4 @@
-package VoteCount::ReadBallots;
+package Vote::Count::ReadBallots;
 
 use 5.028;
 use feature qw/postderef signatures/;

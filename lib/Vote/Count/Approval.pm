@@ -4,7 +4,7 @@ use 5.026;
 
 use feature qw /postderef signatures/;
 
-package VoteCount::Approval;
+package Vote::Count::Approval;
 use Moose::Role;
 
 no warnings 'experimental';

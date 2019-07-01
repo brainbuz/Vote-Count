@@ -10,10 +10,10 @@ use Data::Printer;
 
 use Path::Tiny;
 
-use VoteCount;
-use VoteCount::ReadBallots 'read_ballots';
+use Vote::Count;
+use Vote::Count::ReadBallots 'read_ballots';
 
-my $VC1 = VoteCount->new(
+my $VC1 = Vote::Count->new(
   ballotset => read_ballots('t/data/data1.txt'), );
 
 is(

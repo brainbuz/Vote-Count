@@ -10,10 +10,10 @@ use Data::Printer;
 
 use Path::Tiny;
 
-use VoteCount;
-use VoteCount::ReadBallots 'read_ballots';
+use Vote::Count;
+use Vote::Count::ReadBallots 'read_ballots';
 
-my $VC1 = VoteCount->new( ballotset => read_ballots('t/data/data2.txt'), );
+my $VC1 = Vote::Count->new( ballotset => read_ballots('t/data/data2.txt'), );
 
 my $tc1       = $VC1->TopCount();
 my $expecttc1 = {
@@ -60,8 +60,8 @@ subtest 'TopCountMajority from the same data' => sub {
 subtest 'Topcount ranking' => sub {
   #  my @rankedtc1 = ;
   my $x = $VC1->RankTopCount();
-  isa_ok($x, ['VoteCount::TopCount::Rank'],
-    '->RankTopCount generated object of VoteCount::TopCount::Rank');
+  isa_ok($x, ['Vote::Count::TopCount::Rank'],
+    '->RankTopCount generated object of Vote::Count::TopCount::Rank');
   can_ok( $x, [qw/ hashwithorder hashbyrank arraytop arraybottom/],
     "have expected subs");
   my %xwithorder = $x->hashwithorder();

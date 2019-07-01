@@ -10,10 +10,10 @@ use Data::Printer;
 
 use Path::Tiny;
 
-use VoteCount::ReadBallots 'read_ballots';
+use Vote::Count::ReadBallots 'read_ballots';
 
 is_deeply(
-  VoteCount::ReadBallots::_choices(':CHOICES:VANILLA:CHOCOLATE:STRAWBERRY'),
+  Vote::Count::ReadBallots::_choices(':CHOICES:VANILLA:CHOCOLATE:STRAWBERRY'),
   {  VANILLA => 1, CHOCOLATE => 1, STRAWBERRY => 1} ,
   "_choices private sub returns hash from choices string");
 
