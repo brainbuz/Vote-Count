@@ -28,7 +28,7 @@ sub Approval ( $self, $active=undef ) {
         }
       }
     }
-  return \%approval;
+  return Vote::Count::RankCount->Rank( \%approval );
 }
 
 1;

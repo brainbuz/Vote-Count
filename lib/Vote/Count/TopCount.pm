@@ -34,7 +34,7 @@ no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
 # use boolean;
-use Data::Printer;
+# use Data::Printer;
 
 sub TopCount ( $self, $active=undef ) {
   my %ballotset = $self->ballotset()->%*;

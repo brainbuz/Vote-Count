@@ -31,7 +31,7 @@ sub __builder_ballotsettype__ ( $self ) {
 }
 
 
-with 'Vote::Count::Approval', 'Vote::Count::TopCount';
+with 'Vote::Count::Approval', 'Vote::Count::TopCount', 'Vote::Count::Boorda';
 
 __PACKAGE__->meta->make_immutable;
 1;

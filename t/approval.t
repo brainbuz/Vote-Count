@@ -27,7 +27,7 @@ my $expectA1 = {
   VANILLA    => 10
 };
 
-is_deeply( $A1, $expectA1,
+is_deeply( $A1->RawCount(), $expectA1,
   "Approval counted for a small set with no active list" );
 
 my $A2       = $VC1->Approval(
@@ -40,7 +40,7 @@ my $expectA2 = {
   VANILLA    => 10
 };
 
-is_deeply( $A2, $expectA2,
+is_deeply( $A2->RawCount(), $expectA2,
   "Approval counted a small set with AN active list" );
 
 done_testing();
