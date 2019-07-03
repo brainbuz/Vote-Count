@@ -8,7 +8,7 @@ package Vote::Count::Approval;
 use Moose::Role;
 
 no warnings 'experimental';
-use Data::Printer;
+# use Data::Printer;
 
 sub Approval ( $self, $active=undef ) {
   my %ballotset = $self->ballotset()->%*;

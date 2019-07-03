@@ -6,7 +6,7 @@ use 5.026;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-use Data::Printer;
+# use Data::Printer;
 
 use Path::Tiny;
 
@@ -20,7 +20,5 @@ is(
   $VC1->ballotsettype(),
   'rcv',
   'ballotsettype option is set to rcv' );
-
-p $VC1;
 
 done_testing();

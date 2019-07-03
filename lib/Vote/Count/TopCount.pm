@@ -4,29 +4,6 @@ use 5.026;
 
 use feature qw /postderef signatures/;
 
-# package Vote::Count::TopCount::Rank;
-# no warnings 'experimental';
-
-# # RankTopCount Method returns an object
-# # The object needs to be defined in another class
-# # This class within the module for another class is only
-# # visble there, which is the only place it should be visible.
-
-# sub new ( $class, $ordered, $byrank, $top, $bottom ) {
-#   my $I = {
-#     'ordered' => $ordered,
-#     'byrank' => $byrank,
-#     'top' => $top,
-#     'bottom' => $bottom
-#   };
-#   return bless $I, $class;
-# }
-
-# sub hashwithorder ( $I ) { return $I->{'ordered'}->%* }
-# sub hashbyrank ( $I ) { return $I->{'byrank'}->%* }
-# sub arraytop ( $I ) { return sort $I->{'top'}->@* }
-# sub arraybottom ( $I ) { return sort $I->{'bottom'}->@* }
-
 package Vote::Count::TopCount;
 use Moose::Role;
 
