@@ -18,7 +18,8 @@ use Vote::Count::Boorda;
 
 
 my $VC1 = Vote::Count->new(
-  ballotset => read_ballots('t/data/data1.txt'), );
+  ballotset => read_ballots('t/data/data1.txt'),
+  bordadepth => 5 );
 
 subtest '_boordashrinkballot private method' => sub {
 my $shrunken = Vote::Count::Boorda::_boordashrinkballot (
@@ -52,8 +53,15 @@ subtest '_doboordacount private method' => sub {
     'CHERRY' => { 2 => 5 }
   };
   my $lightweight = sub { return 1 };
-  my $counted = Vote::Count::Boorda::_doboordacount(
-    $bordatable, $lightweight );
+  my $dbc = Vote::Count->new(
+      ballotset => read_ballots('t/data/data1.txt'),
+      bordaweight => $lightweight );
+# need an object for this test. the lightweight
+# bordaweight doesn't care about active or
+# bordadepth so an
+# empty hashref is passed as a placeholder.
+  my $counted = $dbc->_doboordacount(
+    $bordatable, {} );
   is( $counted->{'VANILLA'}, 19,
     'check count for first choice' );
   is( $counted->{'RAISIN'}, 8,
@@ -63,8 +71,6 @@ subtest '_doboordacount private method' => sub {
 };
 
 my ( $A1Rank, $A1Boorda ) = $VC1->Boorda();
-# p $A1Rank;
-# p $A1Boorda;
 
 
 my $expectA1 = {
@@ -80,38 +86,71 @@ my $expectA1 = {
 
 # p $A1Rank->RawCount();
 is_deeply( $A1Rank->RawCount(), $expectA1,
-  "Boorda counted for a small set with no active list" );
+  "Boorda counted small set no active list forced depth 5" );
 
-my $testweight = sub {
-  my $x = shift;
-  if    ( $x == 1 ) { return 12 }
-  elsif ( $x == 2 ) { return 6 }
-  elsif ( $x == 3 ) { return 4 }
-  elsif ( $x == 4 ) { return 3 }
-  else              { return 0 }
+# THis time set no depth and use a ballot set
+# with 12 choices
+my $BC1 = Vote::Count->new(
+  ballotset => read_ballots('t/data/ties1.txt'));
+my $expectB1 = {
+  BUBBLEGUM  => 68,
+  CARAMEL    => 44,
+  CHERRY     => 66,
+  CHOCCHUNK  => 24,
+  CHOCOLATE  => 62,
+  FUDGESWIRL => 72,
+  MINTCHIP   => 88,
+  PISTACHIO  => 48,
+  ROCKYROAD  => 59,
+  RUMRAISIN  => 48,
+  STRAWBERRY => 40,
+  VANILLA    => 72
+};
+# then repeat the last test
+my ( $B1Rank, $B1Boorda ) = $BC1->Boorda();
+# p $A1Rank->RawCount();
+# p $B1Rank->RawCount();
+is_deeply( $B1Rank->RawCount(), $expectB1,
+  "Boorda counted small set no active list default depth of 0" );
+
+subtest 'boorda with a custom weight funciton' => sub {
+  my $testweight = sub {
+    my $x = shift;
+    if    ( $x == 1 ) { return 12 }
+    elsif ( $x == 2 ) { return 6 }
+    elsif ( $x == 3 ) { return 4 }
+    elsif ( $x == 4 ) { return 3 }
+    else              { return 0 }
+  };
+
+  my $VC2 = Vote::Count->new(
+    ballotset   => read_ballots('t/data/data2.txt'),
+    bordaweight => $testweight,
+  );
+
+  my ( $A2, $B2 ) = $VC2->Boorda(
+    {
+      'VANILLA'   => 1,
+      'CHOCOLATE' => 1,
+      'CARAMEL'   => 1,
+      'PISTACHIO' => 0
+    }
+  );
+  my $expectA2 = {
+    CARAMEL   => 12,
+    CHOCOLATE => 50,
+    PISTACHIO => 24,
+    VANILLA   => 102
+  };
+
+  is_deeply( $A2->RawCount(), $expectA2,
+    "Boorda counted a small set with AN active list" );
+
+  is_deeply(
+    $B2->{'CHOCOLATE'},
+    { 1 => 1, 2 => 5, 3 => 2 },
+    'test a value on the Boorda Ranking table.'
+  );
 };
 
-my $VC2 = Vote::Count->new(
-  ballotset   => read_ballots('t/data/data2.txt'),
-  bordaweight => $testweight,
-);
-
-my ($A2, $B2 )     = $VC2->Boorda(
-    { 'VANILLA' => 1, 'CHOCOLATE' => 1, 'CARAMEL' => 1,
-      'PISTACHIO' => 0 });
-my $expectA2 = {
-  CARAMEL    => 12,
-  CHOCOLATE  => 50,
-  PISTACHIO  => 24,
-  VANILLA    => 102
-};
-
-is_deeply( $A2->RawCount(), $expectA2,
-  "Approval counted a small set with AN active list" );
-
-is_deeply(
-  $B2->{'CHOCOLATE'},
-  { 1 => 1, 2 => 5, 3 => 2 },
-  'test a value on the Boorda Ranking table.'
-);
 done_testing();

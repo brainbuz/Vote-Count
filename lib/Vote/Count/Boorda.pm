@@ -11,7 +11,7 @@ use List::Util qw( min max );
 use Vote::Count::RankCount;
 # use Try::Tiny;
 # use boolean;
-# use Data::Printer;
+use Data::Printer;
 
 has 'bordaweight' => (
   is => 'rw',
@@ -20,16 +20,48 @@ has 'bordaweight' => (
   lazy => 1,
 );
 
+has 'bordadepth' => (
+  is => 'rw',
+  isa => 'Int',
+  default => 0,
+);
+
+=pod
+
+=head1 Boorda Wieght
+
+Boorda's original method assigned each position the
+inverse if its position, ie in a 9 choice ballot
+position 1 was worth 9, while position 9 was worth 1,
+and position 8 was worth 2.
+
+When Creating a VoteCount object the Boorda weight
+may be set by passing a coderef. The coderef takes
+two arguments. The first argument is the
+position of the choice in question.
+The second argument is the depth of the ballot. The
+optional bordadepth attribute will set an arbitrary
+depth. Some popular options such inversion ( where
+choice $c becomes $c/1 then inverted to 1/$c) don't
+need to know the depth. In such cases the coderef
+should just ignore the second argument.
+
+The default Weight when none are provided is Boorda's
+original weight. If the boordadepth attribute is set
+it will be followed.
+
+=cut
+
 sub _buildbordaweight {
    return sub {
-    my $x = shift ;
+    my ( $x, $y ) = @_ ;
     if( $x > 5) { return 0 }
-    return ( 6 - $x) }
+    return ( $y +1 - $x) }
   }
 
 =pod
 
-=head3 _boordashrinkballot( $ballotset, $active )
+=head3 Private Method _boordashrinkballot( $ballotset, $active )
 
 Takes a ballotset and active list and returns a
 ballotset reduced to only the active choices. When
@@ -56,18 +88,29 @@ sub _boordashrinkballot ( $ballotset, $active ) {
   return $newballots;
 }
 
-sub _doboordacount( $BoordaTable, $weight) {
+sub _doboordacount( $self, $BoordaTable, $active) {
+# p $self;
+# p $BoordaTable;
+# p $active;
   my $BoordaCount = {};
+  my $weight = $self->bordaweight;
+  my $depth = $self->bordadepth
+    ? $self->bordadepth
+    : scalar( keys %{$active} );
   for my $c ( keys $BoordaTable->%*) {
     for my $rank ( keys $BoordaTable->{$c}->%* ) {
       $BoordaCount->{ $c } +=
-        $BoordaTable->{$c}{$rank} * $weight->( $rank )
+        $BoordaTable->{$c}{$rank} *
+        $weight->( $rank, $depth ) ;
     }
   }
   return $BoordaCount;
 }
 
 sub Boorda ( $self, $active = undef ) {
+
+
+
   my %ballotset = $self->ballotset()->%*;
   my %ballots   = ();
   if ( defined $active ) {
@@ -91,10 +134,13 @@ sub Boorda ( $self, $active = undef ) {
       }
     }
   }
+  my $BoordaCounted =
+         _doboordacount(
+           $self,
+           \%BoordaTable,
+           $active );
   return (
-    Vote::Count::RankCount->Rank(
-      _doboordacount( \%BoordaTable, $self->bordaweight() )
-    ),
+    Vote::Count::RankCount->Rank( $BoordaCounted ),
     \%BoordaTable
   );
 }
