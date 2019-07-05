@@ -11,7 +11,7 @@ use List::Util qw( min max );
 use Vote::Count::RankCount;
 # use Try::Tiny;
 # use boolean;
-use Data::Printer;
+# use Data::Printer;
 
 has 'bordaweight' => (
   is => 'rw',
@@ -55,23 +55,22 @@ it will be followed.
 sub _buildbordaweight {
    return sub {
     my ( $x, $y ) = @_ ;
-    if( $x > 5) { return 0 }
     return ( $y +1 - $x) }
   }
 
 =pod
 
-=head3 Private Method _boordashrinkballot( $ballotset, $active )
+=head3 Private Method _boordashrinkballot( $BallotSet, $active )
 
-Takes a ballotset and active list and returns a
-ballotset reduced to only the active choices. When
+Takes a BallotSet and active list and returns a
+BallotSet reduced to only the active choices. When
 choices are removed later choices are promoted.
 
 =cut
 
-sub _boordashrinkballot ( $ballotset, $active ) {
+sub _boordashrinkballot ( $BallotSet, $active ) {
   my $newballots = {};
-  my %ballots = $ballotset->{'ballots'}->%* ;
+  my %ballots = $BallotSet->{'ballots'}->%* ;
   for my $b ( keys %ballots ) {
     my @newballot = ();
     for my $item ( $ballots{$b}{'votes'}->@* ) {
@@ -89,9 +88,6 @@ sub _boordashrinkballot ( $ballotset, $active ) {
 }
 
 sub _doboordacount( $self, $BoordaTable, $active) {
-# p $self;
-# p $BoordaTable;
-# p $active;
   my $BoordaCount = {};
   my $weight = $self->bordaweight;
   my $depth = $self->bordadepth
@@ -99,6 +95,7 @@ sub _doboordacount( $self, $BoordaTable, $active) {
     : scalar( keys %{$active} );
   for my $c ( keys $BoordaTable->%*) {
     for my $rank ( keys $BoordaTable->{$c}->%* ) {
+      $BoordaCount->{ $c } = 0 unless defined $BoordaCount->{ $c };
       $BoordaCount->{ $c } +=
         $BoordaTable->{$c}{$rank} *
         $weight->( $rank, $depth ) ;
@@ -108,17 +105,14 @@ sub _doboordacount( $self, $BoordaTable, $active) {
 }
 
 sub Boorda ( $self, $active = undef ) {
-
-
-
-  my %ballotset = $self->ballotset()->%*;
+  my %BallotSet = $self->BallotSet()->%*;
   my %ballots   = ();
   if ( defined $active ) {
-    %ballots = %{_boordashrinkballot( \%ballotset, $active )};
+    %ballots = %{_boordashrinkballot( \%BallotSet, $active )};
   }
   else {
-    %ballots = $ballotset{'ballots'}->%*;
-    $active  = $ballotset{'choices'};
+    %ballots = $BallotSet{'ballots'}->%*;
+    $active  = $BallotSet{'choices'};
   }
   my %BoordaTable = ( map { $_ => {} } keys( $active->%* ) );
   for my $b ( keys %ballots ) {

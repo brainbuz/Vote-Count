@@ -13,7 +13,7 @@ use Path::Tiny;
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
 
-my $VC1 = Vote::Count->new( ballotset => read_ballots('t/data/data2.txt'), );
+my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data2.txt'), );
 
 my $A1       = $VC1->Approval();
 my $expectA1 = {

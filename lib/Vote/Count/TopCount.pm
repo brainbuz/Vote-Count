@@ -14,7 +14,7 @@ use Vote::Count::RankCount;
 # use Data::Printer;
 
 sub TopCount ( $self, $active=undef ) {
-  my %ballotset = $self->ballotset()->%*;
+  my %ballotset = $self->BallotSet()->%*;
   my %ballots = ( $ballotset{'ballots'}->%* );
   $active = $ballotset{'choices'} unless defined $active ;
   my %topcount = ( map { $_ => 0 } keys( $active->%* ));

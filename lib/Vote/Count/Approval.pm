@@ -11,10 +11,10 @@ no warnings 'experimental';
 # use Data::Printer;
 
 sub Approval ( $self, $active=undef ) {
-  my %ballotset = $self->ballotset()->%*;
-  my %ballots = ( $ballotset{'ballots'}->%* );
+  my %BallotSet = $self->BallotSet()->%*;
+  my %ballots = ( $BallotSet{'ballots'}->%* );
 # p %ballots;
-  $active = $ballotset{'choices'} unless defined $active ;
+  $active = $BallotSet{'choices'} unless defined $active ;
 # p $active;
   my %approval = ( map { $_ => 0 } keys( $active->%* ));
     for my $b ( keys %ballots ) {

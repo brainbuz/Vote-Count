@@ -10,28 +10,21 @@ use Moose;
 
 no warnings 'experimental';
 
-has 'ballotset' => ( is => 'ro', isa => 'HashRef' );
-has 'ballotsettype' => (
+has 'BallotSet' => ( is => 'ro', isa => 'HashRef' );
+has 'BallotSetType' => (
   is      => 'ro',
   isa     => 'Str',
   lazy    => 1,
-  builder => '__builder_ballotsettype__',
+  default =>  'rcv',
 );
 
-sub __builder_ballotsettype__ ( $self ) {
-  if ( $self->{'ballotset'}{'options'}{'rcv'} ) {
-    $self->{'ballotsettype'} = 'rcv';
-  }
-  elsif ( $self->{'ballotset'}{'options'}{'range'} ) {
-    { $self->{'ballotsettype'} = 'range' }
-  }
-  else {
-    die 'ballotset data missing option value of range or rcv';
-  }
-}
 
-
-with 'Vote::Count::Approval', 'Vote::Count::TopCount', 'Vote::Count::Boorda';
+# load the roles providing the underlying ops.
+with  'Vote::Count::Approval',
+      'Vote::Count::TopCount',
+      'Vote::Count::Boorda',
+      # 'Vote::Count::Matrix'
+      ;
 
 __PACKAGE__->meta->make_immutable;
 1;

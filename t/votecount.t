@@ -17,8 +17,8 @@ my $VC1 = Vote::Count->new(
   ballotset => read_ballots('t/data/data1.txt'), );
 
 is(
-  $VC1->ballotsettype(),
+  $VC1->BallotSetType(),
   'rcv',
-  'ballotsettype option is set to rcv' );
+  'BallotSetType option is set to rcv' );
 
 done_testing();
