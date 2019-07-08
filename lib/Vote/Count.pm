@@ -22,8 +22,7 @@ has 'BallotSetType' => (
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',
       'Vote::Count::TopCount',
-      'Vote::Count::Boorda',
-      # 'Vote::Count::Matrix'
+      'Vote::Count::Boorda'
       ;
 
 __PACKAGE__->meta->make_immutable;

@@ -8,7 +8,11 @@ use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
 use Data::Printer;
+use JSON::MaybeXS;
+use YAML::XS;
 use feature qw /postderef signatures/;
+
+my $json = JSON::MaybeXS->new( utf8 => 1, pretty => 1 );
 
 use Path::Tiny;
 
@@ -20,9 +24,14 @@ my $M1 = Vote::Count::Matrix->new(
   'BallotSet' => read_ballots('t/data/ties1.txt'),
 );
 
-# can_ok( $M1,
-#   [qw/Populate/],
-#   "expected subs for a matrix");
+my $M2 = Vote::Count::Matrix->new(
+  'BallotSet' => read_ballots('t/data/data1.txt'),
+);
+
+my $M3 = Vote::Count::Matrix->new(
+  'BallotSet' => read_ballots('t/data/data2.txt'),
+);
+
 isa_ok( $M1, ['Vote::Count::Matrix'],
 'The matrix is a Vote::Count::Matrix');
 
@@ -78,6 +87,62 @@ subtest 'check some in the matrix' => sub {
     'access a result in both possible pairing orders identical'
   );
 
+};
+
+subtest '_scorematrix' => sub {
+  my $scored1 = $M2->_scorematrix();
+  my $xscored1 = {
+    CARAMEL   =>   1,
+    CHOCOLATE  =>  5,
+    MINTCHIP     => 7,
+    PISTACHIO  =>  1,
+    ROCKYROAD  =>  0,
+    RUMRAISIN  =>  0,
+    STRAWBERRY =>  0,
+    VANILLA    =>  6
+};
+  is_deeply( $scored1, $xscored1, 'check scoring for a dataset');
+  my $xscored2 = {
+    CHOCOLATE  =>  1,
+    MINTCHIP     => 3,
+    PISTACHIO  =>  0,
+    VANILLA    =>  2
+};
+
+  $M2->Active( $xscored2 );
+  my $scored2 = $M2->_scorematrix();
+  is_deeply( $scored2, $xscored2,
+    'check scoring same data after eliminating some choices');
+};
+
+subtest 'CondorcetLoser elimination' => sub {
+  my $E2 =  $M2->CondorcetLoser();
+  is ( $E2->{'terse'},
+    "Eliminated Condorcet Losers: PISTACHIO, CHOCOLATE, VANILLA\n",
+    "terse is list of eliminated losers");
+
+like(
+  $E2->{'verbose'},
+  qr/^Removing Condorcet Losers/,
+  'check verbose for expected first line');
+like(
+  $E2->{'verbose'},
+  qr/Eliminationg Condorcet Loser: \*CHOCOLATE\*/,
+  'check verbose for an elimination notice');
+is_deeply ( $M2->{'Active'}, { 'MINTCHIP' => 3},
+  'only the condorcet winner remains in active') ;
+
+};
+
+subtest '_getsmithguessforchoice' => sub {
+  my %rumr = Vote::Count::Matrix::_getsmithguessforchoice(
+    'RUMRAISIN', $M1->{'Matrix'});
+  is( scalar(keys %rumr), 11,
+    'choice with a lot of losses proposed large smith set');
+  my %mchip = Vote::Count::Matrix::_getsmithguessforchoice(
+    'MINTCHIP', $M1->{'Matrix'});
+  is_deeply([ sort keys %mchip ], [ qw/ BUBBLEGUM MINTCHIP VANILLA/],
+      'choice with 1 defeat and 1 tie returned correct 3 choices');
 };
 
 done_testing();
