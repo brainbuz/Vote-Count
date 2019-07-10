@@ -88,7 +88,6 @@ sub BUILD {
     my $A = shift @choices;
     for my $B (@choices) {
       my $result = Vote::Count::Matrix::_conduct_pair( $ballotset, $A, $B );
-
       # Each result has two hash keys so it can be found without
       # having to try twice or sort the names for a single key.
       $results->{$A}{$B} = $result;
@@ -103,7 +102,6 @@ sub _scorematrix ( $self ) {
   my %active = $self->Active()->%*;
   for my $A ( keys %active ) {
     $scores->{$A} = 0;
-
     # for my $B ( values $self->{'Matrix'}{$A}->%* ) {
     for my $B ( keys %active ) {
       next if $B eq $A;
@@ -118,7 +116,6 @@ sub CondorcetLoser( $self ) {
   my $unfinished = 1;
   my $wordy      = "Removing Condorcet Losers\n";
   my @eliminated = ();
-
 CONDORCETLOSERLOOP:
   while ($unfinished) {
     $unfinished = 0;
@@ -144,40 +141,78 @@ CONDORCETLOSERLOOP:
       }
     }
   }
-
   my $elimstr =
     scalar(@eliminated)
     ? "Eliminated Condorcet Losers: " . join( ', ', @eliminated ) . "\n"
     : "No Condorcet Losers Eliminated\n";
   return {
-    verbose    => $wordy,
-    terse      => $elimstr
+    verbose => $wordy,
+    terse   => $elimstr
   };
 }
 
-sub _getsmithguessforchoice ( $h, $matrix ) {
-  my @winners = ( $h );
-  for my $P ( keys $matrix->{$h}->%* ) {
-    if ( $matrix->{$h}{$P}{'winner'} eq $P ) {
-      push @winners, ( $P);
-    } elsif ( $matrix->{$h}{$P}{'tie'} ) {
-      push @winners, ( $P);
+sub CondorcetWinner( $self ) {
+  my $scores = $self->_scorematrix;
+  my @choices = keys $scores->%*;
+  # # if there is only one choice left they win.
+  # if ( scalar(@choices) == 1 ) { return $choices[0]}
+  my $mustwin = scalar(@choices) -1;
+  my $winner = '';
+  for my $c (@choices) {
+# p $c;
+# p $scores;
+    if ( $scores->{$c} == $mustwin) {
+      $winner .= $c;
     }
   }
-  return (map { $_ => 1 } @winners) ;
+  return $winner;
+}
+
+sub _getsmithguessforchoice ( $h, $matrix ) {
+  my @winners = ($h);
+  for my $P ( keys $matrix->{$h}->%* ) {
+    if ( $matrix->{$h}{$P}{'winner'} eq $P ) {
+      push @winners, ($P);
+    }
+    elsif ( $matrix->{$h}{$P}{'tie'} ) {
+      push @winners, ($P);
+    }
+  }
+  return ( map { $_ => 1 } @winners );
 }
 
 sub SmithSet ( $self ) {
-  my $matrix = $self->{'Matrix'};
-  my @alist  = ( keys $self->Active()->%* );
-  my $sets = {};
+  my $matrix    = $self->{'Matrix'};
+  my @alist     = ( keys $self->Active()->%* );
+  my $sets      = {};
+  my $setcounts = {};
   # my $shortest = scalar(@list);
-  for my $h ( @alist ) {
-
+  for my $h (@alist) {
+    my %set = Vote::Count::Matrix::_getsmithguessforchoice( $h, $matrix );
+    $sets->{$h} = \%set;
+    # the keys of setcounts are the counts
+    $setcounts->{ scalar( keys %set ) }{$h} = 1;
   }
-
-
-
+  # p $sets;
+  my $proposal = {};
+  my $minset   = min( keys( $setcounts->%* ) );
+  # p $setcounts->{ $minset };
+  for my $h ( keys $setcounts->{$minset}->%* ) {
+    for my $k ( keys( $sets->{$h}->%* ) ) {
+      $proposal->{$k} = 1;
+    }
+  }
+SMITHLOOP: while (1) {
+    my $cntchoice = scalar( keys $proposal->%* );
+    for my $h ( keys $proposal->%* ) {
+      $proposal = { %{$proposal}, %{ $sets->{$h} } };
+    }
+    # done when no choices get added on a pass through loop
+    if ( scalar( keys $proposal->%* ) == $cntchoice ) {
+      last SMITHLOOP;
+    }
+  }
+  return $proposal;
 }
 
 1;
