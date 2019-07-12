@@ -59,40 +59,4 @@ sub TopCountMajority ( $self, $topcount = undef, $active = undef ) {
   );
 }
 
-# sub RankTopCount ( $self, $topcount = undef, $active = undef ) {
-#   unless ( defined $topcount ) { $topcount = $self->TopCount($active) }
-#   my %tc      = $topcount->%*;    # destructive process needs to use a copy.
-#   my %ordered = ();
-#   my %byrank  = () ;
-#   my $pos = 0;
-#   my $maxpos = scalar( keys %tc ) ;
-#   while ( 0 < scalar( keys %tc ) ) {
-#     $pos++;
-#     my @vtc      = values %tc;
-#     my $max      = max @vtc;
-#     for my $k ( keys %tc ) {
-#       if ( $tc{$k} == $max ) {
-#         $ordered{$k} = $pos;
-#         delete $tc{ $k };
-#         if ( defined $byrank{$pos} ) {
-#           push @{ $byrank{$pos} }, $k;
-#         }
-#         else {
-#           $byrank{$pos} = [ $k ];
-#         }
-#       }
-#     }
-#     die "RankTopCount in infinite loop\n" if
-#       $pos > $maxpos ;
-#     ;
-#   }
-#   # %byrank[1] is arrayref of 1st position,
-#   # $pos still has last position filled, %byrank{$pos} is the last place.
-
-#   return Vote::Count::TopCount::Rank->new(
-#     \%ordered, \%byrank, $byrank{1}, $byrank{ $pos} );
-# }
-
-
-
 1;

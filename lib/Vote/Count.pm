@@ -8,6 +8,10 @@ use namespace::autoclean;
 use Moose;
 
 use Data::Printer;
+use Time::Piece;
+use Text::MarkdownTable;
+
+our $VERSION = 0.001;
 
 no warnings 'experimental';
 
@@ -19,22 +23,44 @@ has 'BallotSetType' => (
   default =>  'rcv',
 );
 
-# floor rules:
-# none, app5 5% approval, tc5 5% topchoice,
-# tcapp = approval must be at least half leading topcount
-# custom = pass coderef to CustomFloorRule
+sub BUILD {
+  my $self      = shift;
+  # Verbose Log
+  $self->{'LogV'} = localtime->cdate . "\n" ;
+  # Debugging Log
+  $self->{'LogD'} = qq/Vote::Count Version $VERSION\n/;
+  $self->{'LogD'} .= localtime->cdate . "\n" ;
+  # Terse Log
+  $self->{'LogT'} = '';
+}
 
-has 'FloorRule' => (
-  is      => 'ro',
-  isa     => 'Str',
-  default =>  'app5',
-);
+sub logt {
+  my $self = shift @_;
+  return $self->{'LogT'} unless ( @_) ;
+  my $msg = join( "\n", @_ ) . "\n";
+  $self->{'LogT'} .= $msg;
+  $self->{'LogV'} .= $msg;
+  $self->logd( @_);
+}
 
-has 'CustomFloorRule' => (
-  is      => 'ro',
-  isa     => 'CodeRef'
-);
+sub logv {
+  my $self = shift @_;
+  return $self->{'LogV'} unless ( @_) ;
+  my $msg = join( "\n", @_ ) . "\n";
+  $self->{'LogV'} .= $msg;
+  $self->logd( @_);
+}
 
+sub logd {
+  my $self = shift @_;
+  return $self->{'LogD'} unless ( @_) ;
+  my @args = (@_);
+  # since ops are seqential and fast logging event times
+  # clutters the debug log.
+  # unshift @args, localtime->date . ' ' . localtime->time;
+  my $msg = join( "\n", @args ) . "\n";
+  $self->{'LogD'} .= $msg;
+}
 
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',

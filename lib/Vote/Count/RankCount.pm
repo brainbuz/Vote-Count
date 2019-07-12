@@ -7,7 +7,8 @@ package Vote::Count::RankCount;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 use List::Util qw( min max );
-use boolean;
+use Text::Table::Tiny  qw/generate_markdown_table/;
+# use boolean;
 use Data::Printer;
 
 sub _RankResult ( $rawcount ) {
@@ -66,5 +67,20 @@ sub ArrayTop ( $I ) { return  $I->{'top'} }
 sub ArrayBottom ( $I ) { return $I->{'bottom'} }
 # sub ArrayTop ( $I ) { return [sort $I->{'top'}->@* ] }
 # sub ArrayBottom ( $I ) { return [sort $I->{'bottom'}->@* ] }
+
+sub RankTable( $self ) {
+  my @rows = ( [ 'Rank', 'Choice', 'Votes']);
+  my %rc = $self->{'rawcount'}->%*;
+  my %byrank = $self->{'byrank'}->%*;
+  for my $r ( sort keys %byrank ) {
+    my @choice = sort $byrank{$r}->@*;
+    for my $choice ( @choice ) {
+      my $votes = $rc{$choice};
+      my @row = ( $r, $choice, $votes );
+      push @rows, (\@row);
+    }
+  }
+  return generate_markdown_table( rows => \@rows );
+}
 
 1;

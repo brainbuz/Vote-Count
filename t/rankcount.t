@@ -68,4 +68,18 @@ is_deeply( $counted1top, [ 'VANILLA' ], "confirm top element");
 is_deeply( $counted1bottom, [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
  "confirm bottom elements");
 
+# p $counted1;
+my $table = $counted1->RankTable();
+my $xtable = q/| Rank | Choice     | Votes |
+|------|------------|-------|
+| 1    | VANILLA    | 7     |
+| 2    | MINTCHIP   | 5     |
+| 3    | PISTACHIO  | 2     |
+| 4    | CHOCOLATE  | 1     |
+| 4    | STRAWBERRY | 1     |
+| 5    | CARAMEL    | 0     |
+| 5    | ROCKYROAD  | 0     |
+| 5    | RUMRAISIN  | 0     |/;
+is( $table, $xtable, 'Generate a table with ->RankTable()');
+
 done_testing();
