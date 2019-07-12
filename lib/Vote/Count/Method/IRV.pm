@@ -4,6 +4,7 @@ use 5.022;
 use feature qw /postderef signatures/;
 
 package Vote::Count::Method::IRV;
+
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';

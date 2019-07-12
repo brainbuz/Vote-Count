@@ -4,6 +4,7 @@ use 5.022;
 use feature qw /postderef signatures/;
 
 package Vote::Count::Boorda;
+
 use Moose::Role;
 
 no warnings 'experimental';
