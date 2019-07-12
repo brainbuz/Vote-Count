@@ -1,7 +1,9 @@
 use strict;
 use warnings;
-use 5.026;
+use 5.022;
 use feature qw /postderef signatures/;
+
+# ABSTRACT: toolkit for implementing voting methods.
 
 package Vote::Count;
 use namespace::autoclean;
@@ -10,8 +12,6 @@ use Moose;
 use Data::Printer;
 use Time::Piece;
 use Text::MarkdownTable;
-
-our $VERSION = 0.001;
 
 no warnings 'experimental';
 

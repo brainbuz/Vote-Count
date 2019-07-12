@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.026;
+use 5.022;
 use feature qw /postderef signatures/;
 
 package Vote::Count::Method::IRV;
@@ -52,7 +52,8 @@ IRVLOOP:
         winner     => $winner,
         votes      => $majority->{'votes'},
         winvotes   => $majority->{'winvotes'},
-        thresshold => $majority->{'thresshold'}
+        thresshold => $majority->{'thresshold'},
+        tie => 0,
       };
       $self->logt(
         '---',
@@ -68,7 +69,7 @@ IRVLOOP:
         # if there is a tie at the end, the finalists should
         # be both top and bottom and the active set.
         $self->logt( "Tied: " . join( ', ', @bottom ) );
-        return { tie => 1, tied => \@bottom };
+        return { tie => 1, tied => \@bottom, winner => 0  };
       }
       $self->logv( "Eliminating: " . join( ', ', @bottom ) );
       for my $b (@bottom) {

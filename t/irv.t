@@ -31,7 +31,8 @@ my $ex1 = {
   'votes'      => 15,
   'winner'     => 'MINTCHIP',
   'winvotes'   => 8,
-  'thresshold' => 8
+  'thresshold' => 8,
+  'tie'        => 0,
 };
 is_deeply( $r1, $ex1, 'returns set with Mintchip winning 8 of 15 votes');
 
@@ -44,7 +45,8 @@ my $ex2 = {
   'votes'      => 216,
   'winner'     => 'MINTCHIP',
   'winvotes'   => 122,
-  'thresshold' => 109
+  'thresshold' => 109,
+  'tie'        => 0,
 };
 is_deeply( $r2, $ex2, 'returns set with Mintchip winning 122 of 216 votes');
 # need test of tie at the top.
@@ -52,28 +54,8 @@ is_deeply( $r2, $ex2, 'returns set with Mintchip winning 122 of 216 votes');
 ok $B3;
 my $r3 = $B3->RunIRV();
 my $ex3 = {
-  tie => 1, tied => [ 'CHOCOLATE','VANILLA' ]
+  tie => 1, tied => [ 'CHOCOLATE','VANILLA' ], winner => 0
 };
 is_deeply( $r3, $ex3, 'tie at top returns correct data');
-# note $B3->logd();
-
-# my $floor1 = $B1->ApprovalFloor();
-# my @f1 = sort( $floor1->@* ) ;
-# is_deeply( \@f1,
-#   [ qw/CARAMEL CHOCOLATE MINTCHIP PISTACHIO ROCKYROAD RUMRAISIN
-#       STRAWBERRY VANILLA/],
-#   'Approval Floor (defaulted to 5%) Remaining set');
-
-# my $floor2 = $B2->TopCountFloor( 4);
-# my @f2 = sort( $floor2->@* ) ;
-# is_deeply( \@f2,
-#   [ qw/CHOCOLATE MINTCHIP PISTACHIO  VANILLA/],
-#   'TopCount Floor at 4% Remaining set');
-
-# my $floor3 = $B3->TCA();
-# my @f3 = sort( $floor3->@* ) ;
-# is_deeply( \@f3,
-#   [ qw/CHOCOLATE MINTCHIP STRAWBERRY VANILLA/],
-#   'TCA Approval on highest TopCount ');
 
 done_testing();

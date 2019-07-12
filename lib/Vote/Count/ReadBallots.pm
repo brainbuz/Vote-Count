@@ -1,6 +1,6 @@
 package Vote::Count::ReadBallots;
 
-use 5.028;
+use 5.022;
 use feature qw/postderef signatures/;
 # use strict;
 # use warnings;
@@ -9,8 +9,6 @@ use Path::Tiny;
 use Carp;
 use Data::Dumper;
 use Data::Printer;
-
-our $VERSION='2019.0627';
 
 use Exporter::Easy (
        OK => [ qw( read_ballots ) ],
