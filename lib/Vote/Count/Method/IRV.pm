@@ -13,6 +13,8 @@ extends 'Vote::Count';
 # with 'Vote::Count';
 # with 'Vote::Count::Matrix';
 
+our $VERSION='0.002';
+
 no warnings 'experimental';
 use List::Util qw( min max );
 
@@ -82,3 +84,21 @@ IRVLOOP:
 }
 
 1;
+
+#buildpod
+
+=pod
+
+=head1 IRV
+
+Some things to know about IRV.
+
+
+=head2 Warning
+
+IRV is the best algorithm for resolving a small Condorcet Tie, but
+a poor algorithm for an election. But it is really simple.
+
+=cut
+
+#buildpod

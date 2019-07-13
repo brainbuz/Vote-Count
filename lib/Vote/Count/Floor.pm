@@ -40,7 +40,7 @@ sub _DoFloor( $self, $ranked, $cutoff ) {
     "Remaining: ",
     join( ', ', @active ),
     );
-  return \@active;
+  return { map { $_ => 1 } @active };
 }
 
 sub ApprovalFloor( $self, $floorpct=5 ) {
