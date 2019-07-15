@@ -7,8 +7,8 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-# use Data::Printer;
-use JSON::MaybeXS qw/encode_json/;
+use Data::Printer;
+# use JSON::MaybeXS;
 # use YAML::XS;
 use feature qw /postderef signatures/;
 
@@ -16,31 +16,38 @@ use feature qw /postderef signatures/;
 
 use Path::Tiny;
 
-use Vote::Count;
-use Vote::Count::Matrix;
+use Vote::Count::Method::CondorcetDropping;
 use Vote::Count::ReadBallots 'read_ballots';
 
 my $M1 =
-  Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/ties1.txt'),
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/data2.txt'),
   );
 
-my $M2 =
-  Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/data1.txt'),
-  );
+# my $M2 =
+#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/data1.txt'),
+#   );
 
-my $M3 =
-  Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/data2.txt'),
-  );
+# my $M3 =
+#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/data2.txt'),
+#   );
 
-my $LoopSet =
-  Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/loop1.txt'),
-  );
+# my $LoopSet =
+#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/loop1.txt'),
+#   );
 
-my $KnotSet =
-  Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/knot1.txt'),
-  );
+# my $KnotSet =
+#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/knot1.txt'),
+#   );
 
-isa_ok( $M1, ['Vote::Count::Matrix'], 'The matrix is a Vote::Count::Matrix' );
+isa_ok( $M1, ['Vote::Count::Method::CondorcetDropping'],
+  'ISA Vote::Count::Method::CondorcetDropping' );
+
+my $result = $M1->RunCondorcetPLD();
+note $M1->logd();
+
+done_testing();
+=pod
 
 subtest '_conduct_pair returns hash with pairing info' => sub {
   my $t1 = Vote::Count::Matrix::_conduct_pair( $M1->BallotSet, 'RUMRAISIN',
@@ -194,6 +201,5 @@ subtest 'CondorcetWinner' => sub {
 'reduced Active of last winnerless set to one choice, now returned as winner'
   );
 };
-
 
 done_testing();

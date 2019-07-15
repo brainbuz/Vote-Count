@@ -8,13 +8,13 @@ use Moose;
 
 no warnings 'experimental';
 use List::Util qw( min max );
+use Text::Table::Tiny  qw/generate_markdown_table/;
 
-# use Vote::Count::RankCount;
 # use Try::Tiny;
 use Data::Printer;
 use Data::Dumper;
 
-# use YAML::XS;
+use YAML::XS;
 
 has BallotSet => (
   is       => 'ro',
@@ -147,7 +147,9 @@ CONDORCETLOSERLOOP:
     : "No Condorcet Losers Eliminated\n";
   return {
     verbose => $wordy,
-    terse   => $elimstr
+    terse   => $elimstr,
+    eliminated => \@eliminated,
+    eliminations => scalar(@eliminated),
   };
 }
 
@@ -159,8 +161,6 @@ sub CondorcetWinner( $self ) {
   my $mustwin = scalar(@choices) -1;
   my $winner = '';
   for my $c (@choices) {
-# p $c;
-# p $scores;
     if ( $scores->{$c} == $mustwin) {
       $winner .= $c;
     }
@@ -193,10 +193,8 @@ sub SmithSet ( $self ) {
     # the keys of setcounts are the counts
     $setcounts->{ scalar( keys %set ) }{$h} = 1;
   }
-  # p $sets;
   my $proposal = {};
   my $minset   = min( keys( $setcounts->%* ) );
-  # p $setcounts->{ $minset };
   for my $h ( keys $setcounts->{$minset}->%* ) {
     for my $k ( keys( $sets->{$h}->%* ) ) {
       $proposal->{$k} = 1;
@@ -213,6 +211,40 @@ SMITHLOOP: while (1) {
     }
   }
   return $proposal;
+}
+
+# options may later be used to add rankcount objects
+# from boorda, approval, and topcount.
+sub MatrixTable ( $self, $options = {} ) {
+  my @header = ( 'Choice', 'Wins', 'Losses', 'Ties' );
+  my $o_topcount = defined $options->{'topcount'}
+    ? $options->{'topcount'} : 0;
+  push @header, 'Top Count' if $o_topcount;
+  my @active = sort ( keys $self->Active()->%* );
+  my @rows = ( \@header );    # [ 'Rank', 'Choice', 'TopCount']);
+  for my $A (@active) {
+    my $wins   = 0;
+    my $ties   = 0;
+    my $losses = 0;
+    my $topcount = $o_topcount ? $options->{'topcount'}{$A} : 0;
+  MTNEWROW:
+    for my $B (@active) {
+      if ( $A eq $B ) { next MTNEWROW }
+      elsif ( $self->{'Matrix'}{$A}{$B}{'winner'} eq $A ) {
+        $wins++;
+      }
+      elsif ( $self->{'Matrix'}{$A}{$B}{'winner'} eq $B ) {
+        $losses++;
+      }
+      elsif ( $self->{'Matrix'}{$A}{$B}{'tie'} ) {
+        $ties++;
+      }
+    }
+    my @newrow = ( $A, $wins, $losses, $ties);
+    push @newrow, $topcount if $o_topcount ;
+    push @rows, \@newrow;
+  }
+  return generate_markdown_table( rows => \@rows );
 }
 
 1;

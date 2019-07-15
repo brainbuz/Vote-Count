@@ -30,43 +30,25 @@ sub RunIRV ( $self, $active = undef ) {
   unless ( defined $active ) {
     $active = $self->BallotSet->{'choices'};
   }
-  my $winner     = undef;
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
-  my $resulthash = {};
   $self->logt( "Instant Runoff Voting",
     'Choices: ', join( ', ', ( sort keys %{$active} ) ) );
+# forever loop normally ends with return from $majority
+# a tie should be detected and also generate a
+# return from the else loop.
+# if something goes wrong roundcountr/maxround
+# will generate exception.
 IRVLOOP:
-  until ( defined $winner ) {
+  until ( 0 ) {
     $roundctr++;
     die "IRVLOOP infinite stopped at $roundctr" if $roundctr > $maxround;
     my $round = $self->TopCount($active);
     $self->logv( '---', "IRV Round $roundctr", $round->RankTable() );
-    my $majority = $self->TopCountMajority( $round, $active );
-    if ( $majority->{'winner'} ) {
-      $winner = $majority->{'winner'};
-      my $rows = [
-        [ 'Winner',                    $winner ],
-        [ 'Votes in Final Round',      $majority->{'votes'} ],
-        [ 'Votes Needed for Majority', $majority->{'thresshold'} ],
-        [ 'Winning Votes',             $majority->{'winvotes'} ],
-      ];
-      $resulthash = {
-        winner     => $winner,
-        votes      => $majority->{'votes'},
-        winvotes   => $majority->{'winvotes'},
-        thresshold => $majority->{'thresshold'},
-        tie => 0,
-      };
-      $self->logt(
-        '---',
-        generate_markdown_table(
-          rows       => $rows,
-          header_row => 0
-        )
-      );
-    }
-    else {
+    my $majority = $self->EvaluateTopCountMajority( $round );
+    if ( defined $majority->{'winner'} ) {
+      return $majority;
+    } else {
       my @bottom = sort $round->ArrayBottom()->@*;
       if ( scalar(@bottom) == scalar( keys %{$active} ) ) {
         # if there is a tie at the end, the finalists should
@@ -80,7 +62,6 @@ IRVLOOP:
       }
     }
   }
-  return $resulthash;
 }
 
 1;

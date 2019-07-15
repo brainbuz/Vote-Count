@@ -6,7 +6,7 @@ package Vote::Count::RankCount;
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
-use List::Util qw( min max );
+use List::Util qw( min max sum);
 use Text::Table::Tiny  qw/generate_markdown_table/;
 # use boolean;
 use Data::Printer;
@@ -65,6 +65,7 @@ sub HashWithOrder ( $I ) { return $I->{'ordered'} }
 sub HashByRank ( $I ) { return $I->{'byrank'} }
 sub ArrayTop ( $I ) { return  $I->{'top'} }
 sub ArrayBottom ( $I ) { return $I->{'bottom'} }
+sub CountVotes ($I) { return sum ( values $I->{'rawcount'}->%* )}
 # sub ArrayTop ( $I ) { return [sort $I->{'top'}->@* ] }
 # sub ArrayBottom ( $I ) { return [sort $I->{'bottom'}->@* ] }
 

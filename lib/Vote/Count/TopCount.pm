@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.026;
+use 5.022;
 
 use feature qw /postderef signatures/;
 
@@ -10,6 +10,7 @@ use Moose::Role;
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
+use Text::Table::Tiny 'generate_markdown_table';
 # use boolean;
 # use Data::Printer;
 
@@ -31,12 +32,23 @@ TOPCOUNTBALLOTS:
   return Vote::Count::RankCount->Rank( \%topcount );
 }
 
+=head2 TopCountMajority
+
+  $self->TopCountMajority( $round_topcount )
+  or
+  $self->TopCountMajority( undef, $active_choices )
+
+Will find the majority winner from the results of a topcount, or alternately may be given undef and a hashref of active choices and will topcount the ballotset for just those choices and then find the majority winner.
+
+Returns a hashref of results. It will always include the votes in the round and the thresshold for majority. If there is a winner it will also include the winner and winvotes.
+
+=cut
+
 sub TopCountMajority ( $self, $topcount = undef, $active = undef ) {
   unless ( defined $topcount ) { $topcount = $self->TopCount($active) }
   my $topc = $topcount->RawCount();
-  my $numvotes = 0;
+  my $numvotes = $topcount->CountVotes();
   my @choices  = keys $topc->%*;
-  for my $t (@choices) { $numvotes += $topc->{$t} }
   my $thresshold = 1 + int( $numvotes / 2 );
   for my $t (@choices) {
     if ( $topc->{$t} >= $thresshold ) {
@@ -57,6 +69,33 @@ sub TopCountMajority ( $self, $topcount = undef, $active = undef ) {
       thresshold => $thresshold
     }
   );
+}
+
+=head2 EvaluateTopCountMajority
+
+This method wraps TopCountMajority adding logging, the logging of which would be a lot of boiler plate in round oriented methods. It takes the same parameters and returns the same hashref.
+
+=cut
+
+sub EvaluateTopCountMajority ( $self, $topcount = undef, $active = undef) {
+  my $majority = $self->TopCountMajority( $topcount, $active );
+  if ( $majority->{'winner'} ) {
+    my $winner = $majority->{'winner'};
+    my $rows = [
+      [ 'Winner',                    $winner ],
+      [ 'Votes in Final Round',      $majority->{'votes'} ],
+      [ 'Votes Needed for Majority', $majority->{'thresshold'} ],
+      [ 'Winning Votes',             $majority->{'winvotes'} ],
+    ];
+    $self->logt(
+      '---',
+      generate_markdown_table(
+        rows       => $rows,
+        header_row => 0
+      )
+    );
+  }
+  return $majority;
 }
 
 1;

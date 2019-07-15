@@ -31,6 +31,7 @@ Vote::Count::Method::CondorcetDropping
 
 no warnings 'experimental';
 use List::Util qw( min max );
+use YAML::XS;
 
 use Vote::Count::Matrix;
 # use Try::Tiny;
@@ -38,20 +39,87 @@ use Text::Table::Tiny 'generate_markdown_table';
 use Data::Printer;
 use Data::Dumper;
 
-subtype 'DropRuleName',
-    as 'Str',
-    where { lc($_) =~ /coderef|boorda|approval|plurality|topcount/ },
-    message { "$_ is not one of the defined coderef|boorda|approval|plurality rules, for a custom rule use coderef " };
-};
-
-has 'DropStyle' => {
-  isa => 'DropRuleName',
+has 'Matrix' => (
+  isa => 'Object',
   is => 'ro',
-  default => 'plurality'
-};
+  lazy => 1,
+  builder => '_newmatrix',
+);
 
-has 'DropRule' => {
-  isa => 'CodeRef',
-  is => 'to',
-  builder => '_builddroprule',
+# DropStyle: whether to apply drop rule against
+# all choices ('all') or the least winning ('leastwins').
+has 'DropStyle' => (
+  isa => 'Str',
+  is => 'ro',
+  default => 'leastwins',
+);
+
+sub _newmatrix ($self) {
+  return Vote::Count::Matrix->new(
+    'BallotSet' => $self->BallotSet()  );
 }
+
+sub RunCondorcetPLD ( $self, $active = undef ) {
+  unless ( defined $active ) {
+    $active = $self->BallotSet->{'choices'};
+  }
+  my $roundctr   = 0;
+  my $maxround   = scalar( keys %{$active} );
+  $self->logt( "Condorcet Dropping, Plurality Loser (Lowest TopCount) Rule.",
+    'Choices: ', join( ', ', ( sort keys %{$active} ) ) );
+PLDLOOP:
+  until ( 0 ) {
+    $roundctr++;
+    die "PLDLOOP infinite stopped at $roundctr" if $roundctr > $maxround;
+# First step on every round is to seek a majority winner.
+    my $round = $self->TopCount($active);
+    $self->logv( '---', "Round $roundctr TopCount", $round->RankTable() );
+    my $majority = $self->EvaluateTopCountMajority( $round );
+    if ( defined $majority->{'winner'} ) {
+      return $majority->{'winner'};
+    }
+# No Majority? look for a Condorcet Winner.
+    my $matrix = Vote::Count::Matrix->new(
+      'BallotSet' => $self->BallotSet,
+      'Active' => $active );
+    $self->logv( '---', "Round $roundctr Pairings", $matrix->MatrixTable() );
+    my $cw = $matrix->CondorcetWinner() || 0 ;
+    if ( $cw ) {
+      $self->logt( "Winner $cw");
+      return $cw;
+    }
+    my $eliminated = $matrix->CondorcetLoser();
+$self->logd( "eliminated ", YAML::XS::Dump($eliminated) );
+    if( $eliminated->{'eliminations'}) {
+      # tracking active between iterations of matrix.
+      $active = $matrix->Active();
+      # active changed, restart loop
+      next PLDLOOP;
+    }
+    # no losers eliminated, then we go to topcount!
+    my @jeapardy = ();
+    if( $self->DropStyle eq 'leastwins') {
+      my %scored = $matrix->_scorematrix()->%*;
+      my $lowscore = min( values %scored );
+      for my $A ( keys %{$active} ) {
+        if ( $scored{ $A } == $lowscore ) {
+          push @jeapardy, $A;
+        }
+      }
+    } else { @jeapardy = keys %{$active} }
+    my $lowest = $round->CountVotes();
+    for my $j (@jeapardy) {
+      $lowest = $round->{$j} if $round->{$j} < $lowest;
+    }
+    for my $j (@jeapardy) {
+      if ( $round->{$j} == $lowest ) {
+        delete $active->{$j}
+      }
+    }
+
+  };#infinite PLDLOOP
+
+  }
+
+
+1;

@@ -60,4 +60,10 @@ is_deeply(
 'Topcount from saved subset topcount TopCountMajority also gives winner info'
 );
 
+is_deeply(
+  $VC1->EvaluateTopCountMajority($tc2),
+  { thresshold => 6, votes => 11, winner => 'VANILLA', winvotes => 7 },
+'repeat last set with EvaluateTopCountMajority for same results'
+);
+
 done_testing();

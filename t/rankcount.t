@@ -82,4 +82,6 @@ my $xtable = q/| Rank | Choice     | Votes |
 | 5    | RUMRAISIN  | 0     |/;
 is( $table, $xtable, 'Generate a table with ->RankTable()');
 
+is( $counted1->CountVotes(), 16, 'CountVotes method');
+
 done_testing();

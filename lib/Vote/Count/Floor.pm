@@ -18,9 +18,9 @@ with  'Vote::Count::Approval',
 
 sub _FloorMin( $self, $floorpct ) {
   my $pct = $floorpct > .2 ? $floorpct / 100 : $floorpct;
-  my $min = int( $self->CountBallots() * $pct );
   return int( $self->CountBallots() * $pct );
 }
+
 
 sub _DoFloor( $self, $ranked, $cutoff ) {
   my @active = ();
@@ -43,15 +43,21 @@ sub _DoFloor( $self, $ranked, $cutoff ) {
   return { map { $_ => 1 } @active };
 }
 
+# Approval Floor is Approval votes vs total
+# votes cast -- not total of approval votes.
+# so floor is the same as for topcount floor.
 sub ApprovalFloor( $self, $floorpct=5 ) {
-  $self->logt( "Applying Floor Rule of $floorpct\% Approval Count.");
+  my $votescast = $self->CountBallots();
+  $self->logt(
+    "Applying Floor Rule of $floorpct\% " .
+    "Approval Count. vs Ballots Cast of $votescast.");
   return $self->_DoFloor(
     $self->Approval()->RawCount(),
     $self->_FloorMin($floorpct )
   );
 }
 
-sub TopCountFloor( $self, $floorpct=5 ) {
+sub TopCountFloor( $self, $floorpct=2 ) {
   $self->logt( "Applying Floor Rule of $floorpct\% First Choice Votes.");
   return $self->_DoFloor(
     $self->TopCount()->RawCount(),
