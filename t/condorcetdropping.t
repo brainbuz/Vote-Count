@@ -19,187 +19,108 @@ use Path::Tiny;
 use Vote::Count::Method::CondorcetDropping;
 use Vote::Count::ReadBallots 'read_ballots';
 
-my $M1 =
+subtest 'Plurality Loser Dropping (TopCount)' => sub {
+
+my $M3 =
   Vote::Count::Method::CondorcetDropping->new(
-    'BallotSet' => read_ballots('t/data/data2.txt'),
+    'BallotSet' => read_ballots('t/data/biggerset1.txt'),
+    'DropStyle' => 'all',
+    'DropRule'  => 'topcount',
   );
-
-# my $M2 =
-#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/data1.txt'),
-#   );
-
-# my $M3 =
-#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/data2.txt'),
-#   );
-
-# my $LoopSet =
-#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/loop1.txt'),
-#   );
-
-# my $KnotSet =
-#   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/knot1.txt'),
-#   );
-
-isa_ok( $M1, ['Vote::Count::Method::CondorcetDropping'],
+isa_ok( $M3, ['Vote::Count::Method::CondorcetDropping'],
   'ISA Vote::Count::Method::CondorcetDropping' );
+my $rM3 = $M3->RunCondorcetDropping();
+is ( $rM3, 'MINTCHIP', 'winner for biggerset1 topcount/all');
+# note $M3->logv();
 
-my $result = $M1->RunCondorcetPLD();
-note $M1->logd();
+my $LoopSet =
+  Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/loop1.txt'),
+  );
+my $rLoopSet = $LoopSet->RunCondorcetDropping();
+is( $rLoopSet, 'MINTCHIP', 'loopset plurality leastwins winner');
+# note $LoopSet->logd();
 
-done_testing();
-=pod
+my $LoopSetA =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/loop1.txt'),
+    'DropStyle' => 'all',
+    'DropRule'  => 'topcount',
+  );
+my $rLoopSetA = $LoopSetA->RunCondorcetDropping();
+is( $rLoopSetA, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
+# note $LoopSetA->logd();
 
-subtest '_conduct_pair returns hash with pairing info' => sub {
-  my $t1 = Vote::Count::Matrix::_conduct_pair( $M1->BallotSet, 'RUMRAISIN',
-    'STRAWBERRY' );
-  my $x1 = {
-    loser      => "",
-    margin     => 0,
-    RUMRAISIN  => 4,
-    STRAWBERRY => 4,
-    tie        => 1,
-    winner     => "",
-  };
-  is_deeply( $t1, $x1, 'A Tie' );
-  my $t2 = Vote::Count::Matrix::_conduct_pair( $M1->BallotSet, 'RUMRAISIN',
-    'FUDGESWIRL' );
-  my $x2 = {
-    FUDGESWIRL => 6,
-    loser      => "RUMRAISIN",
-    margin     => 2,
-    RUMRAISIN  => 4,
-    tie        => 0,
-    winner     => "FUDGESWIRL",
-  };
-  is_deeply( $t2, $x2, 'has winner' );
-};
-
-subtest 'check some in the matrix' => sub {
-  my $xVanMint = {
-    loser    => "",
-    margin   => 0,
-    MINTCHIP => 6,
-    tie      => 1,
-    VANILLA  => 6,
-    winner   => ""
-  };
-  my $xRockStraw = {
-    loser      => "STRAWBERRY",
-    margin     => 1,
-    ROCKYROAD  => 5,
-    STRAWBERRY => 4,
-    tie        => 0,
-    winner     => "ROCKYROAD"
-  };
-  my $VanMint = $M1->{'Matrix'}{'VANILLA'}{'MINTCHIP'};
-  is_deeply( $xVanMint, $VanMint, 'check a tie' );
-  my $RockStraw = $M1->{'Matrix'}{'ROCKYROAD'}{'STRAWBERRY'};
-  is_deeply( $xRockStraw, $RockStraw, 'one with a winner' );
-  is_deeply(
-    $M1->{'Matrix'}{'FUDGESWIRL'}{'CHOCCHUNK'},
-    $M1->{'Matrix'}{'CHOCCHUNK'}{'FUDGESWIRL'},
-    'access a result in both possible pairing orders identical'
+my $KnotSet =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/knot1.txt'),
   );
 
+my $rKnotSet = $KnotSet->RunCondorcetDropping();
+is( $rKnotSet, 'CHOCOLATE', 'knotset winner with defaults');
+# note $KnotSet->logd();
 };
 
-subtest '_scorematrix' => sub {
-  my $scored1  = $M2->_scorematrix();
-  my $xscored1 = {
-    CARAMEL    => 1,
-    CHOCOLATE  => 5,
-    MINTCHIP   => 7,
-    PISTACHIO  => 1,
-    ROCKYROAD  => 0,
-    RUMRAISIN  => 0,
-    STRAWBERRY => 0,
-    VANILLA    => 6
-  };
-  is_deeply( $scored1, $xscored1, 'check scoring for a dataset' );
-  my $xscored2 = {
-    CHOCOLATE => 1,
-    MINTCHIP  => 3,
-    PISTACHIO => 0,
-    VANILLA   => 2
-  };
+note "==== Edgeleastwins";
+my $edge =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/condorcetdropping_edgecase.txt'),
+  );
+my $redge = $edge->RunCondorcetDropping();
+# is( $redge, 'CHOCOLATE', 'knotset winner with defaults');
+note $edge->logd();
 
-  $M2->Active($xscored2);
-  my $scored2 = $M2->_scorematrix();
-  is_deeply( $scored2, $xscored2,
-    'check scoring same data after eliminating some choices' );
+note "==== Edgeall";
+my $edge1 =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/condorcetdropping_edgecase.txt'),
+    'DropStyle' => 'all',
+    'DropRule'  => 'topcount',
+  );
+my $redge1 = $edge1->RunCondorcetDropping();
+# is( $redge, 'CHOCOLATE', 'knotset winner with defaults');
+note $edge1->logd();
+
+
+subtest 'Approval Dropping' => sub {
+
+note "********** LOOPSET *********";
+my $LoopSet =
+  Vote::Count::Method::CondorcetDropping->new(
+  'BallotSet' => read_ballots('t/data/loop1.txt'),
+    'DropStyle' => 'all',
+    'DropRule'  => 'approval',
+  );
+my $rLoopSet = $LoopSet->RunCondorcetDropping();
+is( $rLoopSet, 'VANILLA', 'loopset approval all winner');
+note $LoopSet->logd();
 };
 
-subtest 'CondorcetLoser elimination' => sub {
-  my $E2 = $M2->CondorcetLoser();
-  is(
-    $E2->{'terse'},
-    "Eliminated Condorcet Losers: PISTACHIO, CHOCOLATE, VANILLA\n",
-    "terse is list of eliminated losers"
+subtest 'Boorda Dropping' => sub {
+
+note "\n********** LOOPSET BOORDA *********";
+my $LoopSetB =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/loop1.txt'),
+    'DropStyle' => 'leastwins',
+    'DropRule'  => 'boorda',
+  );
+my $rLoopSetB = $LoopSetB->RunCondorcetDropping();
+is( $rLoopSetB, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
+note $LoopSetB->logd();
+
+note "\n********** KNOTSET BOORDA *********";
+my $KnotSet =
+  Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet' => read_ballots('t/data/knot1.txt'),
+    'DropStyle' => 'all',
+    'DropRule'  => 'boorda',
   );
 
-  like(
-    $E2->{'verbose'},
-    qr/^Removing Condorcet Losers/,
-    'check verbose for expected first line'
-  );
-  like(
-    $E2->{'verbose'},
-    qr/Eliminationg Condorcet Loser: \*CHOCOLATE\*/,
-    'check verbose for an elimination notice'
-  );
-  is_deeply(
-    $M2->{'Active'},
-    { 'MINTCHIP' => 3 },
-    'only the condorcet winner remains in active'
-  );
-
+my $rKnotSet = $KnotSet->RunCondorcetDropping();
+is( $rKnotSet, 'MINTCHIP', 'knotset winner with defaults');
+note $KnotSet->logd();
 };
 
-subtest '_getsmithguessforchoice' => sub {
-  my %rumr = Vote::Count::Matrix::_getsmithguessforchoice( 'RUMRAISIN',
-    $M1->{'Matrix'} );
-  is( scalar( keys %rumr ),
-    11, 'choice with a lot of losses proposed large smith set' );
-  my %mchip = Vote::Count::Matrix::_getsmithguessforchoice( 'MINTCHIP',
-    $M1->{'Matrix'} );
-  is_deeply(
-    [ sort keys %mchip ],
-    [qw/ BUBBLEGUM MINTCHIP VANILLA/],
-    'choice with 1 defeat and 1 tie returned correct 3 choices'
-  );
-};
 
-subtest 'SmithSet' => sub {
-  my $k     = $KnotSet->SmithSet();
-  my @knot  = sort keys $k->%*;
-  my @xknot = (qw/ CARAMEL CHOCOLATE MINTCHIP VANILLA/);
-  is_deeply( \@knot, \@xknot,
-    'Simple Knot test data returns 4 for Smith Set' );
-  my $l     = $LoopSet->SmithSet();
-  my @loop  = sort keys $l->%*;
-  my @xloop = (qw/CHOCOLATE MINTCHIP VANILLA/);
-  is_deeply( \@loop, \@xloop, 'Loop test data returns 3 element Smith Set' );
-  my $m  = $M2->SmithSet();
-  my @m  = sort keys $l->%*;
-  my @xm = (qw/CHOCOLATE MINTCHIP VANILLA/);
-  is_deeply( \@m, \@xm, 'Set with no winner' );
-};
-
-subtest 'CondorcetWinner' => sub {
-  is( $M1->CondorcetWinner(),
-    '', 'set with no condorcet winner returns empty string' );
-  is( $M2->CondorcetWinner(),
-    'MINTCHIP', 'set with  condorcet winner returns it' );
-  is( $M3->CondorcetWinner(),
-    'MINTCHIP', 'set with  condorcet winner returns it' );
-  is( $LoopSet->CondorcetWinner(),
-    '', 'set with no condorcet winner returns empty string' );
-  is( $KnotSet->CondorcetWinner(),
-    '', 'set with no condorcet winner returns empty string' );
-  $KnotSet->Active( { 'VANILLA' => 1 } );
-  is( $KnotSet->CondorcetWinner(), 'VANILLA',
-'reduced Active of last winnerless set to one choice, now returned as winner'
-  );
-};
 
 done_testing();

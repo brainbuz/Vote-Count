@@ -7,7 +7,7 @@ package Vote::Count::Matrix;
 use Moose;
 
 no warnings 'experimental';
-use List::Util qw( min max );
+use List::Util qw( min max sum );
 use Text::Table::Tiny  qw/generate_markdown_table/;
 
 # use Try::Tiny;
@@ -101,15 +101,29 @@ sub _scorematrix ( $self ) {
   my $scores = {};
   my %active = $self->Active()->%*;
   for my $A ( keys %active ) {
+    my $hasties = 0;
     $scores->{$A} = 0;
-    # for my $B ( values $self->{'Matrix'}{$A}->%* ) {
     for my $B ( keys %active ) {
       next if $B eq $A;
-      my $winner = $self->{'Matrix'}{$A}{$B}{'winner'};
-      if ( $winner eq $A ) { $scores->{$A}++ }
+        if( $A eq $self->{'Matrix'}{$A}{$B}{'winner'} ) { $scores->{$A}++ }
+        if( $self->{'Matrix'}{$A}{$B}{'tie'} ) { $hasties = .001 }
     }
+    if ( $scores->{$A} == 0 ) { $scores->{$A} += $hasties }
   }
   return $scores;
+}
+
+# return the choice with fewest wins in matrix.
+sub LeastWins ( $matrix ) {
+  my @lowest = ();
+  my %scored = $matrix->_scorematrix()->%*;
+      my $lowscore = min( values %scored );
+      for my $A ( keys %scored ) {
+        if ( $scored{ $A } == $lowscore ) {
+          push @lowest, $A;
+        }
+      }
+  return @lowest;
 }
 
 sub CondorcetLoser( $self ) {

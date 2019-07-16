@@ -135,10 +135,7 @@ sub Boorda ( $self, $active = undef ) {
            $self,
            \%BoordaTable,
            $active );
-  return (
-    Vote::Count::RankCount->Rank( $BoordaCounted ),
-    \%BoordaTable
-  );
+  return Vote::Count::RankCount->Rank( $BoordaCounted );
 }
 
 

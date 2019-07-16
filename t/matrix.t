@@ -103,9 +103,9 @@ subtest '_scorematrix' => sub {
     CHOCOLATE  => 5,
     MINTCHIP   => 7,
     PISTACHIO  => 1,
-    ROCKYROAD  => 0,
-    RUMRAISIN  => 0,
-    STRAWBERRY => 0,
+    ROCKYROAD  => 0.001,
+    RUMRAISIN  => 0.001,
+    STRAWBERRY => 0.001,
     VANILLA    => 6
   };
   is_deeply( $scored1, $xscored1, 'check scoring for a dataset' );

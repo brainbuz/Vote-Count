@@ -7,7 +7,7 @@ use 5.026;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-use Data::Printer;
+# use Data::Printer;
 use feature qw /postderef signatures/;
 
 use Path::Tiny;
@@ -90,7 +90,7 @@ subtest 'bordadepth at 5, standard method' => sub {
     bordaweight => $testweight,
   );
 
-  my ( $A2, $B2 ) = $VC2->Boorda(
+  my ( $A2 ) = $VC2->Boorda(
     {
       'VANILLA'   => 1,
       'CHOCOLATE' => 1,
@@ -109,9 +109,8 @@ subtest 'bordadepth at 5, standard method' => sub {
     "Boorda counted a small set with AN active list" );
 
   is_deeply(
-    $B2->{'CHOCOLATE'},
-    { 1 => 1, 2 => 5, 3 => 2 },
-    'test a value on the Boorda Ranking table from set with active list.'
+    $A2->RawCount()->{'CHOCOLATE'}, 50 ,
+    'test a value on the Boorda Ranking table.'
   );
 };
 
@@ -135,7 +134,7 @@ subtest 'tests with default boorda weighting' => sub {
     VANILLA    => 72
   };
 
-  my ( $B1Rank, $B1Boorda ) = $BC1->Boorda();
+  my ( $B1Rank ) = $BC1->Boorda();
 
   is_deeply( $B1Rank->RawCount(), $expectB1,
     "Small set no active list default depth of 0" );
@@ -148,7 +147,7 @@ subtest 'tests with default boorda weighting' => sub {
     CHERRY    => 24,
     VANILLA   => 24,
   };
-  my ( $C1Rank, $C1Boorda ) = $BC1->Boorda($activeset);
+  my ( $C1Rank ) = $BC1->Boorda($activeset);
   is_deeply( $C1Rank->RawCount(), $activeset,
     "small set WITH active list default depth of 0" );
 
