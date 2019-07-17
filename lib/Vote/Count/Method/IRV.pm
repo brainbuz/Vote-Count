@@ -13,7 +13,7 @@ extends 'Vote::Count';
 # with 'Vote::Count';
 # with 'Vote::Count::Matrix';
 
-our $VERSION='0.002';
+our $VERSION='0.003';
 
 no warnings 'experimental';
 use List::Util qw( min max );

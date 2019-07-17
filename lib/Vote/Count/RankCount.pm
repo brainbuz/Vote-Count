@@ -7,7 +7,7 @@ package Vote::Count::RankCount;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 use List::Util qw( min max sum);
-use Text::Table::Tiny  qw/generate_markdown_table/;
+use TextTableTiny  qw/generate_markdown_table/;
 # use boolean;
 use Data::Printer;
 

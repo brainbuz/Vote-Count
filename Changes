@@ -1,4 +1,6 @@
 Revision history for Vote::Count
+0.003 July 16, 2019
+      CondorcetDropping for simple Condorcet implementations.
 0.002 July 12, 2019
       IRV complete added utility (nuisance) script for updating versions
       and markdown docs as pod in modules. Because dzil only has a plugin

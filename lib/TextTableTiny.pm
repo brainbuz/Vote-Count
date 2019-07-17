@@ -1,7 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
-package Text::Table::Tiny;
+package TextTableTiny;
 
 use parent 'Exporter';
 use List::Util qw();
@@ -74,7 +74,7 @@ sub generate_markdown_table {
   $HEADER_CORNER_MARKER = '|';
   my @ARGS = (@_);
   unshift @ARGS, ( header_row => 1, top_and_tail => 1 );
-  return Text::Table::Tiny::generate_table(@ARGS);
+  return TextTableTiny::generate_table(@ARGS);
 }
 
 sub _maxwidths {
@@ -119,6 +119,10 @@ sub _get_header_row_separator {
 __END__
 
 =pod
+
+=head1 TextTableTiny
+
+This is a temporary fork of Neil Bowen's module to support a method I added to set all of the flags for markdown compatible tables. While waiting on Neil to accept or reject the pull request I wanted Vote::Count to be work on other systems.
 
 =head1 NAME
 

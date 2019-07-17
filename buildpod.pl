@@ -100,30 +100,30 @@ say "Counted Markers: $num_markers";
   )
 }
 
-my $ex1 = <<'QUOTE' ;
-use perl;
-our $VERSION='2019.0712';
+# my $ex1 = <<'QUOTE' ;
+# use perl;
+# our $VERSION='2019.0712';
 
-=pod
+# =pod
 
-=head1 something
+# =head1 something
 
-=head1 VERSION 1.05
+# =head1 VERSION 1.05
 
-=cut
-1;
+# =cut
+# 1;
 
-#buildpod
+# #buildpod
 
-QUOTE
+# QUOTE
 
-my $testmd = <<'TESTMD';
+# my $testmd = <<'TESTMD';
 
-# A Title
+# # A Title
 
-Some Text.
+# Some Text.
 
-TESTMD
+# TESTMD
 
 
 my $dist = path( './dist.ini')->slurp;

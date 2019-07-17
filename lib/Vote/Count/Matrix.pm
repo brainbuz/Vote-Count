@@ -8,7 +8,7 @@ use Moose;
 
 no warnings 'experimental';
 use List::Util qw( min max sum );
-use Text::Table::Tiny  qw/generate_markdown_table/;
+use TextTableTiny  qw/generate_markdown_table/;
 
 # use Try::Tiny;
 use Data::Printer;

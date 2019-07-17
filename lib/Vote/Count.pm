@@ -9,9 +9,8 @@ package Vote::Count;
 use namespace::autoclean;
 use Moose;
 
-use Data::Printer;
+# use Data::Printer;
 use Time::Piece;
-use Text::MarkdownTable;
 
 no warnings 'experimental';
 

@@ -10,9 +10,19 @@ use Moose::Role;
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
-use Text::Table::Tiny 'generate_markdown_table';
+use TextTableTiny 'generate_markdown_table';
 # use boolean;
 # use Data::Printer;
+
+our $VERSION='0.003';
+
+=head1 NAME
+
+Vote::Count::TopCount
+
+=head1 VERSION 0.003
+
+=cut
 
 sub TopCount ( $self, $active=undef ) {
   my %ballotset = $self->BallotSet()->%*;
