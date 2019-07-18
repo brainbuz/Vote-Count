@@ -7,7 +7,7 @@ package Vote::Count::Boorda;
 
 use Moose::Role;
 
-our $VERSION='0.003';
+our $VERSION='0.005';
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;

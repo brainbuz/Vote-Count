@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='0.003';
+our $VERSION='0.005';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 0.003
+=head1 VERSION 0.005
 
 =cut
 
