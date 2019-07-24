@@ -13,14 +13,14 @@ extends 'Vote::Count';
 # with 'Vote::Count';
 # with 'Vote::Count::Matrix';
 
-our $VERSION='0.005';
+our $VERSION='0.008';
 
 no warnings 'experimental';
 use List::Util qw( min max );
 
 # use Vote::Count::RankCount;
 # use Try::Tiny;
-use Text::Table::Tiny 'generate_markdown_table';
+use TextTableTiny 'generate_markdown_table';
 use Data::Printer;
 use Data::Dumper;
 
@@ -66,20 +66,54 @@ IRVLOOP:
 
 1;
 
-#buildpod
-
 =pod
 
 =head1 IRV
 
-Some things to know about IRV.
+Implements Instant Runoff Voting.
 
+=head1 SYNOPSIS
 
-=head2 Warning
+  use Vote::Count::Method::IRV;
+  use Vote::Count::ReadBallots 'read_ballots';
 
-IRV is the best algorithm for resolving a small Condorcet Tie, but
-a poor algorithm for an election. But it is really simple.
+  my $Election = Vote::Count::Method::IRV->new(
+    BallotSet => read_ballots('%path_to_my_ballots'), );
+
+  my $result = $Election->RunIRV();
+  my $winner = $result->{'winner'};
+
+  say $Election->logv(); # Print the full Log.
+
+=head1 Method Summary
+
+Instant Runoff Voting Looks for a Majority Winner. If one isn't present the choice with the lowest Top Count is removed.
+
+Instant Runoff Voting is easy to count by hand and meets the Later Harm and Condorcet Loser Criteria. It, unfortunately, fails a large number of consistency criteria; the order of candidate dropping matters and small changes to the votes of non-winning choices that result in changes to the dropping order can change the outcome.
+
+=head2 Tie Handling
+
+If there is a tie for lowest Top Count this implementation removes all of the tied choices, or returns a tie when all choices are tied for lowest.
+
+At present there is no interface to set a tie breaker, it is a planned feature enhancement to change this in a future release.
+
+Your Election Rules should specify Eliminate All for ties.
+
+There is no standard accepted method for IRV tie resolution, Eliminate All is a common one.
+
+=head2 RunIRV
+
+  $ElectionRunIRV();
+
+  $ElectionRunIRV( $active )
+
+Runs IRV on the provided Ballot Set. Takes an optional parameter of $active which is a hashref for which the keys are the currently active choices.
+
+Returns results in a hashref which will be the results of  Vote::Count::TopCount->EvaluateTopCountMajority, if there is no winner hash will instead be:
+  tie => [true or false],
+  tied => [ array of tied choices ],
+  winner => a false value
+
+Supports the Vote::Count logt, logv, and logd methods for providing details of the method.
 
 =cut
-
-#buildpod

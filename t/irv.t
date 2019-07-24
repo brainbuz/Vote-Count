@@ -11,7 +11,6 @@ use Test2::Bundle::More;
 
 use Path::Tiny;
 
-use Vote::Count;
 use Vote::Count::Method::IRV;
 use Vote::Count::ReadBallots 'read_ballots';
 
@@ -83,9 +82,5 @@ my $logcheck2 = q/Eliminating:PISTACHIO---IRVRound4/;
   like( $tlv, qr/$expecttlv/,
     "compare terse log to expected log" );
 };
-
-
-
-
 
 done_testing();

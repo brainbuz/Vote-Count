@@ -93,11 +93,10 @@ subtest 'check some in the matrix' => sub {
     $M1->{'Matrix'}{'CHOCCHUNK'}{'FUDGESWIRL'},
     'access a result in both possible pairing orders identical'
   );
-
 };
 
-subtest '_scorematrix' => sub {
-  my $scored1  = $M2->_scorematrix();
+subtest 'ScoreMatrix' => sub {
+  my $scored1  = $M2->ScoreMatrix();
   my $xscored1 = {
     CARAMEL    => 1,
     CHOCOLATE  => 5,
@@ -117,7 +116,7 @@ subtest '_scorematrix' => sub {
   };
 
   $M2->Active($xscored2);
-  my $scored2 = $M2->_scorematrix();
+  my $scored2 = $M2->ScoreMatrix();
   is_deeply( $scored2, $xscored2,
     'check scoring same data after eliminating some choices' );
 };
@@ -195,5 +194,24 @@ subtest 'CondorcetWinner' => sub {
   );
 };
 
+
+subtest 'GetPairResult' => sub {
+  is(
+    $M1->GetPairWinner( 'FUDGESWIRL', 'ROCKYROAD' ),
+    'FUDGESWIRL',
+    'Lookup the winner of a pairing with GetPairWinner');
+  my  $STFS = {
+        'FUDGESWIRL' =>  6,
+        'loser'      =>  "STRAWBERRY",
+        'margin'     =>  2,
+        'STRAWBERRY' =>  4,
+        'tie'        =>  0,
+        'winner'     =>  "FUDGESWIRL"
+    };
+  is_deeply(
+    $M1->GetPairResult( "FUDGESWIRL", "STRAWBERRY"),
+    $STFS,
+    "Check the hashref returned by GetPairResult");
+};
 
 done_testing();

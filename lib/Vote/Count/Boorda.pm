@@ -7,7 +7,7 @@ package Vote::Count::Boorda;
 
 use Moose::Role;
 
-our $VERSION='0.005';
+our $VERSION='0.008';
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
@@ -137,20 +137,5 @@ sub Boorda ( $self, $active = undef ) {
            $active );
   return Vote::Count::RankCount->Rank( $BoordaCounted );
 }
-
-
-# =pod
-
-# =head3 RangeBoorda
-
-# When applying Boorda to ranged voting the choices are to convert to rcv or to boorda
-# count multiple choices at the same range the same. This method implements that latter.
-
-# =cut
-
-# sub RangeBoorda {
-#   ...
-# }
-
 
 1;

@@ -13,6 +13,8 @@ use Path::Tiny;
 use Vote::Count;
 use Vote::Count::RankCount;
 
+use feature qw/signatures postderef/;
+
 # my $VC1 = Vote::Count->new( ballotset => read_ballots('t/data/data2.txt'), );
 
 # my $tc1       = $VC1->TopCount();

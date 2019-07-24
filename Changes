@@ -1,10 +1,5 @@
 Revision history for Vote::Count
-0.005 July 16, 2019
-      CondorcetDropping for simple Condorcet implementations.
-0.002 July 12, 2019
-      IRV complete added utility (nuisance) script for updating versions
-      and markdown docs as pod in modules. Because dzil only has a plugin
-      to make markdown from pod not the other way and the dzil version plugin
-      won't update version numbers already in file.
-0.001 July 12, 2019
-      Early Development Release.
+0.008 July 24, 2019
+      Early Preview Release. Core Functionality for Condorcet, Boorda
+      TopCount are implemented as well as full methods for IRV
+      and simple (Paired) Condorcet.
