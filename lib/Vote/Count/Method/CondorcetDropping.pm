@@ -113,7 +113,7 @@ sub DropChoice ( $self, $round, @jeapardy ) {
 
 sub _newmatrix ($self) {
   return Vote::Count::Matrix->new(
-    'BallotSet' => $self->BallotSet()  );
+    'BallotSet' => $self->BallotSet() );
 }
 
 sub _logstart( $self, $active ) {
