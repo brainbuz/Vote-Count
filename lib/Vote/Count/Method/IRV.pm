@@ -8,12 +8,18 @@ package Vote::Count::Method::IRV;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
-# Brings the main Vote::Count Object in along with
-# Topcount and other methods.
-# with 'Vote::Count';
-# with 'Vote::Count::Matrix';
 
-our $VERSION='0.009';
+our $VERSION='0.010';
+
+=head1 NAME
+
+Vote::Count::IRV
+
+=head1 VERSION 0.010
+
+=cut
+
+# ABSTRACT: Runs an IRV Election
 
 no warnings 'experimental';
 use List::Util qw( min max );

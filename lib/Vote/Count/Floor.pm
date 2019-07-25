@@ -11,6 +11,18 @@ use Data::Printer;
 
 no warnings 'experimental';
 
+our $VERSION='0.010';
+
+=head1 NAME
+
+Vote::Count::Floor
+
+=head1 VERSION 0.010
+
+=cut
+
+# ABSTRACT: Floor Rules for RCV elections.
+
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',
       'Vote::Count::TopCount',
@@ -84,6 +96,3 @@ sub TCA( $self ) {
 
 
 1;
-
-=pod
-

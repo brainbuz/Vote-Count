@@ -7,7 +7,19 @@ package Vote::Count::Borda;
 
 use Moose::Role;
 
-our $VERSION='0.009';
+
+our $VERSION='0.010';
+
+=head1 NAME
+
+Vote::Count::Borda
+
+=head1 VERSION 0.010
+
+=cut
+
+# ABSTRACT: Provides Borda Count to Vote::Count objects
+
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
@@ -139,3 +151,4 @@ sub Borda ( $self, $active = undef ) {
 }
 
 1;
+

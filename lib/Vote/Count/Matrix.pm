@@ -16,14 +16,13 @@ use Data::Dumper;
 
 use YAML::XS;
 
-
-our $VERSION='0.009';
+our $VERSION='0.010';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.009
+=head1 VERSION 0.010
 
 =cut
 

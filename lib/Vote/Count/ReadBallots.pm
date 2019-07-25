@@ -7,8 +7,20 @@ use feature qw/postderef signatures/;
 no warnings qw/experimental/;
 use Path::Tiny;
 use Carp;
-use Data::Dumper;
-use Data::Printer;
+# use Data::Dumper;
+# use Data::Printer;
+
+our $VERSION='0.009';
+
+=head1 NAME
+
+Vote::Count::ReadBallots
+
+=head1 VERSION 0.009
+
+=cut
+
+# ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
 use Exporter::Easy (
        OK => [ qw( read_ballots ) ],
@@ -58,11 +70,6 @@ sub read_ballots( $filename ) {
   }
   return \%data ;
 }
-
-
-
-
-
-
-
 1;
+
+#buildpod

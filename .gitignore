@@ -2,3 +2,5 @@ startlib
 .*
 *ERR
 *LOG
+pod.html
+*tmp

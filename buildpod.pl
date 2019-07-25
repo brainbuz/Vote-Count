@@ -125,6 +125,32 @@ say "Counted Markers: $num_markers";
 
 # TESTMD
 
+my $footer = <<'FOOTER';
+
+#FOOTER
+
+=pod
+
+BUG TRACKER
+
+L<https://github.com/brainbuz/Vote-Count/issues>
+
+AUTHOR
+
+John Karr (BRAINBUZ) brainbuz@cpan.org
+
+CONTRIBUTORS
+
+Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+
+LICENSE
+
+This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+=cut
+
+FOOTER
+
 
 my $dist = path( './dist.ini')->slurp;
 $dist =~ /version\s? =\s?(\d+\.\d+)/;
@@ -161,6 +187,7 @@ for my $md ( @mdfiles ) {
   }
   for my $pm ( values %pmkeys ) {
     my $pmtext = path($pm)->slurp;
+    unless ($pmtext =~ /^#FOOTER/) { $pmtext .= $footer ; }
     path($pm)->spew( fix_version( $pmtext, $version) );
     say "updated version in $pm";
   }

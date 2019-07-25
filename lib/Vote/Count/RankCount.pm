@@ -9,7 +9,20 @@ no warnings 'experimental';
 use List::Util qw( min max sum);
 use TextTableTiny  qw/generate_markdown_table/;
 # use boolean;
-use Data::Printer;
+# use Data::Printer;
+
+our $VERSION='0.009';
+
+=head1 NAME
+
+Vote::Count::RankCount
+
+=head1 VERSION 0.009
+
+=cut
+
+# ABSTRACT: RankCount object for Vote::Count. Toolkit for vote counting.
+
 
 sub _RankResult ( $rawcount ) {
   my %rc      = $rawcount->%*;    # destructive process needs to use a copy.
@@ -92,3 +105,5 @@ sub RankTable( $self ) {
 }
 
 1;
+
+#buildpod
