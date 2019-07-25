@@ -16,13 +16,13 @@ use TextTableTiny 'generate_markdown_table';
 
 # ABSTRACT: TopCount and related methods for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='0.009';
+our $VERSION='0.010';
 
 =head1 NAME
 
 Vote::Count::TopCount
 
-=head1 VERSION 0.009
+=head1 VERSION 0.010
 
 =head1 Synopsis
 
@@ -125,3 +125,25 @@ sub EvaluateTopCountMajority ( $self, $topcount = undef, $active = undef) {
 }
 
 1;
+#FOOTER
+
+=pod
+
+BUG TRACKER
+
+L<https://github.com/brainbuz/Vote-Count/issues>
+
+AUTHOR
+
+John Karr (BRAINBUZ) brainbuz@cpan.org
+
+CONTRIBUTORS
+
+Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+
+LICENSE
+
+This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+=cut
+

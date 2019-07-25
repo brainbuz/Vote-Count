@@ -11,13 +11,13 @@ use TextTableTiny  qw/generate_markdown_table/;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION='0.009';
+our $VERSION='0.010';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.009
+=head1 VERSION 0.010
 
 =cut
 
@@ -107,3 +107,25 @@ sub RankTable( $self ) {
 1;
 
 #buildpod
+#FOOTER
+
+=pod
+
+BUG TRACKER
+
+L<https://github.com/brainbuz/Vote-Count/issues>
+
+AUTHOR
+
+John Karr (BRAINBUZ) brainbuz@cpan.org
+
+CONTRIBUTORS
+
+Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+
+LICENSE
+
+This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+=cut
+

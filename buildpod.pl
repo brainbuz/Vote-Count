@@ -100,31 +100,6 @@ say "Counted Markers: $num_markers";
   )
 }
 
-# my $ex1 = <<'QUOTE' ;
-# use perl;
-# our $VERSION='2019.0712';
-
-# =pod
-
-# =head1 something
-
-# =head1 VERSION 1.05
-
-# =cut
-# 1;
-
-# #buildpod
-
-# QUOTE
-
-# my $testmd = <<'TESTMD';
-
-# # A Title
-
-# Some Text.
-
-# TESTMD
-
 my $footer = <<'FOOTER';
 
 #FOOTER
@@ -187,7 +162,7 @@ for my $md ( @mdfiles ) {
   }
   for my $pm ( values %pmkeys ) {
     my $pmtext = path($pm)->slurp;
-    unless ($pmtext =~ /^#FOOTER/) { $pmtext .= $footer ; }
+    unless ($pmtext =~ /\#FOOTER/) { $pmtext .= $footer ; }
     path($pm)->spew( fix_version( $pmtext, $version) );
     say "updated version in $pm";
   }
