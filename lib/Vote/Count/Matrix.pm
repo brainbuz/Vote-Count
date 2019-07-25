@@ -17,13 +17,13 @@ use Data::Dumper;
 use YAML::XS;
 
 
-our $VERSION='0.008';
+our $VERSION='0.009';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.008
+=head1 VERSION 0.009
 
 =cut
 
@@ -253,7 +253,7 @@ SMITHLOOP: while (1) {
 }
 
 # options may later be used to add rankcount objects
-# from boorda, approval, and topcount.
+# from Borda, approval, and topcount.
 sub MatrixTable ( $self, $options = {} ) {
   my @header = ( 'Choice', 'Wins', 'Losses', 'Ties' );
   my $o_topcount = defined $options->{'topcount'}

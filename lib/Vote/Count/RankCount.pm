@@ -66,8 +66,15 @@ sub HashByRank ( $I ) { return $I->{'byrank'} }
 sub ArrayTop ( $I ) { return  $I->{'top'} }
 sub ArrayBottom ( $I ) { return $I->{'bottom'} }
 sub CountVotes ($I) { return sum ( values $I->{'rawcount'}->%* )}
-# sub ArrayTop ( $I ) { return [sort $I->{'top'}->@* ] }
-# sub ArrayBottom ( $I ) { return [sort $I->{'bottom'}->@* ] }
+
+sub Leader ( $I ) {
+  my @leaders = $I->ArrayTop()->@*;
+  my %return = ( 'tie' => 0, 'winner' => '', 'tied' => [] );
+  if ( 1 == @leaders ) { $return{'winner'} = $leaders[0] }
+  elsif ( 1 < @leaders ) { $return{'tie'} = 1; $return{'tied'} =  \@leaders }
+  else { die "Does not compute in sub RankCount->Leader\n"}
+  return \%return;
+}
 
 sub RankTable( $self ) {
   my @rows = ( [ 'Rank', 'Choice', 'Votes']);

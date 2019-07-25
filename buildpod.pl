@@ -134,7 +134,7 @@ my @mdfiles = path("./md")->children( qr/md$/ );
 my @pmfiles1 = path("./lib/Vote/Count")->children( qr/pm$/);
 my @pmfiles2 = path("./lib/Vote/Count/Method")->children( qr/pm$/);
 my $countpm = path( "./lib/Vote/Count.pm");
-my @pmfiles = ( @pmfiles1, @pmfiles2);
+my @pmfiles = ( @pmfiles1, @pmfiles2, $countpm);
 my %pmkeys = ();
 for my $pm (@pmfiles ) {
   $pm =~ /(.*)\.pm/; # extract the part of the string before .pm

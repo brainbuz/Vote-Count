@@ -97,23 +97,23 @@ note $LoopSet->logd();
 
 subtest 'Boorda Dropping' => sub {
 
-note "\n********** LOOPSET BOORDA *********";
+note "\n********** LOOPSET BORDA *********";
 my $LoopSetB =
   Vote::Count::Method::CondorcetDropping->new(
     'BallotSet' => read_ballots('t/data/loop1.txt'),
     'DropStyle' => 'leastwins',
-    'DropRule'  => 'boorda',
+    'DropRule'  => 'borda',
   );
 my $rLoopSetB = $LoopSetB->RunCondorcetDropping();
 is( $rLoopSetB, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
 note $LoopSetB->logd();
 
-note "\n********** KNOTSET BOORDA *********";
+note "\n********** KNOTSET BORDA *********";
 my $KnotSet =
   Vote::Count::Method::CondorcetDropping->new(
     'BallotSet' => read_ballots('t/data/knot1.txt'),
     'DropStyle' => 'all',
-    'DropRule'  => 'boorda',
+    'DropRule'  => 'borda',
   );
 
 my $rKnotSet = $KnotSet->RunCondorcetDropping();

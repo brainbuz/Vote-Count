@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='0.008';
+our $VERSION='0.009';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 0.008
+=head1 VERSION 0.009
 
 =cut
 
@@ -32,7 +32,7 @@ This module implements dropping methodologies for resolving a Condorcet Matrix w
 
 =head2 Basic Dropping Methods
 
-Common Dropping Methods are: Boorda Count (with all the attendant weighting issues), Approval, Plurality Loser (TopCount), and Greatest Loss. Greatest Loss is not currently available, and will likely be implemented in the SSD module if and when that is ever written.
+Common Dropping Methods are: Borda Count (with all the attendant weighting issues), Approval, Plurality Loser (TopCount), and Greatest Loss. Greatest Loss is not currently available, and will likely be implemented in the SSD module if and when that is ever written.
 
 
 =head1 SYNOPSIS
@@ -83,9 +83,9 @@ sub GetRound ( $self, $active, $roundnum='' ) {
     $self->logv( "Round $roundnum Approval Totals ", $round->RankTable() );
     return $round;
   }
-  elsif ( $rule eq 'boorda' ) {
-    my $round = $self->Boorda($active);
-    $self->logv( "Round $roundnum Boorda Count ", $round->RankTable() );
+  elsif ( $rule eq 'borda' ) {
+    my $round = $self->Borda($active);
+    $self->logv( "Round $roundnum Borda Count ", $round->RankTable() );
     return $round;
   }
   elsif ( $rule eq 'greatestloss' ) {
@@ -113,7 +113,7 @@ sub DropChoice ( $self, $round, @jeapardy ) {
 
 sub _newmatrix ($self) {
   return Vote::Count::Matrix->new(
-    'BallotSet' => $self->BallotSet() );
+    'BallotSet' => $self->BallotSet(), Active => $self->Active() );
 }
 
 sub _logstart( $self, $active ) {
@@ -129,7 +129,7 @@ sub _logstart( $self, $active ) {
   elsif ( $self->DropRule() eq 'approval' ) {
     $rule = "Drop the Choice With the Lowest Approval.";
   }
-  elsif ( $self->DropRule() eq 'boorda' ) {
+  elsif ( $self->DropRule() eq 'borda' ) {
     $rule = "Drop the Choice With the Lowest Borda Score.";
   }
   elsif ( $self->DropRule() eq 'greatestloss' ) {
@@ -145,7 +145,7 @@ sub _logstart( $self, $active ) {
 }
 
 sub RunCondorcetDropping ( $self, $active = undef ) {
-  unless ( defined $active ) { $active = $self->BallotSet->{'choices'} }
+  unless ( defined $active ) { $active = $self->Active() }
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
   $self->_logstart( $active);

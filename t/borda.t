@@ -14,15 +14,15 @@ use Path::Tiny;
 
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
-use Vote::Count::Boorda;
+use Vote::Count::Borda;
 
 my $VC1 = Vote::Count->new(
   BallotSet  => read_ballots('t/data/data1.txt'),
   bordadepth => 5
 );
 
-subtest '_boordashrinkballot private method' => sub {
-  my $shrunken = Vote::Count::Boorda::_boordashrinkballot( $VC1->BallotSet(),
+subtest '_bordashrinkballot private method' => sub {
+  my $shrunken = Vote::Count::Borda::_bordashrinkballot( $VC1->BallotSet(),
     { 'CARAMEL' => 1, 'STRAWBERRY' => 1, 'MINTCHIP' => 1 } );
 
   # p $shrunken;
@@ -36,7 +36,7 @@ subtest '_boordashrinkballot private method' => sub {
     2, 'choice that still has multipe choices has the right number' );
 };
 
-subtest '_doboordacount private method' => sub {
+subtest '_dobordacount private method' => sub {
   my $bordatable = {
     'VANILLA' => { 1 => 4, 2 => 6, 3 => 9 },
     'RAISIN'  => { 1 => 6, 3 => 2 },
@@ -52,7 +52,7 @@ subtest '_doboordacount private method' => sub {
   # bordaweight doesn't care about active or
   # bordadepth so an
   # empty hashref is passed as a placeholder.
-  my $counted = $dbc->_doboordacount( $bordatable, {} );
+  my $counted = $dbc->_dobordacount( $bordatable, {} );
   is( $counted->{'VANILLA'}, 19, 'check count for first choice' );
   is( $counted->{'RAISIN'},  8,  'check count for second choice' );
   is( $counted->{'CHERRY'},  5,  'check count for third choice' );
@@ -60,7 +60,7 @@ subtest '_doboordacount private method' => sub {
 
 subtest 'bordadepth at 5, standard method' => sub {
 
-  my ( $A1Rank, $A1Boorda ) = $VC1->Boorda();
+  my ( $A1Rank, $A1Borda ) = $VC1->Borda();
 
   my $expectA1 = {
     CARAMEL    => 4,
@@ -74,7 +74,7 @@ subtest 'bordadepth at 5, standard method' => sub {
   };
 
   is_deeply( $A1Rank->RawCount(), $expectA1,
-    "Boorda counted small set no active list forced depth 5" );
+    "Borda counted small set no active list forced depth 5" );
 
   my $testweight = sub {
     my $x = shift;
@@ -90,7 +90,7 @@ subtest 'bordadepth at 5, standard method' => sub {
     bordaweight => $testweight,
   );
 
-  my ( $A2 ) = $VC2->Boorda(
+  my ( $A2 ) = $VC2->Borda(
     {
       'VANILLA'   => 1,
       'CHOCOLATE' => 1,
@@ -106,15 +106,15 @@ subtest 'bordadepth at 5, standard method' => sub {
   };
 
   is_deeply( $A2->RawCount(), $expectA2,
-    "Boorda counted a small set with AN active list" );
+    "Borda counted a small set with AN active list" );
 
   is_deeply(
     $A2->RawCount()->{'CHOCOLATE'}, 50 ,
-    'test a value on the Boorda Ranking table.'
+    'test a value on the Borda Ranking table.'
   );
 };
 
-subtest 'tests with default boorda weighting' => sub {
+subtest 'tests with default borda weighting' => sub {
 
   # THis time set no depth and use a ballot set
   # with 12 choices
@@ -134,7 +134,7 @@ subtest 'tests with default boorda weighting' => sub {
     VANILLA    => 72
   };
 
-  my ( $B1Rank ) = $BC1->Boorda();
+  my ( $B1Rank ) = $BC1->Borda();
 
   is_deeply( $B1Rank->RawCount(), $expectB1,
     "Small set no active list default depth of 0" );
@@ -147,7 +147,7 @@ subtest 'tests with default boorda weighting' => sub {
     CHERRY    => 24,
     VANILLA   => 24,
   };
-  my ( $C1Rank ) = $BC1->Boorda($activeset);
+  my ( $C1Rank ) = $BC1->Borda($activeset);
   is_deeply( $C1Rank->RawCount(), $activeset,
     "small set WITH active list default depth of 0" );
 

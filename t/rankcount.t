@@ -28,8 +28,19 @@ my %set1 = (
   STRAWBERRY => 1,
   VANILLA    => 7 )
 ;
+my %tiedset = (
+  CARAMEL    => 11,
+  CHOCOLATE  => 1,
+  MINTCHIP   => 5,
+  PISTACHIO  => 2,
+  ROCKYROAD  => 0,
+  RUMRAISIN  => 0,
+  STRAWBERRY => 11,
+  VANILLA    => 7 )
+;
 
 my $counted1 = Vote::Count::RankCount->Rank( \%set1 );
+my $tied1 = Vote::Count::RankCount->Rank( \%tiedset );
 # p $counted1;
 isa_ok( $counted1, ['Vote::Count::RankCount'],
   'Made a new counted object from rank' );
@@ -63,12 +74,18 @@ subtest 'HashByRank' => sub {
 # always sort so we don't care if deeply cares about order.
 # p $counted1;
 my $counted1top = $counted1->ArrayTop();
-
+my $leader1 = $counted1->Leader();
+my $tieresult1 = $tied1->Leader();
 my $counted1bottom = $counted1->ArrayBottom();
 
 is_deeply( $counted1top, [ 'VANILLA' ], "confirm top element");
 is_deeply( $counted1bottom, [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
  "confirm bottom elements");
+is( $leader1->{'winner'}, 'VANILLA', 'Leader Method returned top element as winner');
+is( $leader1->{'tie'}, 0, 'Leader Method tie is false on data with winner');
+
+is( $tieresult1->{'winner'}, '', 'Leader Method returned empty winner for set with tie');
+is( $tieresult1->{'tie'}, 1, 'Leader Method tie is true for set with tie');
 
 # p $counted1;
 my $table = $counted1->RankTable();

@@ -14,7 +14,7 @@ use Time::Piece;
 
 no warnings 'experimental';
 
-our $VERSION=0.002;
+our $VERSION='0.009';
 
 has 'BallotSet' => ( is => 'ro', isa => 'HashRef' );
 has 'BallotSetType' => (
@@ -23,6 +23,14 @@ has 'BallotSetType' => (
   lazy    => 1,
   default =>  'rcv',
 );
+
+has 'Active' => (
+  is => 'rw',
+  isa => 'HashRef',
+  lazy => 1,
+  builder => '_buildactive', );
+
+sub _buildactive ( $self ) { return  $self->BallotSet()->{'choices'} }
 
 sub BUILD {
   my $self      = shift;
@@ -66,7 +74,7 @@ sub logd {
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',
       'Vote::Count::TopCount',
-      'Vote::Count::Boorda',
+      'Vote::Count::Borda',
       'Vote::Count::Floor'
       ;
 
