@@ -16,13 +16,13 @@ use Data::Dumper;
 
 use YAML::XS;
 
-our $VERSION='0.011';
+our $VERSION='0.012';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.011
+=head1 VERSION 0.012
 
 =cut
 
@@ -196,6 +196,43 @@ sub CondorcetWinner( $self ) {
   return $winner;
 }
 
+sub GreatestLoss ( $self, $A ) {
+  my $bigloss = 0;
+GREATESTLOSSLOOP:
+    for my $B ( keys $self->Active()->%* ) {
+      next GREATESTLOSSLOOP if $B eq $A;
+      my %result = $self->{'Matrix'}{$A}{$B}->%*;
+# warn "$A : $B loser $result{'loser'} : margin $result{'margin'} $A: $result{$A} $B: $result{$B}";
+      if ( $result{'loser'} eq $A ) {
+        $bigloss = $result{'margin'} if $result{'margin'} > $bigloss;
+      }
+    }
+  return $bigloss;
+}
+
+# reset active to choices
+sub ResetActive ( $self ) {
+  $self->{'Active'} = $self->BallotSet->{'choices'};
+}
+
+sub RankGreatestLoss ( $self ){
+  ...
+# borrowing scorematrix
+  #   my $scores = {};
+  # my %active = $self->Active()->%*;
+  # for my $A ( keys %active ) {
+  #   my $hasties = 0;
+  #   $scores->{$A} = 0;
+  #   for my $B ( keys %active ) {
+  #     next if $B eq $A;
+  #       if( $A eq $self->{'Matrix'}{$A}{$B}{'winner'} ) { $scores->{$A}++ }
+  #       if( $self->{'Matrix'}{$A}{$B}{'tie'} ) { $hasties = .001 }
+  #   }
+  #   if ( $scores->{$A} == 0 ) { $scores->{$A} += $hasties }
+  # }
+  # return $scores;
+}
+
 sub _getsmithguessforchoice ( $h, $matrix ) {
   my @winners = ($h);
   for my $P ( keys $matrix->{$h}->%* ) {
@@ -251,6 +288,15 @@ SMITHLOOP: while (1) {
   return $proposal;
 }
 
+# ScoreMatrix as a table.
+sub ScoreTable ( $self ) {
+  my $scores = $self->ScoreMatrix();
+  my @header = ( 'Choice', 'Score' );
+  my @rows = ( \@header );
+  for my $c ( sort keys $scores->%* ) {push @rows, [ $c, $scores->{$c} ] }
+  return generate_markdown_table( rows => \@rows );
+}
+
 # options may later be used to add rankcount objects
 # from Borda, approval, and topcount.
 sub MatrixTable ( $self, $options = {} ) {
@@ -298,6 +344,7 @@ Condorcet Pairwise Methods require a Win-Loss Matrix. This object takes an RCV B
 
 =head1 SYNOPSIS
 
+ perl
  my $Matrix =
    Vote::Count::Matrix->new(
      'BallotSet' => $myVoteCount->BallotSet() );
@@ -339,7 +386,8 @@ Returns a MarkDown formatted table with the wins losses and ties for each Active
 
 Returns the results of the pairing of two choices as a hashref.
 
- Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
+ perl
+   Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
    {
     'FUDGESWIRL' =>  6,
     'loser'      =>  "STRAWBERRY",
@@ -370,7 +418,8 @@ Returns an array of the choice or choices with the fewest wins.
 
 Eliminates all Condorcet Losers from the Matrix Object's Active list. Returns a hashref:
 
- {
+ perl
+   {
      verbose => 'verbose message',
      terse   => 'terse message',
      eliminated => [ eliminated choices ],

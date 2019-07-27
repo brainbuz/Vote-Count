@@ -11,13 +11,13 @@ use TextTableTiny  qw/generate_markdown_table/;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION='0.011';
+our $VERSION='0.012';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.011
+=head1 VERSION 0.012
 
 =cut
 
@@ -58,12 +58,14 @@ sub _RankResult ( $rawcount ) {
   # sorted anyway. For testing it makes the element order predictable.
   my @top = sort @{$byrank{1}} ;
   my @bottom = sort @{$byrank{ $pos }};
+  my $tie = scalar(@top) > 1 ? 1 : 0 ;
   return {
     'rawcount' => $rawcount,
     'ordered' => \%ordered,
     'byrank' => \%byrank,
     'top' => \@top,
     'bottom' => \@bottom,
+    'tie' => $tie,
     };
 }
 

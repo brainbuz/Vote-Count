@@ -8,60 +8,52 @@ This is also extremely useful to researchers who may want to study multiple meth
 
 # Synopsis
 
-```perl
-use 5.022; # Minimum Perl, or any later Perl.
-use feature qw /postderef signatures/;
-
-use Vote::Count;
-use Vote::Count::Method::CondorcetDropping;
-use Vote::Count::ReadBallots 'read_ballots';
-
-
-# example uses biggerset1 from the distribution test data.
-my $ballotset = read_ballots 't/data/biggerset1.txt' ;
-my $CondorcetElection =
-  Vote::Count::Method::CondorcetDropping->new(
-    'BallotSet' => $ballotset ,
-    'DropStyle' => 'all',
-    'DropRule'  => 'topcount',
-  );
-# ChoicesAfterFloor a hashref of choices meeting the
-# ApprovalFloor which defaulted to 5%.
-my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
-# Apply the ChoicesAfterFloor to the Election.
-$CondorcetElection->Active( $ChoicesAfterFloor );
-# Get Smith Set and the Election with it as the Active List.
-my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
-$CondorcetElection->logt(
-  "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
-my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet );
-
-# Create an object for IRV, use the same Floor as Condorcet
-my $IRVElection = Vote::Count::Method::IRV->new(
-  'BallotSet' => $ballotset,
-  'Active' => $ChoicesAfterFloor );
-# Get a RankCount Object for the
-my $Plurality = $IRVElection->TopCount();
-# In case of ties RankCount objects return top as an array, log the result.
-my $PluralityWinner = $Plurality->Leader();
-$IRVElection->logv( "Plurality Results", $Plurality->RankTable);
-if ( $PluralityWinner->{'winner'}) {
-  $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
-} else {
-  $IRVElection->logt(
-    "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
-}
-my $IRVResult = $IRVElection->RunIRV();
-
-# Now print the logs and winning information.
-note $CondorcetElection->logv();
-note $IRVElection->logv();
-note '******************';
-note "Plurality Winner: $PluralityWinner->{'winner'}";
-note "IRV Winner: $IRVResult->{'winner'}";
-note "Winner: $Winner";
-
-```
+    use 5.022; # Minimum Perl, or any later Perl.
+    use feature qw /postderef signatures/;
+    use Vote::Count;
+    use Vote::Count::Method::CondorcetDropping;
+    use Vote::Count::ReadBallots 'read_ballots';
+    # example uses biggerset1 from the distribution test data.
+    my $ballotset = read_ballots 't/data/biggerset1.txt' ;
+    my $CondorcetElection =
+      Vote::Count::Method::CondorcetDropping->new(
+        'BallotSet' => $ballotset ,
+        'DropStyle' => 'all',
+        'DropRule'  => 'topcount',
+      );
+    # ChoicesAfterFloor a hashref of choices meeting the
+    # ApprovalFloor which defaulted to 5%.
+    my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
+    # Apply the ChoicesAfterFloor to the Election.
+    $CondorcetElection->Active( $ChoicesAfterFloor );
+    # Get Smith Set and the Election with it as the Active List.
+    my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
+    $CondorcetElection->logt(
+      "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
+    my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
+    # Create an object for IRV, use the same Floor as Condorcet
+    my $IRVElection = Vote::Count::Method::IRV->new(
+      'BallotSet' => $ballotset,
+      'Active' => $ChoicesAfterFloor );
+    # Get a RankCount Object for the
+    my $Plurality = $IRVElection->TopCount();
+    # In case of ties RankCount objects return top as an array, log the result.
+    my $PluralityWinner = $Plurality->Leader();
+    $IRVElection->logv( "Plurality Results", $Plurality->RankTable);
+    if ( $PluralityWinner->{'winner'}) {
+      $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
+    } else {
+      $IRVElection->logt(
+        "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
+    }
+    my $IRVResult = $IRVElection->RunIRV();
+    # Now print the logs and winning information.
+    say $CondorcetElection->logv();
+    say $IRVElection->logv();
+    say '******************';
+    say "Plurality Winner: $PluralityWinner->{'winner'}";
+    say "IRV Winner: $IRVResult->{'winner'}";
+    say "Winner: $Winner";
 
 # Preview Release
 
@@ -99,7 +91,7 @@ To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cr
 
 Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If removing one of the clones would cause the other to win, the presence of both should not cause a non-clone to win.
 
-The cases described bove:Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as seperate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
+The cases described above: Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as seperate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
 
 #### Complexity
 
@@ -135,7 +127,8 @@ Scores choices on a ballot based on their position. Borda supporters often disag
 * Easy to Understand.
 * Fails Later Harm.
 * Fails Condorcet Winner.
-* Inconsistant and vulnerable to manipulation by voters coordinating their votes.
+* Inconsistant.
+* Vulnerable to a Cloning Attack.
 
 #### Condorcet
 
@@ -146,7 +139,7 @@ The basic Condorcet Method will frequently fail to identify a winner. One possib
 * Complexity Varies among sub-methods.
 * Fails Later Harm.
 * Meets both Condorcet Criteria.
-* When a Condorcet Winner is present Consistency is met, when a loop is present, this Consistency also applies between the loop and the rest of the choices. Submethods vary in consistency when there is no Condorcet Winner.
+* When a Condorcet Winner is present Consistency is met. When there is no Condorcet Winner this Consistency also applies between a Dominant (Smith) Set and the rest of the choices, but not within the Smith Set. Submethods vary in consistency when there is no Condorcet Winner.
 
 ### Score Voting Systems
 
@@ -171,20 +164,37 @@ The Vote::Count::ReadBallots library provides functionality for reading files fr
 
 The Modules in the space Vote::Count::%Component% provide functionality needed to create a functioning Voting Method. Many of these are consumed as Roles by the Vote::Count object, some such as RankCount and Matrix are not roles and return their own objects.
 
-The Modules in the space Vote::Count::Method::%Something% implement a Voting Method such as IRV. These Modules inherit the parent Vote::Count and all of the Components available to it.
+The Modules in the space Vote::Count::Method::%Something% implement a Voting Method such as IRV. These Modules inherit the parent Vote::Count and all of the Components available to it. These modules all return a Hash Reference with the following key: *winner*, some return additional keys. Methods that can be tied will have additional keys *tie* and *tied*. When there is no winner the value of *winner* will be false.
 
 Simpler Methods such as single iteration Borda or Approval can be run directly from the Vote::Count Object.
 
-## Core Object is Vote::Count
+## Vote::Count Module
 
-The Core Module requires a Ballot Set (which can be obtained from ReadBallots). Optionally an Active Set can be passed as at creation.
+The Core Module requires a Ballot Set (which can be obtained from ReadBallots).
 
-```
   my $Election = Vote::Count->new(
       BallotSet => read_ballots( 'ballotfile'), # imported from ReadBallots
       ActiveSet => { 'A' => 1, 'B' => 1, 'C' => 1 }, # Optional
   );
-```
+
+
+### Optional Paramters to Vote::Count
+
+#### Active
+
+A Hashref with the active choices as keys. The Active Choices are represented by a Hashref because it is easier to manipulate hash keys than it is to manipulate random array elements.
+
+#### LogTo
+
+Sets a path and Naming pattern for writing logs with the WriteLogs method.
+
+  'LogTo' => '/logging_path/election_name'
+
+The WriteLogs method will write the logs appending '.brief', '.full', and '.debug' for the three logs where brief is a summary written with the logt (log terse) method, the full transcript log wirtten with logv, and finally the debug log written with logd. Each higher log level captures all events of the lower log levels.
+
+The default log location is '/tmp/votecount'.
+
+When logging from your methods, use logt for events that produce a summary, use logv for events that should be in the full transcript such as round counts, and finally debug is for events that may be helpful in debugging but which should not be in the transcript.
 
 ### Active Sets
 
@@ -200,5 +210,6 @@ Active sets are typically represnted as a Hash Reference where the keys represen
   * [Vote::Count::TopCount](https://metacpan.org/pod/Vote::Count::TopCount)
 
 ### Return Their Own Objects
+
   * [Vote::Count::Matrix](https://metacpan.org/pod/Vote::Count::Matrix)
   * [Vote::Count::RankCount](https://metacpan.org/pod/Vote::Count::RankCount)

@@ -11,13 +11,13 @@ use Data::Printer;
 
 no warnings 'experimental';
 
-our $VERSION='0.011';
+our $VERSION='0.012';
 
 =head1 NAME
 
 Vote::Count::Floor
 
-=head1 VERSION 0.011
+=head1 VERSION 0.012
 
 =cut
 

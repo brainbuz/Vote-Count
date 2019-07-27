@@ -41,7 +41,7 @@ $CondorcetElection->Active( $ChoicesAfterFloor );
 my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
 $CondorcetElection->logt(
   "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
-my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet );
+my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
 
 # Create an object for IRV, use the same Floor as Condorcet
 my $IRVElection = Vote::Count::Method::IRV->new(

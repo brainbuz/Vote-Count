@@ -7,7 +7,7 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-use Data::Printer;
+# use Data::Printer;
 # use JSON::MaybeXS;
 # use YAML::XS;
 use feature qw /postderef signatures/;
@@ -30,15 +30,15 @@ my $M3 =
 isa_ok( $M3, ['Vote::Count::Method::CondorcetDropping'],
   'ISA Vote::Count::Method::CondorcetDropping' );
 my $rM3 = $M3->RunCondorcetDropping();
-is ( $rM3, 'MINTCHIP', 'winner for biggerset1 topcount/all');
-# note $M3->logv();
+is ( $rM3->{'winner'}, 'MINTCHIP', 'winner for biggerset1 topcount/all');
+note $M3->logv();
 
 my $LoopSet =
   Vote::Count::Method::CondorcetDropping->new( 'BallotSet' => read_ballots('t/data/loop1.txt'),
   );
 my $rLoopSet = $LoopSet->RunCondorcetDropping();
-is( $rLoopSet, 'MINTCHIP', 'loopset plurality leastwins winner');
-# note $LoopSet->logd();
+is( $rLoopSet->{'winner'}, 'MINTCHIP', 'loopset plurality leastwins winner');
+note $LoopSet->logd();
 
 my $LoopSetA =
   Vote::Count::Method::CondorcetDropping->new(
@@ -47,8 +47,8 @@ my $LoopSetA =
     'DropRule'  => 'topcount',
   );
 my $rLoopSetA = $LoopSetA->RunCondorcetDropping();
-is( $rLoopSetA, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
-# note $LoopSetA->logd();
+is( $rLoopSetA->{'winner'}, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
+note $LoopSetA->logd();
 
 my $KnotSet =
   Vote::Count::Method::CondorcetDropping->new(
@@ -56,30 +56,9 @@ my $KnotSet =
   );
 
 my $rKnotSet = $KnotSet->RunCondorcetDropping();
-is( $rKnotSet, 'CHOCOLATE', 'knotset winner with defaults');
-# note $KnotSet->logd();
+is( $rKnotSet->{'winner'}, 'CHOCOLATE', 'knotset winner with defaults');
+note $KnotSet->logd();
 };
-
-note "==== Edgeleastwins";
-my $edge =
-  Vote::Count::Method::CondorcetDropping->new(
-    'BallotSet' => read_ballots('t/data/condorcetdropping_edgecase.txt'),
-  );
-my $redge = $edge->RunCondorcetDropping();
-# is( $redge, 'CHOCOLATE', 'knotset winner with defaults');
-note $edge->logd();
-
-note "==== Edgeall";
-my $edge1 =
-  Vote::Count::Method::CondorcetDropping->new(
-    'BallotSet' => read_ballots('t/data/condorcetdropping_edgecase.txt'),
-    'DropStyle' => 'all',
-    'DropRule'  => 'topcount',
-  );
-my $redge1 = $edge1->RunCondorcetDropping();
-# is( $redge, 'CHOCOLATE', 'knotset winner with defaults');
-note $edge1->logd();
-
 
 subtest 'Approval Dropping' => sub {
 
@@ -91,7 +70,7 @@ my $LoopSet =
     'DropRule'  => 'approval',
   );
 my $rLoopSet = $LoopSet->RunCondorcetDropping();
-is( $rLoopSet, 'VANILLA', 'loopset approval all winner');
+is( $rLoopSet->{'winner'}, 'VANILLA', 'loopset approval all winner');
 note $LoopSet->logd();
 };
 
@@ -105,7 +84,7 @@ my $LoopSetB =
     'DropRule'  => 'borda',
   );
 my $rLoopSetB = $LoopSetB->RunCondorcetDropping();
-is( $rLoopSetB, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
+is( $rLoopSetB->{'winner'}, 'MINTCHIP', 'loopset plurality leastwins winner is the same');
 note $LoopSetB->logd();
 
 note "\n********** KNOTSET BORDA *********";
@@ -117,7 +96,7 @@ my $KnotSet =
   );
 
 my $rKnotSet = $KnotSet->RunCondorcetDropping();
-is( $rKnotSet, 'MINTCHIP', 'knotset winner with defaults');
+is( $rKnotSet->{'winner'}, 'MINTCHIP', 'knotset winner with defaults');
 note $KnotSet->logd();
 };
 

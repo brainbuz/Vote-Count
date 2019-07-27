@@ -4,7 +4,8 @@ Condorcet Pairwise Methods require a Win-Loss Matrix. This object takes an RCV B
 
 # SYNOPSIS
 
-```my $Matrix =
+```perl
+my $Matrix =
   Vote::Count::Matrix->new(
     'BallotSet' => $myVoteCount->BallotSet() );
   my $Scores = $Matrix->ScoreMatrix();
@@ -38,7 +39,8 @@ Returns a MarkDown formatted table with the wins losses and ties for each Active
 
 Returns the results of the pairing of two choices as a hashref.
 
-```   Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
+```perl
+  Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
   {
    'FUDGESWIRL' =>  6,
    'loser'      =>  "STRAWBERRY",
@@ -65,7 +67,8 @@ Returns an array of the choice or choices with the fewest wins.
 
 Eliminates all Condorcet Losers from the Matrix Object's Active list. Returns a hashref:
 
-```  {
+```perl
+  {
     verbose => 'verbose message',
     terse   => 'terse message',
     eliminated => [ eliminated choices ],

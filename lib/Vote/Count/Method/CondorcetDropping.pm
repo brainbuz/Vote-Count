@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='0.011';
+our $VERSION='0.012';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 0.011
+=head1 VERSION 0.012
 
 =cut
 
@@ -149,6 +149,7 @@ sub RunCondorcetDropping ( $self, $active = undef ) {
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
   $self->_logstart( $active);
+  my $result = { tie => 0, tied => undef, winner => 0 };
 DROPLOOP:
   until ( 0 ) {
     $roundctr++;
@@ -158,7 +159,8 @@ DROPLOOP:
     $self->logv( '---', "Round $roundctr TopCount", $topcount->RankTable() );
     my $majority = $self->EvaluateTopCountMajority( $topcount );
     if ( defined $majority->{'winner'} ) {
-      return $majority->{'winner'};
+      $result->{'winner'} = $majority->{'winner'};
+      last DROPLOOP;
     }
     my $matrix = Vote::Count::Matrix->new(
       'BallotSet' => $self->BallotSet,
@@ -169,7 +171,8 @@ DROPLOOP:
       my $wstr = "*  Winner $cw  *";
       my $rpt = length( $wstr) ;
       $self->logt( '*'x$rpt, $wstr, '*'x$rpt );
-      return $cw;
+      $result->{'winner'} = $cw ;
+      last DROPLOOP;
     }
     my $eliminated = $matrix->CondorcetLoser();
     if( $eliminated->{'eliminations'}) {
@@ -191,15 +194,17 @@ DROPLOOP:
     my @remaining = keys $active->%* ;
     if ( @remaining == 0) {
       $self->logt( "All remaining Choices would be eliminated, Tie between @jeapardy");
-      return 'tie';
-      $self->{'tied'} = \@jeapardy;
+      $result->{'tie'} = 1;
+      $result->{'tied'} = \@jeapardy;
+      last DROPLOOP;
     } elsif ( @remaining == 1) {
       my $winner = $remaining[0];
       $self->logt( "Only 1 choice remains.", "** WINNER : $winner **");
-      return $winner;
+      $result->{'winner'} = $winner;
+      last DROPLOOP;
     }
   };#infinite DROPLOOP
-
+  return $result;
   }
 
 

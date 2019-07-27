@@ -2,21 +2,19 @@ package Vote::Count::ReadBallots;
 
 use 5.022;
 use feature qw/postderef signatures/;
-# use strict;
-# use warnings;
 no warnings qw/experimental/;
-use Path::Tiny;
+use Path::Tiny 0.108;
 use Carp;
 # use Data::Dumper;
 # use Data::Printer;
 
-our $VERSION='0.011';
+our $VERSION='0.012';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 0.011
+=head1 VERSION 0.012
 
 =cut
 

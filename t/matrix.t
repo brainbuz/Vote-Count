@@ -214,4 +214,12 @@ subtest 'GetPairResult' => sub {
     "Check the hashref returned by GetPairResult");
 };
 
+subtest 'GreatestLoss' => sub {
+  $M1->ResetActive();
+  is( $M1->GreatestLoss( 'FUDGESWIRL'), 2, 'M1 fudgeswirl' );
+  $KnotSet->ResetActive();
+  is( $KnotSet->GreatestLoss( 'STRAWBERRY'), 13, 'knotset strawberry');
+  is( $KnotSet->GreatestLoss( 'PISTACHIO'), 9 , 'knotset pistachio');
+};
+
 done_testing();
