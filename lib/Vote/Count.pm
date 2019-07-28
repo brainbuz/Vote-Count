@@ -376,12 +376,33 @@ Simpler Methods such as single iteration Borda or Approval can be run directly f
 
 =head2 Vote::Count Module
 
-The Core Module requires a Ballot Set (which can be obtained from ReadBallots). Optionally an Active Set can be passed as at creation.
+The Core Module requires a Ballot Set (which can be obtained from ReadBallots).
 
   my $Election = Vote::Count->new(
       BallotSet => read_ballots( 'ballotfile'), # imported from ReadBallots
       ActiveSet => { 'A' => 1, 'B' => 1, 'C' => 1 }, # Optional
   );
+
+
+=head3 Optional Paramters to Vote::Count
+
+
+=head4 Active
+
+A Hashref with the active choices as keys. The Active Choices are represented by a Hashref because it is easier to manipulate hash keys than it is to manipulate random array elements.
+
+
+=head4 LogTo
+
+Sets a path and Naming pattern for writing logs with the WriteLogs method.
+
+  'LogTo' => '/loggingI<path/election>name'
+
+The WriteLogs method will write the logs appending '.brief', '.full', and '.debug' for the three logs where brief is a summary written with the logt (log terse) method, the full transcript log wirtten with logv, and finally the debug log written with logd. Each higher log level captures all events of the lower log levels.
+
+The default log location is '/tmp/votecount'.
+
+When logging from your methods, use logt for events that produce a summary, use logv for events that should be in the full transcript such as round counts, and finally debug is for events that may be helpful in debugging but which should not be in the transcript.
 
 
 =head3 Active Sets

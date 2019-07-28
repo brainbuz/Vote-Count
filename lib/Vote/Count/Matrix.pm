@@ -6,6 +6,8 @@ use feature qw /postderef signatures/;
 package Vote::Count::Matrix;
 use Moose;
 
+use Vote::Count::RankCount;
+
 no warnings 'experimental';
 use List::Util qw( min max sum );
 use TextTableTiny  qw/generate_markdown_table/;
@@ -210,27 +212,17 @@ GREATESTLOSSLOOP:
   return $bigloss;
 }
 
+sub RankGreatestLoss ( $self ){
+  my %loss = ();
+  for my $A ( keys $self->Active()->%* ) {
+    $loss{$A} = $self->GreatestLoss( $A);
+  }
+  return Vote::Count::RankCount->Rank( \%loss );
+}
+
 # reset active to choices
 sub ResetActive ( $self ) {
   $self->{'Active'} = $self->BallotSet->{'choices'};
-}
-
-sub RankGreatestLoss ( $self ){
-  ...
-# borrowing scorematrix
-  #   my $scores = {};
-  # my %active = $self->Active()->%*;
-  # for my $A ( keys %active ) {
-  #   my $hasties = 0;
-  #   $scores->{$A} = 0;
-  #   for my $B ( keys %active ) {
-  #     next if $B eq $A;
-  #       if( $A eq $self->{'Matrix'}{$A}{$B}{'winner'} ) { $scores->{$A}++ }
-  #       if( $self->{'Matrix'}{$A}{$B}{'tie'} ) { $hasties = .001 }
-  #   }
-  #   if ( $scores->{$A} == 0 ) { $scores->{$A} += $hasties }
-  # }
-  # return $scores;
 }
 
 sub _getsmithguessforchoice ( $h, $matrix ) {

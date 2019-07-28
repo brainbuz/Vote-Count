@@ -222,4 +222,6 @@ subtest 'GreatestLoss' => sub {
   is( $KnotSet->GreatestLoss( 'PISTACHIO'), 9 , 'knotset pistachio');
 };
 
+note( $KnotSet->RankGreatestLoss()->RankTable );
+
 done_testing();

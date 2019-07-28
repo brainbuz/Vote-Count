@@ -25,7 +25,7 @@ use List::Util qw( min max );
 use Vote::Count::RankCount;
 # use Try::Tiny;
 # use boolean;
-# use Data::Printer;
+use Data::Printer;
 
 has 'bordaweight' => (
   is => 'rw',
@@ -121,13 +121,8 @@ sub _dobordacount( $self, $BordaTable, $active) {
 sub Borda ( $self, $active = undef ) {
   my %BallotSet = $self->BallotSet()->%*;
   my %ballots   = ();
-  if ( defined $active ) {
-    %ballots = %{_bordashrinkballot( \%BallotSet, $active )};
-  }
-  else {
-    %ballots = $BallotSet{'ballots'}->%*;
-    $active  = $BallotSet{'choices'};
-  }
+  $active = $self->Active() unless defined $active;
+  %ballots = %{_bordashrinkballot( \%BallotSet, $active )};
   my %BordaTable = ( map { $_ => {} } keys( $active->%* ) );
   for my $b ( keys %ballots ) {
     my @votes  = $ballots{$b}->{'votes'}->@*;

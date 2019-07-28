@@ -33,9 +33,7 @@ use Data::Dumper;
 # use YAML::XS;
 
 sub RunIRV ( $self, $active = undef ) {
-  unless ( defined $active ) {
-    $active = $self->BallotSet->{'choices'};
-  }
+  unless ( defined $active ) { $active = $self->Active() }
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
   $self->logt( "Instant Runoff Voting",
