@@ -4,7 +4,7 @@ Condorcet Pairwise Methods require a Win-Loss Matrix. This object takes an RCV B
 
 # SYNOPSIS
 
-```perl
+```
 my $Matrix =
   Vote::Count::Matrix->new(
     'BallotSet' => $myVoteCount->BallotSet() );
@@ -35,11 +35,15 @@ A hash reference with active choices as the keys. The default value is all of th
 
 Returns a MarkDown formatted table with the wins losses and ties for each Active Choice as text.
 
+## PairingVotesTable
+
+Returns a MarkDown formatted table with the votes for all of the pairings.
+
 ## GetPairResult ( $A, $B )
 
 Returns the results of the pairing of two choices as a hashref.
 
-```perl
+```
   Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
   {
    'FUDGESWIRL' =>  6,
@@ -59,6 +63,10 @@ Returns the winner of the pairing of two choices. If there is no Winner it retur
 
 Returns a HashRef of the choices and their Matrix Scores. The scoring is 1 for each win, 0 for losses and ties. In the event a choice has ties but no wins their score will be .001. Where N is the number of choices, a Condorcet Winner will have a score of N-1, a Condorcet Loser will have a score of 0. Since a choice with at least one tie but no wins is not defeated by all other choices they are not a Condorcet Loser, and thus those cases are scored with a near to zero value instead of 0. Methods that wish to treat no wins but tie case as a Condorcet Loser may test for a score less than 1.
 
+## ScoreTable
+
+Returns the ScoreMatrix as a markdown compatible table.
+
 ## LeastWins
 
 Returns an array of the choice or choices with the fewest wins.
@@ -67,7 +75,7 @@ Returns an array of the choice or choices with the fewest wins.
 
 Eliminates all Condorcet Losers from the Matrix Object's Active list. Returns a hashref:
 
-```perl
+```
   {
     verbose => 'verbose message',
     terse   => 'terse message',
@@ -85,3 +93,16 @@ Returns either the Condorcet Winner or an empty string if there is none.
 Finds the innermost Smith Set (Dominant Set). [ assistance in finding proof of the algorithm used would be appreciated so it could be correctly referenced in this documentation ]. A Dominant Set is a set which defeats all choices outside of that set. The inner Smith Set is the smallest possible Dominant Set.
 
 Returns a hashref with the keys as the choices of the Smith Set.
+
+## ResetActive
+
+Reset Active list to the choices lift of the BallotSet.
+
+## GreatestLoss
+
+Returns the greatest loss for a choice `$MyMatrix->GreatestLoss( $A )`.
+
+## RankGreatestLoss
+
+Returns a RankTable object of the Greatest Loss for each choice.
+

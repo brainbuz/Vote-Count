@@ -224,4 +224,6 @@ subtest 'GreatestLoss' => sub {
 
 note( $KnotSet->RankGreatestLoss()->RankTable );
 
+note( $KnotSet->PairingVotesTable );
+
 done_testing();

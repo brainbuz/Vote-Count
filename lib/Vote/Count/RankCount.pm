@@ -108,7 +108,6 @@ sub RankTable( $self ) {
 
 1;
 
-#buildpod
 #FOOTER
 
 =pod
