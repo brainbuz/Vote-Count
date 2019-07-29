@@ -44,7 +44,6 @@ Returns a MarkDown formatted table with the votes for all of the pairings.
 Returns the results of the pairing of two choices as a hashref.
 
 ```
-  Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
   {
    'FUDGESWIRL' =>  6,
    'loser'      =>  "STRAWBERRY",
@@ -96,7 +95,7 @@ Returns a hashref with the keys as the choices of the Smith Set.
 
 ## ResetActive
 
-Reset Active list to the choices lift of the BallotSet.
+Reset Active list to the choices list of the BallotSet.
 
 ## GreatestLoss
 
@@ -104,5 +103,5 @@ Returns the greatest loss for a choice `$MyMatrix->GreatestLoss( $A )`.
 
 ## RankGreatestLoss
 
-Returns a RankTable object of the Greatest Loss for each choice.
+Returns a RankCount object of the Greatest Loss for each choice.
 

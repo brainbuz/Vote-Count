@@ -6,7 +6,7 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-use Data::Printer;
+# use Data::Printer;
 
 use Path::Tiny;
 
@@ -40,7 +40,7 @@ my %tiedset = (
 ;
 
 my $counted1 = Vote::Count::RankCount->Rank( \%set1 );
-my $tied1 = Vote::Count::RankCount->Rank( \%tiedset );
+my $tied1 = Vote::Count::RankCount->new( \%tiedset );
 # p $counted1;
 isa_ok( $counted1, ['Vote::Count::RankCount'],
   'Made a new counted object from rank' );
@@ -102,5 +102,22 @@ my $xtable = q/| Rank | Choice     | Votes |
 is( $table, $xtable, 'Generate a table with ->RankTable()');
 
 is( $counted1->CountVotes(), 16, 'CountVotes method');
+
+my $bigtie = {
+  'GOLD' => 7,
+  'SILVER' => 7,
+  'COPPER' => 5,
+  'PEARL' => 5,
+  'RUBY' => 5,
+  'BRASS' => 5,
+  'BRONZE' => 5,
+};
+
+my $bt = Vote::Count::RankCount->Rank( $bigtie );
+my $bto = $bt->HashByRank();
+is_deeply( $bto->{2},
+  [ qw/ BRASS BRONZE COPPER PEARL RUBY/],
+  'Check that the arrayref from HashByRank is sorted.'
+);
 
 done_testing();
