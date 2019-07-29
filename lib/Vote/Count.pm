@@ -16,13 +16,13 @@ use Path::Tiny;
 no warnings 'experimental';
 
 
-our $VERSION='0.012';
+our $VERSION='0.013';
 
 =head1 NAME
 
 Vote::Count
 
-=head1 VERSION 0.012
+=head1 VERSION 0.013
 
 =cut
 
@@ -136,6 +136,7 @@ This is also extremely useful to researchers who may want to study multiple meth
     use feature qw /postderef signatures/;
     use Vote::Count;
     use Vote::Count::Method::CondorcetDropping;
+    use Vote::Count::Method::IRV;
     use Vote::Count::ReadBallots 'read_ballots';
     # example uses biggerset1 from the distribution test data.
     my $ballotset = read_ballots 't/data/biggerset1.txt' ;

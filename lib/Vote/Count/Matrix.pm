@@ -18,13 +18,13 @@ use Data::Dumper;
 
 use YAML::XS;
 
-our $VERSION='0.012';
+our $VERSION='0.013';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.012
+=head1 VERSION 0.013
 
 =cut
 
@@ -358,7 +358,7 @@ Condorcet Pairwise Methods require a Win-Loss Matrix. This object takes an RCV B
 
 =head1 SYNOPSIS
 
-
+ 
  my $Matrix =
    Vote::Count::Matrix->new(
      'BallotSet' => $myVoteCount->BallotSet() );
@@ -405,8 +405,7 @@ Returns a MarkDown formatted table with the votes for all of the pairings.
 
 Returns the results of the pairing of two choices as a hashref.
 
-
-   Example where $A and $B are "STRAWBERRY" and "FUDGESWIRL":
+ 
    {
     'FUDGESWIRL' =>  6,
     'loser'      =>  "STRAWBERRY",
@@ -442,7 +441,7 @@ Returns an array of the choice or choices with the fewest wins.
 
 Eliminates all Condorcet Losers from the Matrix Object's Active list. Returns a hashref:
 
-
+ 
    {
      verbose => 'verbose message',
      terse   => 'terse message',
@@ -466,7 +465,7 @@ Returns a hashref with the keys as the choices of the Smith Set.
 
 =head2 ResetActive
 
-Reset Active list to the choices lift of the BallotSet.
+Reset Active list to the choices list of the BallotSet.
 
 
 =head2 GreatestLoss
@@ -476,7 +475,7 @@ Returns the greatest loss for a choice C<<< $MyMatrix->GreatestLoss( $A ) >>>.
 
 =head2 RankGreatestLoss
 
-Returns a RankTable object of the Greatest Loss for each choice.
+Returns a RankCount object of the Greatest Loss for each choice.
 
 =cut
 

@@ -11,13 +11,13 @@ use TextTableTiny qw/generate_markdown_table/;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION = '0.012';
+our $VERSION='0.013';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.012
+=head1 VERSION 0.013
 
 =cut
 
@@ -101,7 +101,7 @@ Returns a HashRef with the Choices as Keys and the position of the choice, the v
 
 =item * HashByRank
 
-Returns a HashRef where the keys are numbers and the values an ArrayRef of the Choices in that position.
+Returns a HashRef where the keys are numbers and the values an ArrayRef of the Choices in that position. The ArrayRefs are sorted alphanumerically.
 
 =item * ArrayTop, ArrayBottom
 
