@@ -10,17 +10,37 @@ use Moose::Role;
 no warnings 'experimental';
 # use Data::Printer;
 
+our $VERSION='0.013';
+
+=head1 NAME
+
+Vote::Count::RankCount
+
+=head1 VERSION 0.013
+
+=cut
+
+# ABSTRACT: RankCount object for Vote::Count. Toolkit for vote counting.
+
+=head1 Definition of Approval
+
+In Approval Voting, voters indicate which Choices they approve of indicating no preference. Approval can be infered from a Ranked Choice Ballot, by treating each ranked Choice as Approved.
+
+=head1 Method Approval
+
+Returns a RankCount object for the current BallotSet taking an optional argument of an active list as a HashRef.
+
+  my $Approval = $Election->Approval();
+  say $Approval->RankTable;
+
+=cut
+
 sub Approval ( $self, $active=undef ) {
   my %BallotSet = $self->BallotSet()->%*;
   my %ballots = ( $BallotSet{'ballots'}->%* );
-# p %ballots;
-  $active = $BallotSet{'choices'} unless defined $active ;
-# p $active;
+  $active = $self->Active() unless defined $active ;
   my %approval = ( map { $_ => 0 } keys( $active->%* ));
     for my $b ( keys %ballots ) {
-# warn "checkijng $b";
-# p $ballots{$b};
-# return {};
       my @votes = $ballots{$b}->{'votes'}->@* ;
       for my $v ( @votes ) {
         if ( defined $approval{$v} ) {
@@ -32,6 +52,7 @@ sub Approval ( $self, $active=undef ) {
 }
 
 1;
+
 #FOOTER
 
 =pod

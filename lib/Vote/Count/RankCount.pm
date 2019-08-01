@@ -119,7 +119,7 @@ Returns a HashRef with the keys tie, tied, winner where winner is the winner, ti
 
 =head3 RankTable
 
-Generates a MarkDown formatted table
+Generates a MarkDown formatted table.
 
 =cut
 

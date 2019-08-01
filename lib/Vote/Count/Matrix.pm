@@ -142,10 +142,15 @@ sub LeastWins ( $matrix ) {
   return @lowest;
 }
 
-sub CondorcetLoser( $self ) {
+sub CondorcetLoser( $self, $nowins=0 ) {
   my $unfinished = 1;
   my $wordy      = "Removing Condorcet Losers\n";
   my @eliminated = ();
+  my $loser = sub ( $score ) {
+    if ( $nowins  ) { return 1 if $score < 1 }
+    else { return 1 if $score == 0 }
+    return 0;
+  };
 CONDORCETLOSERLOOP:
   while ($unfinished) {
     $unfinished = 0;
@@ -162,7 +167,7 @@ CONDORCETLOSERLOOP:
     }
     $wordy .= YAML::XS::Dump($scores);
     for my $A (@alist) {
-      if ( $scores->{$A} == 0 ) {
+      if ( $loser->($scores->{$A} ) ) {
         push @eliminated, ($A);
         $wordy .= "Eliminationg Condorcet Loser: *$A*\n";
         delete $self->{'Active'}{$A};
@@ -358,7 +363,7 @@ Condorcet Pairwise Methods require a Win-Loss Matrix. This object takes an RCV B
 
 =head1 SYNOPSIS
 
- 
+
  my $Matrix =
    Vote::Count::Matrix->new(
      'BallotSet' => $myVoteCount->BallotSet() );
@@ -405,7 +410,7 @@ Returns a MarkDown formatted table with the votes for all of the pairings.
 
 Returns the results of the pairing of two choices as a hashref.
 
- 
+
    {
     'FUDGESWIRL' =>  6,
     'loser'      =>  "STRAWBERRY",
@@ -441,7 +446,7 @@ Returns an array of the choice or choices with the fewest wins.
 
 Eliminates all Condorcet Losers from the Matrix Object's Active list. Returns a hashref:
 
- 
+
    {
      verbose => 'verbose message',
      terse   => 'terse message',

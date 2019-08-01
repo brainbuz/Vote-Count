@@ -209,8 +209,18 @@ Active sets are typically represnted as a Hash Reference where the keys represen
   * [Vote::Count::Borda](https://metacpan.org/pod/Vote::Count::Borda)
   * [Vote::Count::Floor](https://metacpan.org/pod/Vote::Count::Floor)
   * [Vote::Count::TopCount](https://metacpan.org/pod/Vote::Count::TopCount)
+  * [Vote::Count::Redact](https://metacpan.org/pod/Vote::Count::Redact)
 
 ### Return Their Own Objects
 
   * [Vote::Count::Matrix](https://metacpan.org/pod/Vote::Count::Matrix)
   * [Vote::Count::RankCount](https://metacpan.org/pod/Vote::Count::RankCount)
+
+## Voting Methods
+
+  * [Vote::Count::Method::CondorcetDropping](https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping)
+  * [Vote::Count::Method::IRV](https://metacpan.org/pod/Vote::Count::Method::IRV)
+
+## Utilities
+
+  * [Vote::Count::ReadBallots](https://metacpan.org/pod/Vote::Count::ReadBallots)

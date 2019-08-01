@@ -42,12 +42,28 @@ has 'bordadepth' => (
 
 =pod
 
-=head1 Borda Wieght
+=head1 Synopsis
 
-Borda's original method assigned each position the
-inverse if its position, ie in a 9 choice ballot
-position 1 was worth 9, while position 9 was worth 1,
-and position 8 was worth 2.
+  my $VC1 = Vote::Count->new(
+    BallotSet  => read_ballots('t/data/data1.txt'),
+    bordadepth => 5
+  );
+
+=head1 Borda Count
+
+Scores Choices based on their position on the Ballot. The first choice candidate gets a score equal to the number of choices, each lower choice recieves 1 less.
+
+Variations mostly relate to altering the Borda Weight for scoring. The original method scored unranked choices at 1, optionally they may be scored as 0 (which is the current module behaviour).
+
+=head2 Borda Wieght
+
+Numerous alternate weightings have been used.
+
+One alternative is to score for the number of choices after the current one -- in a five choice race first is worth 4 and last is worth 0.
+
+One major criticism of the count is that when there are many choices the difference between a first and second choice becomes negligable. Many of the alternate weights address this by either limiting the maximum depth, fixing the depth or using a different scaling such as 1/x where x is the position of the choice (1 is worth 1, 3 is 1/3).
+
+Range Voting Proposals such as STAR typically use a fixed depth count where voters may rank choices equally.
 
 When Creating a VoteCount object the Borda weight
 may be set by passing a coderef. The coderef takes
@@ -60,9 +76,15 @@ choice $c becomes $c/1 then inverted to 1/$c) don't
 need to know the depth. In such cases the coderef
 should just ignore the second argument.
 
-The default Weight when none are provided is Borda's
-original weight. If the bordadepth attribute is set
-it will be followed.
+  my $testweight = sub {
+    my $x = int shift @_;
+    return $x ? 1/$x : 0 ;
+  };
+
+  my $VC2 = Vote::Count->new(
+    BallotSet   => read_ballots('t/data/data2.txt'),
+    bordaweight => $testweight,
+  );
 
 =cut
 
