@@ -8,13 +8,13 @@ package Vote::Count::Borda;
 use Moose::Role;
 
 
-our $VERSION='0.013';
+our $VERSION='0.015';
 
 =head1 NAME
 
 Vote::Count::Borda
 
-=head1 VERSION 0.013
+=head1 VERSION 0.015
 
 =cut
 
@@ -55,7 +55,7 @@ Scores Choices based on their position on the Ballot. The first choice candidate
 
 Variations mostly relate to altering the Borda Weight for scoring. The original method scored unranked choices at 1, optionally they may be scored as 0 (which is the current module behaviour).
 
-=head2 Borda Wieght
+=head2 Borda Wieght and Depth
 
 Numerous alternate weightings have been used.
 
@@ -85,6 +85,10 @@ should just ignore the second argument.
     BallotSet   => read_ballots('t/data/data2.txt'),
     bordaweight => $testweight,
   );
+
+=head1 To Do
+
+Since there are so many variations of Borda, it would be nice to offer a large array of presets. Currently options are only handled by passing a coderef at object creation. Borda is not a priority for the developer, who considers Borda primarily useful as a tie breaking option or in systems like STAR that use a fixed field depth.
 
 =cut
 
