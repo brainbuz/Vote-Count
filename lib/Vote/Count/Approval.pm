@@ -10,13 +10,13 @@ use Moose::Role;
 no warnings 'experimental';
 # use Data::Printer;
 
-our $VERSION='0.013';
+our $VERSION='0.015';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.013
+=head1 VERSION 0.015
 
 =cut
 
@@ -28,7 +28,7 @@ In Approval Voting, voters indicate which Choices they approve of indicating no 
 
 =head1 Method Approval
 
-Returns a RankCount object for the current BallotSet taking an optional argument of an active list as a HashRef.
+Returns a RankCount object for the current Active Set taking an optional argument of an active list as a HashRef.
 
   my $Approval = $Election->Approval();
   say $Approval->RankTable;
