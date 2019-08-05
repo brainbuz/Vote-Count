@@ -1,5 +1,6 @@
 Revision history for Vote::Count
-0.015 Aug   1, 2019 More Documentation Fixes.
+0.017 Aug   5, 2019 Add comment support to ReadBallots, add write function
+0.016 Aug   2, 2019 Redaction 3 methods done.
 0.013 July 29, 2019 [And earlier releases]
       Preview Release. Core Functionality for Condorcet, Borda
       TopCount are implemented as well as full methods for IRV

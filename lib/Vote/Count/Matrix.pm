@@ -13,18 +13,18 @@ use List::Util qw( min max sum );
 use TextTableTiny  qw/generate_markdown_table/;
 
 # use Try::Tiny;
-use Data::Printer;
-use Data::Dumper;
+#use Data::Printer;
+#use Data::Dumper;
 
 use YAML::XS;
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 

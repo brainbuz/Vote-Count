@@ -7,17 +7,17 @@ package Vote::Count::Floor;
 use namespace::autoclean;
 use Moose::Role;
 
-use Data::Printer;
+# use Data::Printer;
 
 no warnings 'experimental';
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::Floor
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 

@@ -221,6 +221,10 @@ Active sets are typically represnted as a Hash Reference where the keys represen
   * [Vote::Count::Method::CondorcetDropping](https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping)
   * [Vote::Count::Method::IRV](https://metacpan.org/pod/Vote::Count::Method::IRV)
 
+## Non Object Oriented Components
+
+  * [Vote::Count::Redact](https://metacpan.org/pod/Vote::Count::Redact)
+
 ## Utilities
 
   * [Vote::Count::ReadBallots](https://metacpan.org/pod/Vote::Count::ReadBallots)

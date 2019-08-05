@@ -16,13 +16,13 @@ use Path::Tiny;
 no warnings 'experimental';
 
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 
@@ -475,6 +475,18 @@ L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod/Vote::Count::M
 =item *
 
 L<Vote::Count::Method::IRV|https://metacpan.org/pod/Vote::Count::Method::IRV>
+
+
+=back
+
+
+=head2 Non Object Oriented Components
+
+=over
+
+=item *
+
+L<Vote::Count::Redact|https://metacpan.org/pod/Vote::Count::Redact>
 
 
 =back

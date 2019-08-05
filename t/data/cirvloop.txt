@@ -1,0 +1,10 @@
+# Attempt to create a data set that has a natural condorcet winner
+# but when ballots are redacted has 2 other choices that could be
+# condorcet winners. I have been unable to do so.
+:CHOICES:TWINKIE:KRIMPET:HOHO:SUZIEQ:YODEL:DEVILDOG:RINGDING
+99:HOHO:TWINKIE
+98:HOHO:SUZIEQ
+97:TWINKIE:HOHO
+97:TWINKIE:SUZIEQ
+96:SUZIEQ:HOHO
+95:SUZIEQ:TWINKIE

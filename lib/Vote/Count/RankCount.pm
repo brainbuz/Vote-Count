@@ -11,13 +11,13 @@ use TextTableTiny qw/generate_markdown_table/;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 
