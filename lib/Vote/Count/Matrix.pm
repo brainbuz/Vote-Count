@@ -11,20 +11,21 @@ use Vote::Count::RankCount;
 no warnings 'experimental';
 use List::Util qw( min max sum );
 use TextTableTiny  qw/generate_markdown_table/;
+use Sort::Hash;
 
 # use Try::Tiny;
-use Data::Printer;
-use Data::Dumper;
+#use Data::Printer;
+#use Data::Dumper;
 
 use YAML::XS;
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 
@@ -290,7 +291,9 @@ sub ScoreTable ( $self ) {
   my $scores = $self->ScoreMatrix();
   my @header = ( 'Choice', 'Score' );
   my @rows = ( \@header );
-  for my $c ( sort keys $scores->%* ) {push @rows, [ $c, $scores->{$c} ] }
+  for my $c ( sort_hash( $scores, 'numeric', 'desc') ) {
+  # for my $c ( sort ( keys $scores->%* ) ) {
+      push @rows, [ $c, $scores->{$c} ] }
   return generate_markdown_table( rows => \@rows );
 }
 

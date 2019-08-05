@@ -8,13 +8,13 @@ package Vote::Count::Borda;
 use Moose::Role;
 
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::Borda
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 
@@ -25,7 +25,7 @@ use List::Util qw( min max );
 use Vote::Count::RankCount;
 # use Try::Tiny;
 # use boolean;
-use Data::Printer;
+# use Data::Printer;
 
 has 'bordaweight' => (
   is => 'rw',

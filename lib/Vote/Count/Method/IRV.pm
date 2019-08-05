@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='0.015';
+our $VERSION='0.017';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.015
+=head1 VERSION 0.017
 
 =cut
 
@@ -27,8 +27,8 @@ use List::Util qw( min max );
 # use Vote::Count::RankCount;
 # use Try::Tiny;
 use TextTableTiny 'generate_markdown_table';
-use Data::Printer;
-use Data::Dumper;
+#use Data::Printer;
+#use Data::Dumper;
 
 sub _TieBreaker ( $I, $tiebreaker, $active, @choices ) {
   if ( $tiebreaker eq 'all') { return @choices }
