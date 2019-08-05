@@ -52,7 +52,7 @@ Reads a file containing vote data. Retruns a HashRef of a Vote::Count BallotSet.
 
  =head1 Data File Format
  
-   # This is a comment, optional.
+  # This is a comment, optional.
   :CHOICES:VANILLA:CHOCOLATE:STRAWBERRY:MINTCHIP:CARAMEL:RUMRAISIN
   5:VANILLA:CHOCOLATE:STRAWBERRY
   RUMRAISIN

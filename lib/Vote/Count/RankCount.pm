@@ -8,6 +8,7 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 use List::Util qw( min max sum);
 use TextTableTiny qw/generate_markdown_table/;
+use Sort::Hash;
 # use boolean;
 # use Data::Printer;
 
@@ -143,7 +144,7 @@ sub RankTable( $self ) {
   my @rows   = ( [ 'Rank', 'Choice', 'Votes' ] );
   my %rc     = $self->{'rawcount'}->%*;
   my %byrank = $self->{'byrank'}->%*;
-  for my $r ( sort keys %byrank ) {
+  for my $r ( sort {$a <=> $b} ( keys %byrank ) ) {
     my @choice = sort $byrank{$r}->@*;
     for my $choice (@choice) {
       my $votes = $rc{$choice};
@@ -151,7 +152,7 @@ sub RankTable( $self ) {
       push @rows, ( \@row );
     }
   }
-  return generate_markdown_table( rows => \@rows );
+  return generate_markdown_table( rows => \@rows ) . "\n" ;
 }
 
 1;
