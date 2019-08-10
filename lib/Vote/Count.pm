@@ -16,13 +16,13 @@ use Path::Tiny;
 no warnings 'experimental';
 
 
-our $VERSION='0.017';
+our $VERSION='0.020';
 
 =head1 NAME
 
 Vote::Count
 
-=head1 VERSION 0.017
+=head1 VERSION 0.020
 
 =cut
 
@@ -99,9 +99,10 @@ sub WriteLog {
 
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',
-      'Vote::Count::TopCount',
       'Vote::Count::Borda',
       'Vote::Count::Floor',
+      'Vote::Count::IRV',
+      'Vote::Count::TopCount',
       ;
 
 sub CountBallots ( $self ) {

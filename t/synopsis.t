@@ -19,10 +19,9 @@ use Data::Printer;
 use feature qw /postderef signatures/;
 
 # use Path::Tiny;
-use Vote::Count;
-use Vote::Count::ReadBallots 'read_ballots';
-use Vote::Count::Method::CondorcetDropping;
-use Vote::Count::Method::IRV;
+use Vote::Count 0.020;
+use Vote::Count::ReadBallots 0.020 'read_ballots';
+use Vote::Count::Method::CondorcetDropping 0.020;
 
 # example uses biggerset1 from the distribution test data.
 my $ballotset = read_ballots 't/data/biggerset1.txt' ;
@@ -44,7 +43,7 @@ $CondorcetElection->logt(
 my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
 
 # Create an object for IRV, use the same Floor as Condorcet
-my $IRVElection = Vote::Count::Method::IRV->new(
+my $IRVElection = Vote::Count->new(
   'BallotSet' => $ballotset,
   'Active' => $ChoicesAfterFloor );
 # Get a RankCount Object for the

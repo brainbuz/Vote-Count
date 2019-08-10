@@ -3,23 +3,24 @@ use warnings;
 use 5.022;
 use feature qw /postderef signatures/;
 
-package Vote::Count::Method::IRV;
+package Vote::Count::IRV;
 
 use namespace::autoclean;
-use Moose;
-extends 'Vote::Count';
+use Moose::Role;
 
-our $VERSION='0.017';
+with  'Vote::Count::TopCount' ;
+
+our $VERSION='0.020';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.017
+=head1 VERSION 0.020
 
 =cut
 
-# ABSTRACT: Runs an IRV Election
+# ABSTRACT: IRV Method for Vote::Count
 
 no warnings 'experimental';
 use List::Util qw( min max );
@@ -30,7 +31,7 @@ use TextTableTiny 'generate_markdown_table';
 #use Data::Printer;
 #use Data::Dumper;
 
-sub _TieBreaker ( $I, $tiebreaker, $active, @choices ) {
+sub _IRVTieBreaker ( $I, $tiebreaker, $active, @choices ) {
   if ( $tiebreaker eq 'all') { return @choices }
   my $ranked = undef;
   if ( $tiebreaker eq 'borda') {
@@ -75,7 +76,7 @@ IRVLOOP:
     if ( defined $majority->{'winner'} ) {
       return $majority;
     } else {
-      my @bottom = sort $self->_TieBreaker(
+      my @bottom = sort $self->_IRVTieBreaker(
         $tiebreaker,
         $active,
         $round->ArrayBottom()->@* );
@@ -124,15 +125,15 @@ Instant Runoff Voting is easy to count by hand and meets the Later Harm and Cond
 
 There is no standard accepted method for IRV tie resolution, Eliminate All is a common one and the default.
 
-If there is a tie for lowest Top Count the default is 'all' of the tied choices. Returns a tie when all of the remaining choices are in a tie. An optional value to RunIRV is to specify tiebreaker, see _TieBreaker.
+If there is a tie for lowest Top Count the default is 'all' of the tied choices. Returns a tie when all of the remaining choices are in a tie. An optional value to RunIRV is to specify tiebreaker, see _IRVTieBreaker.
 
-=head2 _TieBreaker
+=head2 _IRVTieBreaker
 
 Implements some basic methods for resolving ties. By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), and Approval. The Borda Count methods use the defaults.
 
-Tie Break Methods not provided can be implemented by extending Vote::Count::Method::IRV and over-writing the _TieBreaker Method.
+Tie Break Methods not provided can be implemented by extending Vote::Count::Method::IRV and over-writing the _IRVTieBreaker Method.
 
-  my @remove = $self->_TieBreaker( $tiebreaker, $active, @choices );
+  my @remove = $self->_IRVTieBreaker( $tiebreaker, $active, @choices );
 
 =cut
 
@@ -147,6 +148,7 @@ Tie Break Methods not provided can be implemented by extending Vote::Count::Meth
 Runs IRV on the provided Ballot Set. Takes an optional parameter of $active which is a hashref for which the keys are the currently active choices.
 
 Returns results in a hashref which will be the results of  Vote::Count::TopCount->EvaluateTopCountMajority, if there is no winner hash will instead be:
+
   tie => [true or false],
   tied => [ array of tied choices ],
   winner => a false value

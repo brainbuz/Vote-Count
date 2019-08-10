@@ -10,13 +10,13 @@ use Carp;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='0.017';
+our $VERSION='0.020';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 0.017
+=head1 VERSION 0.020
 
 =head1 SYNOPSIS
 
