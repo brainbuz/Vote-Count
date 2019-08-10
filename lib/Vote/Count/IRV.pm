@@ -100,14 +100,14 @@ IRVLOOP:
 
 =head1 IRV
 
-Implements Instant Runoff Voting.
+Implements Instant Runoff Voting for Vote::Count.
 
 =head1 SYNOPSIS
 
-  use Vote::Count::Method::IRV;
+  use Vote::Count::Method;
   use Vote::Count::ReadBallots 'read_ballots';
 
-  my $Election = Vote::Count::Method::IRV->new(
+  my $Election = Vote::Count::->new(
     BallotSet => read_ballots('%path_to_my_ballots'), );
 
   my $result = $Election->RunIRV();
@@ -125,25 +125,15 @@ Instant Runoff Voting is easy to count by hand and meets the Later Harm and Cond
 
 There is no standard accepted method for IRV tie resolution, Eliminate All is a common one and the default.
 
-If there is a tie for lowest Top Count the default is 'all' of the tied choices. Returns a tie when all of the remaining choices are in a tie. An optional value to RunIRV is to specify tiebreaker, see _IRVTieBreaker.
-
-=head2 _IRVTieBreaker
-
-Implements some basic methods for resolving ties. By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), and Approval. The Borda Count methods use the defaults.
-
-Tie Break Methods not provided can be implemented by extending Vote::Count::Method::IRV and over-writing the _IRVTieBreaker Method.
-
-  my @remove = $self->_IRVTieBreaker( $tiebreaker, $active, @choices );
-
-=cut
+Returns a tie when all of the remaining choices are in a tie. An optional value to RunIRV is to specify tiebreaker, see _IRVTieBreaker.
 
 =head2 RunIRV
 
-  $ElectionRunIRV();
+  $Election->RunIRV();
 
-  $ElectionRunIRV( $active )
+  $Election->RunIRV( $active )
 
-  $ElectionRunIRV( $active, 'approval' )
+  $Election->RunIRV( $active, 'approval' )
 
 Runs IRV on the provided Ballot Set. Takes an optional parameter of $active which is a hashref for which the keys are the currently active choices.
 
@@ -154,6 +144,16 @@ Returns results in a hashref which will be the results of  Vote::Count::TopCount
   winner => a false value
 
 Supports the Vote::Count logt, logv, and logd methods for providing details of the method.
+
+=head2 Private Method _IRVTieBreaker
+
+Implements some basic methods for resolving ties. By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), and Approval. The Borda Count methods use the defaults.
+
+Tie Break Methods not provided can be implemented by extending Vote::Count::Method::IRV and over-ride the _IRVTieBreaker Method.
+
+  my @remove = $self->_IRVTieBreaker( $tiebreaker, $active, @choices );
+
+_IRVTieBreaker returns a list, all choices in that list will be eliminated if there is a tie in the tiebreaker.
 
 =cut
 

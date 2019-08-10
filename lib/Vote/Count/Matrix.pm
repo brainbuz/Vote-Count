@@ -31,8 +31,6 @@ Vote::Count::Matrix
 
 # ABSTRACT: Condorcet Win Loss Matrix
 
-
-
 has BallotSet => (
   is       => 'ro',
   required => 1,

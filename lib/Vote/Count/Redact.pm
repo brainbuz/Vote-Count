@@ -30,8 +30,6 @@ Redacting Ballots is useful for what-if analysis and identifying Later Harm effe
 
 =cut
 
-
-
 # ABSTRACT: Methods for Redacting Vote::Count BallotSets.
 
 use Exporter::Easy (

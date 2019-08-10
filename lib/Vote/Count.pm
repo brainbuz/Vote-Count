@@ -12,9 +12,9 @@ use Moose;
 # use Data::Printer;
 use Time::Piece;
 use Path::Tiny;
+use Vote::Count::Matrix;
 
 no warnings 'experimental';
-
 
 our $VERSION='0.020';
 
@@ -133,53 +133,56 @@ This is also extremely useful to researchers who may want to study multiple meth
 
 =head1 Synopsis
 
-    use 5.022; # Minimum Perl, or any later Perl.
-    use feature qw /postderef signatures/;
-    use Vote::Count;
-    use Vote::Count::Method::CondorcetDropping;
-    use Vote::Count::Method::IRV;
-    use Vote::Count::ReadBallots 'read_ballots';
-    # example uses biggerset1 from the distribution test data.
-    my $ballotset = read_ballots 't/data/biggerset1.txt' ;
-    my $CondorcetElection =
-      Vote::Count::Method::CondorcetDropping->new(
-        'BallotSet' => $ballotset ,
-        'DropStyle' => 'all',
-        'DropRule'  => 'topcount',
-      );
-    # ChoicesAfterFloor a hashref of choices meeting the
-    # ApprovalFloor which defaulted to 5%.
-    my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
-    # Apply the ChoicesAfterFloor to the Election.
-    $CondorcetElection->Active( $ChoicesAfterFloor );
-    # Get Smith Set and the Election with it as the Active List.
-    my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
-    $CondorcetElection->logt(
-      "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
-    my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
-    # Create an object for IRV, use the same Floor as Condorcet
-    my $IRVElection = Vote::Count::Method::IRV->new(
-      'BallotSet' => $ballotset,
-      'Active' => $ChoicesAfterFloor );
-    # Get a RankCount Object for the
-    my $Plurality = $IRVElection->TopCount();
-    # In case of ties RankCount objects return top as an array, log the result.
-    my $PluralityWinner = $Plurality->Leader();
-    $IRVElection->logv( "Plurality Results", $Plurality->RankTable);
-    if ( $PluralityWinner->{'winner'}) {
-      $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
-    } else {
-      $IRVElection->logt(
-        "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
-    }
-    my $IRVResult = $IRVElection->RunIRV();
-    # Now print the logs and winning information.
-    say $CondorcetElection->logv();
-    say $IRVElection->logv();
-    say '******************';
-    say "Plurality Winner: $PluralityWinner->{'winner'}";
-    say "IRV Winner: $IRVResult->{'winner'}";
-    say "Winner: $Winner";
+  use 5.022; # Minimum Perl, or any later Perl.
+  use feature qw /postderef signatures/;
+
+  use Vote::Count;
+  use Vote::Count::ReadBallots 'read_ballots';
+  use Vote::Count::Method::CondorcetDropping;
+
+  # example uses biggerset1 from the distribution test data.
+  my $ballotset = read_ballots 't/data/biggerset1.txt' ;
+  my $CondorcetElection =
+    Vote::Count::Method::CondorcetDropping->new(
+      'BallotSet' => $ballotset ,
+      'DropStyle' => 'all',
+      'DropRule'  => 'topcount',
+    );
+  # ChoicesAfterFloor a hashref of choices meeting the
+  # ApprovalFloor which defaulted to 5%.
+  my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
+  # Apply the ChoicesAfterFloor to the Election.
+  $CondorcetElection->Active( $ChoicesAfterFloor );
+  # Get Smith Set and the Election with it as the Active List.
+  my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
+  $CondorcetElection->logt(
+    "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
+  my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
+
+  # Create an object for IRV, use the same Floor as Condorcet
+  my $IRVElection = Vote::Count->new(
+    'BallotSet' => $ballotset,
+    'Active' => $ChoicesAfterFloor );
+  # Get a RankCount Object for the
+  my $Plurality = $IRVElection->TopCount();
+  # In case of ties RankCount objects return top as an array, log the result.
+  my $PluralityWinner = $Plurality->Leader();
+  $IRVElection->logv( "Plurality Results", $Plurality->RankTable);
+  if ( $PluralityWinner->{'winner'}) {
+    $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
+  } else {
+    $IRVElection->logt(
+      "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
+  }
+  my $IRVResult = $IRVElection->RunIRV();
+
+  # Now print the logs and winning information.
+  say $CondorcetElection->logv();
+  say $IRVElection->logv();
+  say 'B<>B<>B<>B<>**';
+  say "Plurality Winner: $PluralityWinner->{'winner'}";
+  say "IRV Winner: $IRVResult->{'winner'}";
+  say "Winner: $Winner";
 
 
 =head1 Preview Release
