@@ -71,6 +71,7 @@ Returns a hashref of results. It will always include the votes in the round and 
 =cut
 
 sub TopCountMajority ( $self, $topcount = undef, $active = undef ) {
+  $active = $self->Active() unless defined $active;
   unless ( defined $topcount ) { $topcount = $self->TopCount($active) }
   my $topc = $topcount->RawCount();
   my $numvotes = $topcount->CountVotes();
