@@ -11,17 +11,17 @@ use Data::Printer;
 
 use Path::Tiny;
 
-use Vote::Count::Method::IRV;
+use Vote::Count 0.020;
 use Vote::Count::ReadBallots 'read_ballots';
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
-my $B1 = Vote::Count::Method::IRV->new(
+my $B1 = Vote::Count->new(
   BallotSet => read_ballots('t/data/data2.txt'), );
-my $B2 = Vote::Count::Method::IRV->new(
+my $B2 = Vote::Count->new(
   BallotSet => read_ballots('t/data/biggerset1.txt'), );
-my $B3 = Vote::Count::Method::IRV->new(
+my $B3 = Vote::Count->new(
   BallotSet => read_ballots('t/data/irvtie.txt'), );
 
 my $r1 = $B1->RunIRV();
@@ -89,15 +89,15 @@ subtest 'tiebreakers' => sub {
     CHOCOLATE => 0,
     VANILLA => 0,
   };
-  my $I5 = Vote::Count::Method::IRV->new(
+  my $I5 = Vote::Count->new(
   BallotSet => read_ballots('t/data/irvtie.txt'));
-  my @resolve1 = sort $I5->_TieBreaker(
+  my @resolve1 = sort $I5->_IRVTieBreaker(
     'all', $active, ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
     \@resolve1,
     [ 'CHOCOLATE', 'VANILLA'],
     'All returns both tied choices' );
-  my @resolve2 = sort $I5->_TieBreaker(
+  my @resolve2 = sort $I5->_IRVTieBreaker(
     'borda', $active,
     ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
@@ -105,19 +105,19 @@ subtest 'tiebreakers' => sub {
     [ 'CHOCOLATE'],
     'Borda returns choice that won' );
   my @resolve3 = sort
-    $I5->_TieBreaker( 'borda_all', $active, ( 'VANILLA', 'CHOCOLATE' ) );
+    $I5->_IRVTieBreaker( 'borda_all', $active, ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
     \@resolve3,
     [ 'VANILLA'],
     'borda_all returns choice that won (different winner than borda on active!)' );
   my @resolve4 = sort
-    $I5->_TieBreaker( 'approval', $active, ( 'VANILLA', 'CHOCOLATE' ) );
+    $I5->_IRVTieBreaker( 'approval', $active, ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
     \@resolve4,
     [ 'CHOCOLATE', 'VANILLA'],
     'approval returns a tie for the top2' );
   my @resolve5 = sort
-    $I5->_TieBreaker( 'approval', $active, ( 'VANILLA', 'ROCKYROAD' ) );
+    $I5->_IRVTieBreaker( 'approval', $active, ( 'VANILLA', 'ROCKYROAD' ) );
   is_deeply(
     \@resolve5,
     [ 'VANILLA'],
