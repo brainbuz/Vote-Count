@@ -50,22 +50,14 @@ Reads a file containing vote data. Retruns a HashRef of a Vote::Count BallotSet.
       rcv   1
     }
 
-<<<<<<< HEAD
- =head1 Data File Format
-=======
 =head1 Data File Format
->>>>>>> local
 
   # This is a comment, optional.
   :CHOICES:VANILLA:CHOCOLATE:STRAWBERRY:MINTCHIP:CARAMEL:RUMRAISIN
   5:VANILLA:CHOCOLATE:STRAWBERRY
   RUMRAISIN
 
-<<<<<<< HEAD
-CHOICES must be defined before any vote lines. or an error will be thrown. CHOICES must only be defined once. These rules are to protect against errors in manually prepared files.
-=======
 CHOICES must be defined before any vote lines. or an error will be thrown. CHOICES must only be defined once. These two rules are to protect against errors in manually prepared files.
->>>>>>> local
 
 A data line may begin with a number or a choice. When there is no number the line is counted as being a single ballot. The number represents the number of ballots identical to that one; this notation will both dramatically shrink the data files and improve performance.
 
