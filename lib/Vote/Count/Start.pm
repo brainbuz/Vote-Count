@@ -65,11 +65,15 @@ Returns a Vote::Count object performing the above operations.
 
 =head2 Parameter BallotSet or BallotFile
 
-It is mandatory to provide either a reference to a BallotSet or to provide a BallotFile for ReadBallots to create one.
+It is mandatory to provide either a reference to a BallotSet or to provide a BallotFile for ReadBallots to create a BallotSet.
 
 =head2 Paramater FloorRule, FloorValue (optional)
 
 A FloorRule and optional value (see Vote::Count::Floor). If no FloorRule is provide none will be used.
+
+=head2 Other Options
+
+Any other option to Vote::Count can just be passed in the arguments list
 
 =cut
 
@@ -106,6 +110,7 @@ sub _dofloor( $self, %ARGS ) {
     else {
       croak "Undefined Floor rule $flr.\n";
     }
+  $self->logv( '') ; # add blank line to output
   return $floorset;
 }
 
@@ -136,6 +141,23 @@ sub _do_approval ( $Election ) {
   } else {
     $Election->logt(
       "Approval Tie: " . join( ', ',  $AWinner->{'tied'}->@*) );
+    return '';
+  }
+}
+
+sub _do_borda ( $Election ) {
+  my $Borda = $Election->Approval();
+  $Election->logv(
+    "\Borda Count",
+    $Borda->RankTable(),
+    );
+  my $AWinner = $Borda->Leader();
+  if ( $AWinner->{'winner'}) {
+    $Election->logt( "Borda Winner: " . $AWinner->{'winner'}, '' );
+    return $AWinner->{'winner'};
+  } else {
+    $Election->logt(
+      "Borda Tie: " . join( ', ',  $AWinner->{'tied'}->@*) , '');
     return '';
   }
 }
@@ -191,9 +213,11 @@ sub StartElection ( %ARGS ) {
   my $floorset = _dofloor( $Election, %ARGS );
   $Election->Active( $floorset );
   $winners->{'majority'}  = _do_majority( $Election) ;
+  $winners->{'borda'}  = _do_borda( $Election) ;
   $winners->{'condorcet'} = _do_matrix( $Election) ;
   $winners->{'irv'} =  _do_irv( $Election, $floorset ) ;
 # todo generate a summary from the winners hash.
+  $Election->{'startdata'} = $winners;
   return ($Election);
 }
 
