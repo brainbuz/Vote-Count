@@ -181,7 +181,6 @@ The Core Module requires a Ballot Set (which can be obtained from ReadBallots).
       ActiveSet => { 'A' => 1, 'B' => 1, 'C' => 1 }, # Optional
   );
 
-
 ### Optional Paramters to Vote::Count
 
 #### Active
@@ -202,7 +201,23 @@ When logging from your methods, use logt for events that produce a summary, use 
 
 ### Active Sets
 
-Active sets are typically represnted as a Hash Reference where the keys represent the active choices, the values are ignored. The VoteCount Object contains an Active Set which can be Accessed or set via the ->Active() method. Most Components will take an argument for $activeset or default to the current Active set of the Vote::Count object, which will default to the Choices defined in the BallotSet.
+Active sets are typically represnted as a Hash Reference where the keys represent the active choices, the values are ignored. The VoteCount Object contains an Active Set which can be Accessed or set via the ->Active() method. The ->GetActive and ->SetActive methods are preferred because they break the reference link between the object's copy and the external copy of the Active set.
+
+Most Components will take an argument for $activeset or default to the current Active set of the Vote::Count object, which will default to the Choices defined in the BallotSet.
+
+# Vote::Count Methods
+
+* new
+
+* Active: Set or Get Active Set as HashRef
+
+* BallotSet: Get BallotSet
+
+* BallotSetType: Get the BallotSet Type (not implemented)
+
+* PairMatrix: Get a Matrix Object for the Active Set. Generated and cached on the first request.
+
+* UpdatePairMatrix: Regenerate and cache Matrix with current Active Set.
 
 ## Components
 

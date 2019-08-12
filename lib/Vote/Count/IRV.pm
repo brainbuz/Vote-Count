@@ -57,6 +57,8 @@ sub _IRVTieBreaker ( $I, $tiebreaker, $active, @choices ) {
 
 sub RunIRV ( $self, $active = undef, $tiebreaker = 'all' ) {
   unless ( defined $active ) { $active = $self->Active() }
+  # deref self->Active from any other references IRV alters it.
+  else { $self->{'Active'} = { $active->%* } }
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
   $self->logt( "Instant Runoff Voting",

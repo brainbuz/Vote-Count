@@ -43,7 +43,8 @@ Returns a RankCount object containing the TopCount.
 sub TopCount ( $self, $active=undef ) {
   my %ballotset = $self->BallotSet()->%*;
   my %ballots = ( $ballotset{'ballots'}->%* );
-  $active = $ballotset{'choices'} unless defined $active ;
+  # $active = $ballotset{'choices'} unless defined $active ;
+  $active = $self->Active() unless defined $active ;
   my %topcount = ( map { $_ => 0 } keys( $active->%* ));
 TOPCOUNTBALLOTS:
     for my $b ( keys %ballots ) {

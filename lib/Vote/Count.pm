@@ -13,6 +13,7 @@ use Moose;
 use Time::Piece;
 use Path::Tiny;
 use Vote::Count::Matrix;
+use Storable 3.15 'dclone';
 
 no warnings 'experimental';
 
@@ -43,13 +44,45 @@ has 'Active' => (
   lazy => 1,
   builder => '_buildactive', );
 
-sub _buildactive ( $self ) { return  $self->BallotSet()->{'choices'} }
+sub _buildactive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
+
+sub SetActive ( $self, $active ) {
+  # Force deref
+  $self->{'Active'} = { $active->%* };
+}
+
+sub GetActive ( $self ) {
+  # Force deref
+  return { $self->Active()->%* }
+}
 
 has 'LogTo' => (
   is => 'rw',
   isa => 'Str',
   default => '/tmp/votecount',
 );
+
+has 'PairMatrix' => (
+  is => 'ro',
+  isa => 'Object',
+  lazy => 1,
+  builder => '_buildmatrix', );
+
+sub _buildmatrix ( $self ) {
+
+  return  Vote::Count::Matrix->new(
+    BallotSet => $self->BallotSet(),
+    Active => $self->Active()
+  )
+}
+
+sub UpdatePairMatrix ( $self, $active=undef ) {
+  $active = $self->Active() unless defined $active;
+  $self->{'PairMatrix'} = Vote::Count::Matrix->new(
+    BallotSet => $self->BallotSet(),
+    Active => $active
+  )
+}
 
 sub BUILD {
   my $self      = shift;
