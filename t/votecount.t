@@ -23,7 +23,7 @@ is(
   'rcv',
   'BallotSetType option is set to rcv' );
 
-is( $VC1->CountBallots(),
+is( $VC1->VotesCast(),
   10, 'Count the number of ballots in the set' );
 
 $VC1->logt('A Terse Entry');

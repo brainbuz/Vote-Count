@@ -14,7 +14,7 @@ use Data::Printer;
 use feature qw /postderef signatures/;
 
 # use Path::Tiny;
-use Vote::Count::Start;
+use Vote::Count::Method::WinnableAlternatives;
 use Vote::Count::ReadBallots 'read_ballots';
 # use Vote::Count::Method::CondorcetDropping;
 
@@ -25,11 +25,19 @@ my $tenesseechoices =  {
  NASHVILLE =>1
 } ;
 
-my $Election1 = StartElection(
+my $WAT = Vote::Count::Method::WinnableAlternatives->new(
+  BallotSet => read_ballots 't/data/tennessee.txt',
+);
+
+ok $WAT;
+
+done_testing();
+=pod
+my $Election1 = Vote::Count::Method::WinnableAlternatives->Run(
   'BallotFile' => 't/data/tennessee.txt',
   );
 
-# p $Election1;
+p $Election1;
 is_deeply(
   $Election1->BallotSet()->{'choices'},
   $tenesseechoices,

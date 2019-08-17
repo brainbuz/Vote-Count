@@ -48,9 +48,6 @@ is_deeply(
   $save_activebeforeB1,
   'confirm that GetActive/SetActive broke reference links for safety' );
 
-done_testing();
-=pod
-
 my $r2 = $B2->RunIRV();
 # note $B2->logd();
 my $ex2 = {
@@ -137,6 +134,13 @@ subtest 'tiebreakers' => sub {
     \@resolve5,
     [ 'VANILLA'],
     'approval winner for a non-tied pair' );
+
+  my @resolve6 = sort
+    $I5->_IRVTieBreaker( 'grandjunction', $active, ( 'VANILLA', 'ROCKYROAD' ) );
+  is_deeply(
+    \@resolve6,
+    [ 'VANILLA'],
+    'modified grand junction' );
 };
 
 done_testing();

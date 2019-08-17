@@ -21,7 +21,7 @@ Second level comparisons.
 If one of the choices wins the matchup they are the winner.
 
 Else
-Condorcet vs IRV winner -- Condorcet Winner's greatest defeat is the later harm cost. With relaxed 
+Condorcet vs IRV winner -- Condorcet Winner's greatest defeat is the later harm cost. With relaxed
 
 ------
 
@@ -32,7 +32,11 @@ A Winnable Alternative is a Choice which wins when protected from Later Harm by 
 
 If an Alternative is a Condorcet Winner in the original ballots without a Later Harm effect against another Winnable Alternative, that Choice is the Winner. A Majority Winner will always meet this.
 
-If there are multiple Winnable Alternatives, find the number of later choices needed to switch the election between each pair of choices. The choice which needed fewer votes from the other is the winner of the pair.
+If there are multiple Winnable Alternatives, to determine which set of ballots are final, another round of testing is done redacting the ballots in pairs. If in the pair one of the choices wins, give it a point
+
+
+
+test with ballots redacted for both choices.
 
 With the (recommended) Later Harm Relaxed option, the pairing is modified by the margin of victory of the pair winner over the pair loser.
 

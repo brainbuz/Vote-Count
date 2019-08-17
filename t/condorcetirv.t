@@ -7,7 +7,7 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-# use Data::Printer;
+use Data::Printer;
 # use JSON::MaybeXS;
 # use YAML::XS;
 use feature qw /postderef signatures/;
@@ -50,8 +50,13 @@ my $S3 =
   );
 
 my $winner3 = SmithSetIRV( $S3 ) ;
-is( $winner3, 'Tied: FUDGESWIRL, VANILLA', 'set that ends with a tie');
+is( $winner3, '', 'set that ends with a tie returns empty string for winenr');
+my $tiechoices = { 'FUDGESWIRL', 1,'VANILLA',1};
+is_deeply( $S3->Active(), $tiechoices,
+  'after a tie the activeset is the tied choices'
+);
 note $S3->logv;
+# p $S3->Active();
 
 done_testing();
 1;

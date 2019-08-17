@@ -10,13 +10,13 @@ use Carp;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='0.020';
+our $VERSION='0.021';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 0.020
+=head1 VERSION 0.021
 
 =head1 SYNOPSIS
 
@@ -45,6 +45,7 @@ Reads a file containing vote data. Retruns a HashRef of a Vote::Count BallotSet.
         MINTCHIP     1,
         VANILLA      1
     },
+    votescast        1,
     comment   "# Optional Comment",
     options   {
       rcv   1
@@ -91,9 +92,14 @@ sub _choices ( $choices ) {
   return \%C;
 }
 
+## Add ballotscount !
+
 sub read_ballots( $filename ) {
   my %data = (
-    'choices' => undef, 'ballots' => {}, 'options' => { 'rcv' => 1 },
+    'choices' => undef,
+    'ballots' => {},
+    'options' => { 'rcv' => 1 },
+    'votescast' => 0 ,
     'comment' => '' );
 BALLOTREADLINES:
   for my $line_raw ( path($filename)->lines ) {
@@ -111,8 +117,9 @@ BALLOTREADLINES:
     }
     my $line = $line_raw;
     next unless ( $line =~ /\w/ );
-    $line =~ s/(\d+)\://;
+    $line =~ s/^(\d+)\://;
     my $numbals = $1 ? $1 : 1;
+    $data{'votescast'} += $numbals;
     if ( $data{'ballots'}{$line} ) {
       $data{'ballots'}{$line}{'count'} =
         $data{'ballots'}{$line}{'count'} + $numbals;
