@@ -10,6 +10,7 @@ use Data::Printer;
 # use Data::Dumper;
 
 use Path::Tiny;
+use Storable 'dclone';
 
 use Vote::Count 0.020;
 use Vote::Count::ReadBallots 'read_ballots';
@@ -24,6 +25,15 @@ my $B2 = Vote::Count->new(
 my $B3 = Vote::Count->new(
   BallotSet => read_ballots('t/data/irvtie.txt'), );
 
+# Active is passed by reference the GetActive/SetActive
+# methods break the reference for safety
+# prove that this protects copies of the ActiveSet from
+# changes IRV makes to it.
+my $activebeforeB1 = $B1->GetActive();
+my $save_activebeforeB1 = { $activebeforeB1->%* };
+$B1->SetActive( $activebeforeB1 );
+
+
 my $r1 = $B1->RunIRV();
 my $ex1 = {
   'votes'      => 15,
@@ -33,8 +43,10 @@ my $ex1 = {
 };
 is_deeply( $r1, $ex1, 'returns set with Mintchip winning 8 of 15 votes');
 
-
-  # { thresshold => 6, votes => 11, winner => 'VANILLA', winvotes => 7 },
+is_deeply(
+  $activebeforeB1,
+  $save_activebeforeB1,
+  'confirm that GetActive/SetActive broke reference links for safety' );
 
 my $r2 = $B2->RunIRV();
 # note $B2->logd();
@@ -122,6 +134,13 @@ subtest 'tiebreakers' => sub {
     \@resolve5,
     [ 'VANILLA'],
     'approval winner for a non-tied pair' );
+
+  my @resolve6 = sort
+    $I5->_IRVTieBreaker( 'grandjunction', $active, ( 'VANILLA', 'ROCKYROAD' ) );
+  is_deeply(
+    \@resolve6,
+    [ 'VANILLA'],
+    'modified grand junction' );
 };
 
 done_testing();

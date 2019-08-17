@@ -8,15 +8,16 @@ package Vote::Count::IRV;
 use namespace::autoclean;
 use Moose::Role;
 
-with  'Vote::Count::TopCount' ;
+with 'Vote::Count::TopCount' ;
+with 'Vote::Count::TieBreaker' ;
 
-our $VERSION='0.020';
+our $VERSION='0.021';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.020
+=head1 VERSION 0.021
 
 =cut
 
@@ -31,6 +32,13 @@ use TextTableTiny 'generate_markdown_table';
 #use Data::Printer;
 #use Data::Dumper;
 
+
+  # is( $allintie->{'winner'}, 0, 'tiebreaker with no winner returned 0');
+  # is( $allintie->{'tie'}, 1, 'tiebreaker with no winner tie is true');
+  # is_deeply( $allintie->{'tied'}, [ 'FUDGESWIRL', 'VANILLA' ],
+  #   'tiebreaker (multi tie) with no winner tied contains remaining tied choices');
+
+
 sub _IRVTieBreaker ( $I, $tiebreaker, $active, @choices ) {
   if ( $tiebreaker eq 'all') { return @choices }
   my $ranked = undef;
@@ -40,6 +48,11 @@ sub _IRVTieBreaker ( $I, $tiebreaker, $active, @choices ) {
     $ranked = $I->Borda( $I->BallotSet()->{'choices'} );
   } elsif ( $tiebreaker eq 'approval') {
     $ranked = $I->Approval();
+  } elsif ( $tiebreaker eq 'grandjunction') {
+    my $GJ = $I->TieBreakerGrandJunction( @choices );
+    if( $GJ->{'winner'}) { return ( $GJ->{'winner'}) }
+    elsif( $GJ->{'tie'}) { return   $GJ->{'tied'}->@* }
+    else { die "unexpected (or no) result from $tiebreaker!\n"}
   } else { die "undefined tiebreak method $tiebreaker!\n"}
   my @highchoice = () ;
   my $highest = 0;
@@ -57,6 +70,8 @@ sub _IRVTieBreaker ( $I, $tiebreaker, $active, @choices ) {
 
 sub RunIRV ( $self, $active = undef, $tiebreaker = 'all' ) {
   unless ( defined $active ) { $active = $self->Active() }
+  # deref self->Active from any other references IRV alters it.
+  else { $self->{'Active'} = { $active->%* } }
   my $roundctr   = 0;
   my $maxround   = scalar( keys %{$active} );
   $self->logt( "Instant Runoff Voting",
@@ -147,7 +162,11 @@ Supports the Vote::Count logt, logv, and logd methods for providing details of t
 
 =head2 Private Method _IRVTieBreaker
 
-Implements some basic methods for resolving ties. By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), and Approval. The Borda Count methods use the defaults.
+Implements some basic methods for resolving ties. By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), 'grand_junction' is similar to that method and Approval. The Borda Count methods use the defaults.
+
+All was chosen as the module default because it is Later Harm safe. Modified Grand Junction is the most resolveable.
+
+In the event that the tie-breaker returns a tie eliminate all is used, unless that would eliminate all choices, in which case the election returns a tie.
 
 Tie Break Methods not provided can be implemented by extending Vote::Count::Method::IRV and over-ride the _IRVTieBreaker Method.
 
