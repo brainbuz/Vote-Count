@@ -248,6 +248,7 @@ Most Components will take an argument for $activeset or default to the current A
 ## Utilities
 
   * [Vote::Count::ReadBallots](https://metacpan.org/pod/Vote::Count::ReadBallots)
+  * [Vote::Count::Start](https://metacpan.org/pod/Vote::Count::Start)  
 
 # Call for Contributions
 

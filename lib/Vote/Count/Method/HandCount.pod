@@ -1,10 +1,8 @@
-our $VERSION='0.020';
-
 =head1 NAME
 
 Hand Count Methods
 
-=head1 VERSION 0.020
+=head1 VERSION 0.022
 
 =cut
 
@@ -40,7 +38,7 @@ It is easy to create pairings by hand. With a larger field the work to fill out 
 
 If a method only seeks a Condorcet Winner, a significantly smaller number of pairings is needed. A 10 choice election requires 45 pairings, a method that seeks only a Condorcet Winner can find the Condorcet Winner or determine there is none in as little as 9 pairings.
 
-The best known Hand Count method is Benham.
+The best known Condorcet Hand Count method is Benham.
 
 =head2 Benham Condorcet IRV
 
@@ -102,8 +100,7 @@ An equivalent to Benham can be implemented easily through Vote::Count::Condorcet
 
 The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolveable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
 
-Your Election Rules should specifiy a tiebreaker, currently only Eliminate All is available in this libary.
-
+Your Election Rules should specifiy a different tiebreaker, the default is Eliminate All; the modified Grand Junction Tie Breaker provides the maximum possible resolvability.
 
 #FOOTER
 

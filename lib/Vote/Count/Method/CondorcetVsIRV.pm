@@ -3,54 +3,59 @@ use warnings;
 use 5.022;
 use feature qw /postderef signatures/;
 
-package Vote::Count::Method::CondorcetIRV;
+package Vote::Count::Method::CondorcetVsIRV;
 
-use Exporter::Easy ( EXPORT => [ 'SmithSetIRV' ] );
+use namespace::autoclean;
+use Moose;
 
-# use namespace::autoclean;
-# use Moose;
-# extends 'Vote::Count';
+use Vote::Count;
+use Vote::Count::Method::CondorcetIRV;
 
 our $VERSION='0.021';
 
 =head1 NAME
 
-Vote::Count::Method::CondorcetIRV
+Vote::Count::Method::CondorcetVsIRV
 
 =head1 VERSION 0.021
 
 =cut
 
-# ABSTRACT: Simple Condorcet IRV Methods.
+# ABSTRACT: Condorcet versus IRV
 
 =pod
 
 =head1 SYNOPSIS
 
-  use Vote::Count::Method::CondorcetIRV;
+  use Vote::Count::Method::CondorcetVsIRV;
 
   ...
-  # SmithSetIRV
-  my $winner = SmithSetIRV( $Election );
-  say $Election->logv();
 
-=head1 Description
+=head1 Method Common Name: Condorcet vs IRV
 
-Provides Common Basic Condorcet-IRV Methods. These methods are simple and beat most other Condorcet Methods on Later Harm.
+Determine if the Condorcet Winner needed votes from the IRV winner, elect the condorcet winner if there was not a later harm violation, elect the IRV winner if there was.
 
-The author of Vote::Count recomends serious consideration to these methods and Redactionive Condorcet methods.
+The methods looks for a Condorcet Winner, if there is none it uses IRV to find the winner. If there is a Condorcet Winner it uses standard IRV to find the IRV winner. It then copies the ballots and redacts the later choice from those ballots that indicated both. It then determines if one of the two choices is a Condorcet Winner, if not it determines if one of them would win IRV. If either choice is the winner with redacted ballots, they win. If neither wins, the Condorcet Winner dependended on a Later Harm effect against the IRV winner, and the IRV Winner is elected.
 
-These methods can all be considered Sufficient in Resolvability, although specifiying a tie breaker is as always recommended.
+The relaxed later harm option, when neither choice wins the redacted ballots, takes the greatest loss by the Condorcet Winner in the redacted matrix and compares it to their margin of victory over the IRV winner. If the victory margin is greater the Condorcet Winner is elected.
 
-This module exports the methods it provides which expect a Vote::Count object as an argument.
+=head2 Implementation
 
-=head1 Method Common Name: SmithSet IRV
+CondorcetVsIRV applies the TCA Floor Rule.
 
-Identifies the Smith Set and runs IRV on it.
+An important implementation detail is that CondorcetVsIRV uses Smith Set IRV where possible. The initial election for a Condorcet Winner uses this, providing the IRV Winner should there be no Condorcet Winner. If there is a Condorcet Winner, the Redaction election uses Smith Set IRV. The only time it isn't used is conducting IRV after finding a Condorcet Winner in the initial test.
 
-=head2 Function Name: SmithSetIRV
+It was chosen to use the TCA (Top Count vs Approval) Floor Rule because it cannot eliminate any 'Winable Alternatives' (by either Condorcet or IRV), but it is aggressive at eliminating non-winable alternatives which should improve the Consistency of IRV.
 
-SmithSetIRV is exported and requires a Vote::Count object, an optional second argument is an IRV tiebreaker rule name (see IRV module). It will return the winner, in the event of the tie it will return the empty string and the Vote::Count Object's Active Set will be the tied choices (available for any later tie breakers you would implement). Events will be logged to the Vote::Count Object.
+Smith Set IRV is used whenever possible because it also eliminates non-winable alternatives from IRV, and it is already alternating between Condorcet and IRV.
+
+The tie breaker is defaulted to (modified) Grand Junction for resolvability.
+
+=head2 Function Name: CondorcetVsIRV
+
+CondorcetVsIRV is exported.
+
+
 
 =head2 Criteria
 
@@ -79,31 +84,10 @@ Smith Set IRV is therefore substantially more consistent than basic IRV, but les
 =cut
 
 
-no warnings 'experimental';
-# use YAML::XS;
-
-use Carp;
-
-sub SmithSetIRV ( $E, $tiebreaker='all' ) {
-  my $matrix = $E->PairMatrix();
-  $E->logt( 'SmithSetIRV');
-  my $winner = $matrix->CondorcetWinner();;
-  if ( $winner) {
-    $E->logv( "Condorcet Winner: $winner");
-  } else {
-    my $Smith = $matrix->SmithSet();
-    $E->logv( "Smith Set: " . join( ',', sort( keys $Smith->%* )));
-    my $IRV = $E->RunIRV( $Smith, $tiebreaker );
-    $winner = $IRV->{'winner'};
-    unless ( $winner ) {
-      $winner = '';
-      $E->SetActive( {map { $_ => 1 } ( $IRV->{'tied'}->@* )});
-    }
-  }
-  return $winner;
-}
 
 1;
+
+
 
 #FOOTER
 
