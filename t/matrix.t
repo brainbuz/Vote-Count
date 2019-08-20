@@ -25,7 +25,9 @@ my $M1 =
   );
 
 my $M1GJ =
-    Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/ties1.txt'),
+    Vote::Count::Matrix->new( 
+      'BallotSet' => read_ballots('t/data/ties1.txt'), 
+      'TieBreakMethod' => 'grandjunction',
     );
 
 my $M2 =
@@ -56,7 +58,7 @@ is( $mmm->{'eliminations'}, 11,
 
 
 subtest '_conduct_pair returns hash with pairing info' => sub {
-  my $t1 = Vote::Count::Matrix::_conduct_pair( $M1->BallotSet, 'RUMRAISIN',
+  my $t1 = Vote::Count::Matrix::_conduct_pair( $M1, 'RUMRAISIN',
     'STRAWBERRY' );
   my $x1 = {
     loser      => "",
@@ -67,7 +69,7 @@ subtest '_conduct_pair returns hash with pairing info' => sub {
     winner     => "",
   };
   is_deeply( $t1, $x1, 'A Tie' );
-  my $t2 = Vote::Count::Matrix::_conduct_pair( $M1->BallotSet, 'RUMRAISIN',
+  my $t2 = Vote::Count::Matrix::_conduct_pair( $M1, 'RUMRAISIN',
     'FUDGESWIRL' );
   my $x2 = {
     FUDGESWIRL => 6,
@@ -106,6 +108,31 @@ subtest 'check some in the matrix' => sub {
     $M1->{'Matrix'}{'CHOCCHUNK'}{'FUDGESWIRL'},
     'access a result in both possible pairing orders identical'
   );
+};
+
+subtest 'check that ties are broken with grandjunction' => sub {
+
+  note $M1GJ->TieBreakMethod();
+  my $xVanMint = {
+    loser    => "MINTCHIP",
+    margin   => 0,
+    MINTCHIP => 6,
+    tie      => 0,
+    VANILLA  => 6,
+    winner   => "VANILLA"
+  };
+  my $xRockStraw = {
+    loser      => "STRAWBERRY",
+    margin     => 1,
+    ROCKYROAD  => 5,
+    STRAWBERRY => 4,
+    tie        => 0,
+    winner     => "ROCKYROAD"
+  };
+  my $VanMint = $M1GJ->{'Matrix'}{'VANILLA'}{'MINTCHIP'};
+  is_deeply( $VanMint, $xVanMint, 'check a tie' );
+  my $RockStraw = $M1GJ->{'Matrix'}{'ROCKYROAD'}{'STRAWBERRY'};
+  is_deeply( $xRockStraw, $RockStraw, 'one with a winner' );
 };
 
 subtest 'ScoreMatrix' => sub {
@@ -235,8 +262,8 @@ subtest 'GreatestLoss' => sub {
   is( $KnotSet->GreatestLoss( 'PISTACHIO'), 9 , 'knotset pistachio');
 };
 
-note( $KnotSet->RankGreatestLoss()->RankTable );
+# note( $KnotSet->RankGreatestLoss()->RankTable );
 
-note( $KnotSet->PairingVotesTable );
+# note( $KnotSet->PairingVotesTable );
 
 done_testing();

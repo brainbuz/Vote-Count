@@ -8,7 +8,8 @@ use Moose;
 
 with  'Vote::Count::TieBreaker',
       'Vote::Count::Approval',
-      'Vote::Count::Borda';
+      'Vote::Count::Borda',      
+      'Vote::Count::Log';
 
 use Vote::Count::RankCount;
 
@@ -57,6 +58,7 @@ has Active => (
 has TieBreakMethod => (
   is  => 'rw',
   isa => 'Str',
+  required => 0,
   default => 'none',
 );
 
@@ -64,8 +66,17 @@ sub _buildActive ( $self ) {
   return $self->BallotSet->{'choices'};
 }
 
-sub _conduct_pair ( $ballotset, $A, $B ) {
-  my $ballots = $ballotset->{'ballots'};
+sub _untie ( $I, $A, $B ) {
+  my @untie = $I->TieBreaker(
+    $I->TieBreakMethod(),
+    $I->Active(),
+    $A, $B );
+  return $untie[0] if ( scalar(@untie) == 1 );
+  return 0;
+}
+
+sub _conduct_pair ( $I, $A, $B ) {
+  my $ballots = $I->BallotSet()->{'ballots'};
   my $countA  = 0;
   my $countB  = 0;
 FORVOTES:
@@ -89,28 +100,30 @@ FORVOTES:
     'loser'  => '',
     'margin' => abs( $countA - $countB )
   );
-  if ( $countA == $countB ) {
+  my $diff = $countA - $countB;
+  # 0 : $countA == $countB 
+  if ( $diff == 0 ) {
+    my $untied = $I->_untie( $A, $B );
+    if ( $untied ) { 
+      $diff =  1 if $untied eq $A;
+      $diff = -1 if $untied eq $B;
+    }
+  }
+  if ( $diff == 0 ) {    
     $retval{'winner'} = '';
     $retval{'tie'}    = 1;
   }
-  elsif ( $countA > $countB ) {
+  # $diff > 0 A won or won tiebreaker.
+  elsif ( $diff > 0 ) {
     $retval{'winner'} = $A;
     $retval{'loser'}  = $B;
   }
-  elsif ( $countB > $countA ) {
+  # $diff < 0 B won or won tiebreaker.  
+  elsif ( $diff < 0 ) {
     $retval{'winner'} = $B;
     $retval{'loser'}  = $A;
   }
   return \%retval;
-}
-
-sub _untie ( $I, $A, $B ) {
-  my @untie = $I->TieBreaker(
-    $I->TieBreakMethod(),
-    $I->Active(),
-    $A, $B );
-  return $untie[0] if ( scalar(@untie) == 1 );
-  return 0;
 }
 
 sub BUILD {
@@ -121,7 +134,7 @@ sub BUILD {
   while ( scalar(@choices) ) {
     my $A = shift @choices;
     for my $B (@choices) {
-      my $result = Vote::Count::Matrix::_conduct_pair( $ballotset, $A, $B );    
+      my $result = Vote::Count::Matrix::_conduct_pair( $self, $A, $B );    
       # Each result has two hash keys so it can be found without
       # having to try twice or sort the names for a single key.
       $results->{$A}{$B} = $result;
@@ -314,8 +327,6 @@ sub ScoreTable ( $self ) {
   return generate_markdown_table( rows => \@rows );
 }
 
-# options may later be used to add rankcount objects
-# from Borda, approval, and topcount.
 sub MatrixTable ( $self, $options = {} ) {
   my @header = ( 'Choice', 'Wins', 'Losses', 'Ties' );
   my $o_topcount = defined $options->{'topcount'}
@@ -359,10 +370,10 @@ sub PairingVotesTable ( $self ) {
       my $CVote = $self->{'Matrix'}{$Choice}{$Opponent}{$Choice};
       my $OVote = $self->{'Matrix'}{$Choice}{$Opponent}{$Opponent};
       if ($self->{'Matrix'}{$Choice}{$Opponent}{'winner'} eq $Choice ) {
-        $Cstr = "*$Cstr*";
+        $Cstr = "**$Cstr**";
       }
       if ($self->{'Matrix'}{$Choice}{$Opponent}{'winner'} eq $Opponent ) {
-        $Ostr = "*$Ostr*";
+        $Ostr = "**$Ostr**";
       }
       push @rows, [ ' ', $Cstr, $CVote, $Ostr, $OVote ];
     }

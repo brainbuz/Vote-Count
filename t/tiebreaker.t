@@ -107,6 +107,4 @@ subtest 'object tiebreakers' => sub {
     'None, returnes an empty array.' );    
 };
 
-
 done_testing();
-=pod

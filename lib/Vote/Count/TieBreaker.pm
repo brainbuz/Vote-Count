@@ -90,7 +90,7 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
   }
   my $round = 1;
   while ( $round <= $deepest ) {
-    $self->logv( "Tie Breaker Round: $round");
+    $self->logv( "Tie Breaker Round: $round") if $self->can('logv');
     for my $b ( keys $ballots->%* ) {
       my $pick = $ballots->{$b}{'votes'}[$round -1] or next ;
       if ( defined $current{$pick} ) {
@@ -98,16 +98,18 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
       }
     }
     my $max = max( values %current );
-    for my $c ( sort @choices ) { $self->logv( "\t$c: $current{$c}") }
+    for my $c ( sort @choices ) { 
+      $self->logv( "\t$c: $current{$c}") if $self->can('logv');
+    }
     for my $c ( sort @choices ) {
       if ( $current{$c} < $max ) {
         delete $current{$c};
-        $self->logv( "Tie Breaker $c eliminated");
+        $self->logv( "Tie Breaker $c eliminated") if $self->can('logv');
       }
     }
     @choices = ( sort keys %current );
     if ( 1 == @choices ) {
-      $self->logv( "Tie Breaker Won By: $choices[0]");
+      $self->logv( "Tie Breaker Won By: $choices[0]") if $self->can('logv');
       return { 'winner' => $choices[0], 'tie' => 0, 'tied' =>[]  };
     }
     $round++;

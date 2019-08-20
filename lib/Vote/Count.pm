@@ -57,12 +57,6 @@ sub GetActive ( $self ) {
   return dclone $active;
 }
 
-has 'LogTo' => (
-  is => 'rw',
-  isa => 'Str',
-  default => '/tmp/votecount',
-);
-
 has TieBreakMethod => (
   is  => 'rw',
   isa => 'Str',
@@ -105,47 +99,12 @@ sub BUILD {
   $self->{'LogT'} = '';
 }
 
-sub logt {
-  my $self = shift @_;
-  return $self->{'LogT'} unless ( @_) ;
-  my $msg = join( "\n", @_ ) . "\n";
-  $self->{'LogT'} .= $msg;
-  $self->{'LogV'} .= $msg;
-  $self->logd( @_);
-}
-
-sub logv {
-  my $self = shift @_;
-  return $self->{'LogV'} unless ( @_) ;
-  my $msg = join( "\n", @_ ) . "\n";
-  $self->{'LogV'} .= $msg;
-  $self->logd( @_);
-}
-
-sub logd {
-  my $self = shift @_;
-  return $self->{'LogD'} unless ( @_) ;
-  my @args = (@_);
-  # since ops are seqential and fast logging event times
-  # clutters the debug log.
-  # unshift @args, localtime->date . ' ' . localtime->time;
-  my $msg = join( "\n", @args ) . "\n";
-  $self->{'LogD'} .= $msg;
-}
-
-sub WriteLog {
-  my $self = shift @_;
-  my $logroot = $self->LogTo();
-  path( "$logroot.brief")->spew( $self->logt() );
-  path( "$logroot.full")->spew( $self->logv() );
-  path( "$logroot.debug")->spew( $self->logd() );
-}
-
 # load the roles providing the underlying ops.
 with  'Vote::Count::Approval',
       'Vote::Count::Borda',
       'Vote::Count::Floor',
       'Vote::Count::IRV',
+      'Vote::Count::Log',      
       'Vote::Count::TieBreaker',
       'Vote::Count::TopCount',
       ;
