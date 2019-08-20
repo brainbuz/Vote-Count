@@ -100,7 +100,7 @@ An equivalent to Benham can be implemented easily through Vote::Count::Condorcet
 
 The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolveable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
 
-Your Election Rules should specifiy a different tiebreaker, the default is Eliminate All; the modified Grand Junction Tie Breaker provides the maximum possible resolvability.
+Your Election Rules should specify a tiebreaker, the default is Eliminate All; the modified Grand Junction Tie Breaker provides the maximum possible resolvability. [note tie breaker support is a ]
 
 #FOOTER
 

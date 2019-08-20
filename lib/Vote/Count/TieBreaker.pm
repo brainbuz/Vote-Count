@@ -115,6 +115,60 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
 return { 'winner' => 0, 'tie' => 1, 'tied' => \@choices };
 }
 
+
+=head2 TieBreaker
+
+Implements some basic methods for resolving ties. The default value for IRV is 'all', and the default value for Matrix is 'none'. 'all' is inapproriate for Matrix, and 'none' is inappropriate for IRV.
+
+By default RunIRV sets a variable of $tiebreaker = 'all', which is to delete all tied choices. Alternate values that can be set are 'borda' (Borda Count the currently active choices), 'borda_all' (Borda Count all of the Choices on the Ballots), 'grand_junction' is similar to that method and Approval. The Borda Count methods use the defaults.
+
+All was chosen as the module default because it is Later Harm safe. Modified Grand Junction is the most resolveable.
+
+In the event that the tie-breaker returns a tie eliminate all is used, unless that would eliminate all choices, in which case the election returns a tie.
+
+  my @remove = $self->TieBreaker( $tiebreaker, $active, @choices );
+
+TieBreaker returns a list containing the winner, if the method is 'none' the list is empty. If the TieBreaker is a tie there will be multiple elements.
+
+=cut
+
+sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
+  if ( $tiebreaker eq 'all') { return @choices }
+  if ( $tiebreaker eq 'none') { return () }
+  my $choices_hashref = {map { $_ => 1 } @choices};
+  my $ranked = undef;
+  if ( $tiebreaker eq 'borda') {
+    $ranked = $I->Borda( $active );
+  } elsif ( $tiebreaker eq 'borda_all') {
+    $ranked = $I->Borda( $I->BallotSet()->{'choices'} );
+  } elsif ( $tiebreaker eq 'approval') {
+    $ranked = $I->Approval( $choices_hashref );
+  } elsif ( $tiebreaker eq 'grandjunction') {
+    my $GJ = $I->TieBreakerGrandJunction( @choices );
+    if( $GJ->{'winner'}) { return ( $GJ->{'winner'}) }
+    elsif( $GJ->{'tie'}) { return   $GJ->{'tied'}->@* }
+    else { die "unexpected (or no) result from $tiebreaker!\n"}
+  } else { die "undefined tiebreak method $tiebreaker!\n"}
+  my @highchoice = () ;
+  my $highest = 0;
+  my $counted = $ranked->RawCount();
+  for my $c (@choices) {
+    if ( $counted->{$c} > $highest ) {
+      @highchoice = ( $c );
+      $highest = $counted->{$c};
+    } elsif ( $counted->{$c} == $highest ) {
+      push @highchoice, $c;
+    }
+  }
+  my $terse = "Tie Breaker $tiebreaker: " . join( ', ', @choices ) .
+    "\nwinner(s): " . join( ', ', @highchoice );
+  $I->{'last_tiebreaker'} = {
+    'terse' => $terse,
+    'verbose' => $ranked->RankTable(),
+  };
+  return @highchoice;
+}
+
 1;
 
 #FOOTER

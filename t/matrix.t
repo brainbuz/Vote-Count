@@ -24,6 +24,10 @@ my $M1 =
   Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/ties1.txt'),
   );
 
+my $M1GJ =
+    Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/ties1.txt'),
+    );
+
 my $M2 =
   Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/data1.txt'),
   );
@@ -48,7 +52,7 @@ my $N1 =
   );
 my $mmm = $N1->CondorcetLoser( 1 );
 is( $mmm->{'eliminations'}, 11,
-'11 eliminated Condorcet losers in sampe with ties');
+'11 eliminated Condorcet losers in sample with ties');
 
 
 subtest '_conduct_pair returns hash with pairing info' => sub {

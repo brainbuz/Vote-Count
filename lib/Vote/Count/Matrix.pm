@@ -6,7 +6,9 @@ use feature qw /postderef signatures/;
 package Vote::Count::Matrix;
 use Moose;
 
-with 'Vote::Count::TieBreaker';
+with  'Vote::Count::TieBreaker',
+      'Vote::Count::Approval',
+      'Vote::Count::Borda';
 
 use Vote::Count::RankCount;
 
@@ -50,6 +52,12 @@ has Active => (
   isa     => 'HashRef',
   builder => 'Vote::Count::Matrix::_buildActive',
   lazy    => 1,
+);
+
+has TieBreakMethod => (
+  is  => 'rw',
+  isa => 'Str',
+  default => 'none',
 );
 
 sub _buildActive ( $self ) {
@@ -96,6 +104,15 @@ FORVOTES:
   return \%retval;
 }
 
+sub _untie ( $I, $A, $B ) {
+  my @untie = $I->TieBreaker(
+    $I->TieBreakMethod(),
+    $I->Active(),
+    $A, $B );
+  return $untie[0] if ( scalar(@untie) == 1 );
+  return 0;
+}
+
 sub BUILD {
   my $self      = shift;
   my $results   = {};
@@ -104,7 +121,7 @@ sub BUILD {
   while ( scalar(@choices) ) {
     my $A = shift @choices;
     for my $B (@choices) {
-      my $result = Vote::Count::Matrix::_conduct_pair( $ballotset, $A, $B );
+      my $result = Vote::Count::Matrix::_conduct_pair( $ballotset, $A, $B );    
       # Each result has two hash keys so it can be found without
       # having to try twice or sort the names for a single key.
       $results->{$A}{$B} = $result;

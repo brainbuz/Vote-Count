@@ -236,19 +236,27 @@ Most Components will take an argument for $activeset or default to the current A
   * [Vote::Count::Matrix](https://metacpan.org/pod/Vote::Count::Matrix)
   * [Vote::Count::RankCount](https://metacpan.org/pod/Vote::Count::RankCount)
 
-## Voting Methods
+### Voting Methods
 
   * [Vote::Count::Method::CondorcetDropping](https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping)
   * [Vote::Count::Method::IRV](https://metacpan.org/pod/Vote::Count::Method::IRV)
 
-## Non Object Oriented Components
+### Non Object Oriented Components
 
   * [Vote::Count::Redact](https://metacpan.org/pod/Vote::Count::Redact)
 
-## Utilities
+### Utilities
 
   * [Vote::Count::ReadBallots](https://metacpan.org/pod/Vote::Count::ReadBallots)
   * [Vote::Count::Start](https://metacpan.org/pod/Vote::Count::Start)  
+
+### Documentation
+
+Additional Documentation Files
+
+* [Vote::Count::HandCount](https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Count/Method/HandCount.pod)
+* [Vote::Count::Start](https://metacpan.org/pod/Vote::Count::Start)  
+
 
 # Call for Contributions
 

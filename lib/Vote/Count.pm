@@ -48,18 +48,25 @@ sub _buildactive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
 
 sub SetActive ( $self, $active ) {
   # Force deref
-  $self->{'Active'} = { $active->%* };
+  $self->{'Active'} = dclone $active;
 }
 
 sub GetActive ( $self ) {
   # Force deref
-  return { $self->Active()->%* }
+  my $active = $self->Active();
+  return dclone $active;
 }
 
 has 'LogTo' => (
   is => 'rw',
   isa => 'Str',
   default => '/tmp/votecount',
+);
+
+has TieBreakMethod => (
+  is  => 'rw',
+  isa => 'Str',
+  required => 0,
 );
 
 has 'PairMatrix' => (
@@ -69,10 +76,13 @@ has 'PairMatrix' => (
   builder => '_buildmatrix', );
 
 sub _buildmatrix ( $self ) {
-
+  my $tiebreak = defined($self->TieBreakMethod())
+    ? $self->TieBreakMethod()
+    : 'none';
   return  Vote::Count::Matrix->new(
     BallotSet => $self->BallotSet(),
-    Active => $self->Active()
+    Active => $self->Active(),
+    TieBreakMethod => $tiebreak,
   )
 }
 
