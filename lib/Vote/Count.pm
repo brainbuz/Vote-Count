@@ -77,6 +77,7 @@ sub _buildmatrix ( $self ) {
     BallotSet => $self->BallotSet(),
     Active => $self->Active(),
     TieBreakMethod => $tiebreak,
+    LogTo => $self->LogTo() . '_matrix',
   )
 }
 

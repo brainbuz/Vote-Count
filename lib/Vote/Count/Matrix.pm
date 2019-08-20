@@ -79,6 +79,7 @@ sub _conduct_pair ( $I, $A, $B ) {
   my $ballots = $I->BallotSet()->{'ballots'};
   my $countA  = 0;
   my $countB  = 0;
+  $I->logv( "Pairing: $A vs $B");
 FORVOTES:
   for my $b ( keys $ballots->%* ) {
     for my $v ( values $ballots->{$b}{'votes'}->@* ) {
@@ -123,6 +124,10 @@ FORVOTES:
     $retval{'winner'} = $B;
     $retval{'loser'}  = $A;
   }
+  if ( $retval{'winner'}) {
+      $I->logv( "Winner: $retval{'winner'} ($A: $countA $B: $countB)");
+    }
+  else { $I->logv( "Tie $A: $countA $B: $countB") } 
   return \%retval;
 }
 
@@ -134,7 +139,7 @@ sub BUILD {
   while ( scalar(@choices) ) {
     my $A = shift @choices;
     for my $B (@choices) {
-      my $result = Vote::Count::Matrix::_conduct_pair( $self, $A, $B );    
+      my $result = $self->_conduct_pair( $A, $B );    
       # Each result has two hash keys so it can be found without
       # having to try twice or sort the names for a single key.
       $results->{$A}{$B} = $result;
@@ -142,6 +147,8 @@ sub BUILD {
     }
   }
   $self->{'Matrix'} = $results;
+  $self->logt( "# Matrix", $self->MatrixTable() );
+  $self->logv( "# Pairing Results", $self->PairingVotesTable() );
 }
 
 sub ScoreMatrix ( $self ) {
@@ -329,6 +336,8 @@ sub ScoreTable ( $self ) {
 
 sub MatrixTable ( $self, $options = {} ) {
   my @header = ( 'Choice', 'Wins', 'Losses', 'Ties' );
+  # this option was never fully implemented, it shows what the
+  # structure would be if one were or if I finished the feature.
   my $o_topcount = defined $options->{'topcount'}
     ? $options->{'topcount'} : 0;
   push @header, 'Top Count' if $o_topcount;
@@ -338,7 +347,7 @@ sub MatrixTable ( $self, $options = {} ) {
     my $wins   = 0;
     my $ties   = 0;
     my $losses = 0;
-    my $topcount = $o_topcount ? $options->{'topcount'}{$A} : 0;
+    my $topcount = $o_topcount ? $options->{'topcount'} : 0;
   MTNEWROW:
     for my $B (@active) {
       if ( $A eq $B ) { next MTNEWROW }

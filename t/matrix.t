@@ -133,6 +133,10 @@ subtest 'check that ties are broken with grandjunction' => sub {
   is_deeply( $VanMint, $xVanMint, 'check a tie' );
   my $RockStraw = $M1GJ->{'Matrix'}{'ROCKYROAD'}{'STRAWBERRY'};
   is_deeply( $xRockStraw, $RockStraw, 'one with a winner' );
+
+  $M1GJ->LogTo( '/tmp/m1gj_matrix');
+  $M1GJ->WriteLog();
+  # note $M1GJ->logv;
 };
 
 subtest 'ScoreMatrix' => sub {
