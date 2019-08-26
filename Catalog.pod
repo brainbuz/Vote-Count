@@ -2,14 +2,13 @@
 
 =head1 NAME
 
-Catalog
+
+Catalog - Catalog and Examples of Common Voting Methods with Vote::Count
 
 
-=head1 VERSION 0.022
+=head1 VERSION
 
-
-=head1 ABSTRACT: Catalog and Examples of Common Voting Methods with Vote::Count
-
+Version 0.022
 
 =head1 Description
 
