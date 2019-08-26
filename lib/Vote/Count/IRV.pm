@@ -13,13 +13,13 @@ with 'Vote::Count::TieBreaker' ;
 
 use Storable 3.15 'dclone';
 
-our $VERSION='0.021';
+our $VERSION='0.022';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.021
+=head1 VERSION 0.022
 
 =cut
 
@@ -51,7 +51,7 @@ sub _ResolveTie (
   if ( @choices == scalar( keys %high ) ) { return @choices}
 # tiebreaker returns winner, we want losers!
 # use map to remove winner(s) from @choices.
-  my @low = map { if ( $high{$_}) { } else { $_ } } @choices ;
+  my @low = sort (map { if ( $high{$_}) { } else { $_ } } @choices) ;
   return @low;
 }
 
@@ -130,6 +130,8 @@ Implements Instant Runoff Voting for Vote::Count.
 Instant Runoff Voting Looks for a Majority Winner. If one isn't present the choice with the lowest Top Count is removed.
 
 Instant Runoff Voting is easy to count by hand and meets the Later Harm and Condorcet Loser Criteria. It, unfortunately, fails a large number of consistency criteria; the order of candidate dropping matters and small changes to the votes of non-winning choices that result in changes to the dropping order can change the outcome.
+
+Instant Runoff Voting is also known as Alternative Vote and as the Hare Method. 
 
 =head2 Tie Handling
 
