@@ -63,7 +63,7 @@ is_deeply(
 is_deeply(
   $VC1->EvaluateTopCountMajority($tc2),
   { threshold => 6, votes => 11, winner => 'VANILLA', winvotes => 7 },
-'repeat last set with EvaluateTopCountMajority for same results'
+  'repeat last set with EvaluateTopCountMajority for same results'
 );
 
 done_testing();

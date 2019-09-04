@@ -18,7 +18,7 @@ use Vote::Count::Redact qw/RedactSingle RedactPair/;
 use Storable 3.15 qw(dclone);
 
 # Variable is kinda being set as a global, for now at least.
-my %WINDATA = ( );
+my %WINDATA = ();
 
 sub _ExtremeBreaker ( $I, @choices ) {
 
@@ -27,24 +27,26 @@ sub _ExtremeBreaker ( $I, @choices ) {
 
 sub _OriginalWinner ( $Election ) {
   my $winner = $Election->PairMatrix()->CondorcetWinner();
-  if ( $winner ) {
-    %WINDATA{ $winner } = { 'original' => 1 , 'condorcet' => 1 };
-  } else {
+  if ($winner) {
+    %WINDATA{$winner} = { 'original' => 1, 'condorcet' => 1 };
+  }
+  else {
     $irvresult = SmithSetIRV( $Election, 'approval' );
-    if ( $irvresult->{'winner'}) {
+    if ( $irvresult->{'winner'} ) {
       $winner = $irvresult->{'winner'};
-    } else {
-... # use extreme breaker to try all possible tiebreakers
-    # exit on failure.
+    }
+    else {
+      ...    # use extreme breaker to try all possible tiebreakers
+             # exit on failure.
     }
 
-    %WINDATA{ $winner } =  { 'original' => 1 , 'condorcet' => 0 };
+    %WINDATA{$winner} = { 'original' => 1, 'condorcet' => 0 };
   }
   return $winner;
 }
 
 sub RunWinnableAlternatives ( $Election ) {
-  $Election->_OriginalWinner ;
+  $Election->_OriginalWinner;
 
 }
 
@@ -196,15 +198,11 @@ sub RunWinnableAlternatives ( $Election ) {
 #           }
 #       }
 
-
 #     }
 
 #     say $Election->logd();
 #     return $winner;
 # }
-
-
-
 
 1;
 #FOOTER

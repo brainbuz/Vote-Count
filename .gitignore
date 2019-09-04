@@ -4,3 +4,5 @@ startlib
 *LOG
 pod.html
 *tmp
+*.bak
+*scratch

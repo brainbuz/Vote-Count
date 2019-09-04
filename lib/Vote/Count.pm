@@ -17,14 +17,14 @@ use Storable 3.15 'dclone';
 
 no warnings 'experimental';
 
-our $VERSION='0.022';
+our $VERSION='0.10';
 
 =head1 NAME
 
 Vote::Count
 
 
-=head1 VERSION 0.022
+=head1 VERSION 0.10
 
 =cut
 
@@ -32,17 +32,12 @@ Vote::Count
 
 has 'BallotSet' => ( is => 'ro', isa => 'HashRef', required => 1 );
 
-has 'BallotSetType' => (
-  is      => 'ro',
-  isa     => 'Str',
-  default =>  'rcv',
-);
-
 has 'Active' => (
-  is => 'rw',
-  isa => 'HashRef',
-  lazy => 1,
-  builder => 'ResetActive', );
+  is      => 'rw',
+  isa     => 'HashRef',
+  lazy    => 1,
+  builder => 'ResetActive',
+);
 
 sub ResetActive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
 
@@ -63,60 +58,73 @@ sub GetActive ( $self ) {
 }
 
 has TieBreakMethod => (
-  is  => 'rw',
-  isa => 'Str',
+  is       => 'rw',
+  isa      => 'Str',
   required => 0,
 );
 
 has 'PairMatrix' => (
-  is => 'ro',
-  isa => 'Object',
-  lazy => 1,
-  builder => '_buildmatrix', );
+  is      => 'ro',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_buildmatrix',
+);
 
 sub _buildmatrix ( $self ) {
-  my $tiebreak = defined($self->TieBreakMethod())
+  my $tiebreak =
+    defined( $self->TieBreakMethod() )
     ? $self->TieBreakMethod()
     : 'none';
-  return  Vote::Count::Matrix->new(
-    BallotSet => $self->BallotSet(),
-    Active => $self->Active(),
+  return Vote::Count::Matrix->new(
+    BallotSet      => $self->BallotSet(),
+    Active         => $self->Active(),
     TieBreakMethod => $tiebreak,
-    LogTo => $self->LogTo() . '_matrix',
-  )
+    LogTo          => $self->LogTo() . '_matrix',
+  );
 }
 
-sub UpdatePairMatrix ( $self, $active=undef ) {
+sub UpdatePairMatrix ( $self, $active = undef ) {
   $active = $self->Active() unless defined $active;
   $self->{'PairMatrix'} = Vote::Count::Matrix->new(
     BallotSet => $self->BallotSet(),
-    Active => $active
-  )
+    Active    => $active
+  );
 }
 
 sub BUILD {
-  my $self      = shift;
+  my $self = shift;
   # Verbose Log
-  $self->{'LogV'} = localtime->cdate . "\n" ;
+  $self->{'LogV'} = localtime->cdate . "\n";
   # Debugging Log
   $self->{'LogD'} = qq/Vote::Count Version $VERSION\n/;
-  $self->{'LogD'} .= localtime->cdate . "\n" ;
+  $self->{'LogD'} .= localtime->cdate . "\n";
   # Terse Log
   $self->{'LogT'} = '';
 }
 
 # load the roles providing the underlying ops.
-with  'Vote::Count::Approval',
-      'Vote::Count::Borda',
-      'Vote::Count::Floor',
-      'Vote::Count::IRV',
-      'Vote::Count::Log',      
-      'Vote::Count::TieBreaker',
-      'Vote::Count::TopCount',
-      ;
+with 'Vote::Count::Approval',
+  'Vote::Count::Borda',
+  'Vote::Count::Floor',
+  'Vote::Count::IRV',
+  'Vote::Count::Log',
+  'Vote::Count::Range',  
+  'Vote::Count::TieBreaker',
+  'Vote::Count::TopCount',
+  ;
 
 sub VotesCast ( $self ) {
   return $self->BallotSet()->{'votescast'};
+}
+
+sub BallotSetType ( $self ) {
+  if( $self->BallotSet()->{'options'}{'rcv'} ) {
+    return 'rcv'
+  } elsif ( $self->BallotSet()->{'options'}{'range'} ) {
+    return 'range'
+  } else {
+    die "BallotSetType is undefined or unknown type.";
+  }
 }
 
 __PACKAGE__->meta->make_immutable;
@@ -192,7 +200,7 @@ This is also extremely useful to researchers who may want to study multiple meth
 
 =head1 Preview Release
 
-This module is not ready for production. 
+This distribution is almost ready for production, but there may be changes made without notice up to stable release. Before putting it into production you should develop a suite of tests against test data. This will warn you of future changes that will break your code, so you can either update or freeze to an earlier version on BackPAN.
 
 
 =head1 Overview
@@ -233,6 +241,8 @@ To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cr
 Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win.
 
 The cases described above: Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as seperate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
+
+There is a specific Criteria that is sometimes called Consistency, in this discussion consistency is discussed in the broad context. No method passes every possible consistency criteria, from a policy perspective a method is consistent if it has no major consistency failures.
 
 
 =head4 Complexity
@@ -334,9 +344,11 @@ The basic Condorcet Method will frequently fail to identify a winner. One possib
 Complexity Varies among sub-methods.
 
 
+
 =item *
 
 Fails Later Harm.
+
 
 
 =item *
@@ -344,21 +356,25 @@ Fails Later Harm.
 Meets both Condorcet Criteria.
 
 
+
 =item *
 
-When a Condorcet Winner is present Consistency is met. When there is no Condorcet Winner this Consistency also applies between a Dominant (Smith) Set and the rest of the choices, but not within the Smith Set. Sub-methods vary in consistency when there is no Condorcet Winner.
+When a Condorcet Winner is present Consistency is very high. When there is no Condorcet Winner this Consistency applies between a Dominant (Smith) Set and the rest of the choices, but not within the Smith Set. Sub-methods vary in consistency when there is no Condorcet Winner.
+
 
 
 =back
 
 
-=head3 Score (Range) Voting Systems
+=head3 Range (Score) Voting Systems
 
-Most Methods for Ranked Choice Ballots can be used for Score Ballots, either directly or by translating the ballots. Score Voting proposals typically implement I<Borda Count>, with a fixed depth of choices. I<STAR>, creates a virtual runoff between the top two I<Borda Count> Choices.
+Most Methods for Ranked Choice Ballots can be used for Range Ballots. Score Voting proposals typically implement I<Borda Count>, with a fixed depth of choices. I<STAR>, creates a virtual runoff between the top two I<Borda Count> Choices.
 
-Advocates of Score Voting claim that this Ballot Style is a better expression of voter preference (which is purely a matter of opinion and cannot be proved or disproved), but it does create more potential for ties in the resolution process than RC does (which is a reason to assert RC is better). 
+Advocates claim that this Ballot Style is a better expression of voter preference. Where it shows a clear advantage is in allowing Voters to directly mitigate Later Harm by ranking a strongly favored choice with the highest score and weaker choices with the lowest.
 
-Borda appears to benefit from a switch to Score Ballots, while IRV and Condorcet are better served by Ranked Ballots.
+The Range Ballot resolves the Borda weighting problem and allows the voter to manage the later harm effect, so it is clearly the better choice for Borda. Condorcet and IRV can resolve Range Ballots, but ignore the extra information and would prefer strict ordinality (not allowing equal ranking).
+
+Voters may find the Range Ballot to be more complex than the Ranked Choices Ballot.
 
 
 =head1 Objective and Motivation
@@ -373,7 +389,7 @@ The objective is to have a library that can handle any of the myriad variants th
 
 =head2 Reading Ballots
 
-The Vote::Count::ReadBallots library provides functionality for reading files from disc. Currently it defines a format for a ballot file and reads that from disk. In the future additional formats may be added.
+The Vote::Count::ReadBallots library provides functionality for reading files from disc. Currently it defines a format for a ballot file and reads that from disk. In the future additional formats may be added. Range Ballots may be in either JSON or YAML formats.
 
 
 =head2 Voting Method and Component Modules
@@ -447,12 +463,6 @@ BallotSet: Get BallotSet
 
 =item *
 
-BallotSetType: Get the BallotSet Type (not implemented)
-
-
-
-=item *
-
 PairMatrix: Get a Matrix Object for the Active Set. Generated and cached on the first request.
 
 
@@ -475,6 +485,20 @@ VotesCast: Returns the number of votes cast.
 =head2 Components
 
 
+=head3 Catalog of Methods
+
+Directory of Vote Counting Methods linking to the Vote::Count module for it.
+
+=over
+
+=item *
+
+L<Catalog|https://metacpan.org/pod/distribution/Vote-Count/Catalog.pod>
+
+
+=back
+
+
 =head3 Consumed As Roles By Vote::Count
 
 =over
@@ -492,6 +516,11 @@ L<Vote::Count::Borda|https://metacpan.org/pod/Vote::Count::Borda>
 =item *
 
 L<Vote::Count::Floor|https://metacpan.org/pod/Vote::Count::Floor>
+
+
+=item *
+
+L<Vote::Count::IRV|https://metacpan.org/pod/Vote::Count::IRV>
 
 
 =item *
@@ -540,7 +569,17 @@ L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod/Vote::Count::M
 
 =item *
 
-L<Vote::Count::Method::IRV|https://metacpan.org/pod/Vote::Count::Method::IRV>
+L<Vote::Count::Method::CondorcetIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetIRV>
+
+
+=item *
+
+L<Vote::Count::Method::CondorcetVsIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetVsIRV>
+
+
+=item *
+
+L<Vote::Count::Method::STAR|https://metacpan.org/pod/Vote::Count::Method::STAR>
 
 
 =back
@@ -572,25 +611,26 @@ L<Vote::Count::ReadBallots|https://metacpan.org/pod/Vote::Count::ReadBallots>
 L<Vote::Count::Start|https://metacpan.org/pod/Vote::Count::Start>
 
 
-
 =back
 
 
-=head3 Documentation
-
-Additional Documentation Files
+=head3 Additional Documentation
 
 =over
 
 =item *
 
-L<Vote::Count::HandCount|https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Count/Method/HandCount.pod>
+L<Catalog|https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Catalog.pod>
+
+
+=item *
+
+L<Hand Count|https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Hand_Count.pod>
 
 
 =item *
 
 L<Vote::Count::Start|https://metacpan.org/pod/Vote::Count::Start>
-
 
 
 =back
@@ -609,18 +649,26 @@ If you're looking at all of this wondering "which method I should recommend to m
 
 I<Instant Runoff Voting> is simple, easy to count by hand, Later Harm protected, and is the most widely used method. It has serious consistency issues, especially how poorly it handles common cloning situations.
 
-I<Benham Condorcet IRV>, meets the two main Condorcet Criteria, and is countable by hand, but it loses Later Harm.
+I<Benham Condorcet IRV>, meets the two main Condorcet Criteria, and is countable by hand, but it fails Later Harm.
 
-If you like I<Borda> or prefer a I<Range Ballot>, my pick is for I<STAR>. STAR specifies a Range Ballot. Range Ballots are not presently implemented, and will require a lot of work, so it may be some time before it's available here. In the meantime you can implement the RCV variant of STAR with Vote::Count.
+Benham and IRV are good choices for Hand Count Methods.
 
-I<SmithSet IRV>, is the B<best simple method>. It meets all three key criteria for Condorcet Methods and has less Later Harm effect than any other (non-redacting) Condorcet Method.
+I<Smith Set IRV> meets all three key criteria for Condorcet Methods and has less Later Harm effect than any other (non-redacting) Condorcet Method. It is simple to understand, but not practical for hand counting.
 
-I<Redacting Condorcet Methods> are the B<best>. If a Condorcet Winner does not create a Later Harm violation they will always be chosen. They can create a gauge of the later harm effect that then allows for the establishment of a Later Harm tolerance. If there is a Later Harm violation, then ballots are redacted, and the resulting final ballots will meet the Condorcet Criteria.
+If you like I<Borda> or prefer a I<Range Ballot>, my pick is for I<STAR>.
+
+STAR is handcountable but requires a Range Ballot. Range methods like STAR have considerably less Later Harm effect than other Borda Methods.
+
+I<Redacting Condorcet Methods> are the B<best> for a conventional Ranked Choice Ballot. If a Condorcet Winner does not create a Later Harm violation they will always be chosen. They can create a gauge of the later harm effect that then allows for the establishment of a Later Harm tolerance. The steps for I<Condorcet Vs IRV> are easy to understand but the number of steps qualifies it as somewhat complex. Other methods in the family (not yet implemented) will be more complex.
+
+B<STAR> and B<Redacting Condorcet> (Condorcet Vs IRV being the only one available here at the moment) are my preference. If you need to hand count, Benham is your Condorcet Method and IRV is your Later Harm Protected Method. Smith Set IRV is a simple Condorcet Method that is better on Later Harm than any other non-redacting Condorcer Method, it is a much better choice than Benham. If Later Harm compliance is required a Redacting Condorcet Method is your best choice, and IRV your choice if they're too complex.
 
 
-=head2 Always Pick a Floor Rule
+=head2 Floor Rules and Tie Breakers
 
-Unless your voting rules require voters to rank all choices, a good floor rule will quickly eliminate the low support choices.
+In real world elections it is typical to have a number of choices that recieve very little support. A Floor Rule allows quick elimination of these choices, but don't help when voters rank all choices. STAR is an exception and does not benefit from a Floor Rule. 5% Approval is a good weak Floor, and TCA is a good aggressive one.
+
+Ties are inescapable. Modified Grand Junction has the maximum resolvability, but has a Later Harm effect. For a Later Harm safe Tie Breaker Eliminate All is effective (except at the final step).
 
 =cut
 

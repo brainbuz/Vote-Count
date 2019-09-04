@@ -8,19 +8,19 @@ package Vote::Count::Approval;
 use Moose::Role;
 
 no warnings 'experimental';
-# use Data::Printer;
+use Data::Printer;
 
-our $VERSION='0.022';
+our $VERSION='0.10';
 
 =head1 NAME
 
 Vote::Count::Approval
 
-=head1 VERSION 0.022
+=head1 VERSION 0.10
 
 =cut
 
-# ABSTRACT: RankCount object for Vote::Count. Toolkit for vote counting.
+# ABSTRACT: Approval for Vote::Count. Toolkit for vote counting.
 
 =head1 Definition of Approval
 
@@ -35,20 +35,39 @@ Returns a RankCount object for the current Active Set taking an optional argumen
 
 =cut
 
-sub Approval ( $self, $active=undef ) {
-  my %BallotSet = $self->BallotSet()->%*;
-  my %ballots = ( $BallotSet{'ballots'}->%* );
-  $active = $self->Active() unless defined $active ;
-  my %approval = ( map { $_ => 0 } keys( $active->%* ));
-    for my $b ( keys %ballots ) {
-      my @votes = $ballots{$b}->{'votes'}->@* ;
-      for my $v ( @votes ) {
-        if ( defined $approval{$v} ) {
-          $approval{$v} += $ballots{$b}{'count'};
-        }
+sub _approval_rcv_do ( $active, $ballots ) {
+  my %approval = ( map { $_ => 0 } keys( $active->%* ) );
+  for my $b ( keys %{$ballots} ) {
+    my @votes = $ballots->{$b}->{'votes'}->@*;
+    for my $v (@votes) {
+      if ( defined $approval{$v} ) {
+        $approval{$v} += $ballots->{$b}{'count'};
       }
     }
+  }
   return Vote::Count::RankCount->Rank( \%approval );
+}
+
+sub _approval_range_do ( $active, $ballots, $depth ) {
+  my %approval = ( map { $_ => 0 } keys( $active->%* ) );
+  for my $b ( @{$ballots} ) {
+    for my $c ( keys $b->{'votes'}->%* ) {
+      $approval{$c} += $b->{'count'} if defined $approval{$c};
+    }
+  }
+  return Vote::Count::RankCount->Rank( \%approval );
+}
+
+sub Approval ( $self, $active = undef ) {
+  my %BallotSet = $self->BallotSet()->%*;
+  $active = $self->Active() unless defined $active;
+  if ( $BallotSet{'options'}{'rcv'} ) {
+    return _approval_rcv_do( $active, $BallotSet{'ballots'} );
+  }
+  elsif ( $BallotSet{'options'}{'range'} ) {
+    # ...;
+    _approval_range_do( $active, $BallotSet{'ballots'}, $BallotSet{'depth'} );
+  }
 }
 
 1;

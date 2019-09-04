@@ -12,19 +12,20 @@ use Sort::Hash;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION='0.022';
+our $VERSION='0.10';
+
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.022
+=head1 VERSION 0.10
 
 =cut
 
 # ABSTRACT: RankCount object for Vote::Count. Toolkit for vote counting.
 
 sub _RankResult ( $rawcount ) {
-  my %rc      = ( $rawcount->%* ); # destructive process needs to use a copy.
+  my %rc      = ( $rawcount->%* );  # destructive process needs to use a copy.
   my %ordered = ();
   my %byrank  = ();
   my $pos     = 0;
@@ -139,11 +140,12 @@ sub Leader ( $I ) {
   return \%return;
 }
 
+
 sub RankTable( $self ) {
   my @rows   = ( [ 'Rank', 'Choice', 'Votes' ] );
   my %rc     = $self->{'rawcount'}->%*;
   my %byrank = $self->{'byrank'}->%*;
-  for my $r ( sort {$a <=> $b} ( keys %byrank ) ) {
+  for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
     my @choice = sort $byrank{$r}->@*;
     for my $choice (@choice) {
       my $votes = $rc{$choice};
@@ -151,7 +153,7 @@ sub RankTable( $self ) {
       push @rows, ( \@row );
     }
   }
-  return generate_markdown_table( rows => \@rows ) . "\n" ;
+  return generate_markdown_table( rows => \@rows ) . "\n";
 }
 
 1;

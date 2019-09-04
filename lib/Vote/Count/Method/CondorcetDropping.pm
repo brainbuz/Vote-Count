@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='0.022';
+our $VERSION='0.10';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 0.022
+=head1 VERSION 0.10
 
 =cut
 
@@ -48,7 +48,6 @@ Normally RunCondorcetDropping eliminates Condorcet Losers whenever they are disc
 
 =cut
 
-
 no warnings 'experimental';
 use List::Util qw( min max );
 # use YAML::XS;
@@ -61,33 +60,33 @@ use Carp;
 # use Data::Dumper;
 
 has 'Matrix' => (
-  isa => 'Object',
-  is => 'ro',
-  lazy => 1,
+  isa     => 'Object',
+  is      => 'ro',
+  lazy    => 1,
   builder => '_newmatrix',
 );
 
 # DropStyle: whether to apply drop rule against
 # all choices ('all') or the least winning ('leastwins').
 has 'DropStyle' => (
-  isa => 'Str',
-  is => 'ro',
+  isa     => 'Str',
+  is      => 'ro',
   default => 'leastwins',
 );
 
 has 'DropRule' => (
-  isa => 'Str',
-  is => 'ro',
+  isa     => 'Str',
+  is      => 'ro',
   default => 'plurality',
 );
 
 has 'SkipLoserDrop' => (
-  isa => 'Int',
-  is => 'ro',
+  isa     => 'Int',
+  is      => 'ro',
   default => 0,
 );
 
-sub GetRound ( $self, $active, $roundnum='' ) {
+sub GetRound ( $self, $active, $roundnum = '' ) {
   my $rule = lc( $self->DropRule() );
   if ( $rule =~ m/(plurality|topcount)/ ) {
     return $self->TopCount($active);
@@ -127,12 +126,14 @@ sub DropChoice ( $self, $round, @jeapardy ) {
 
 sub _newmatrix ($self) {
   return Vote::Count::Matrix->new(
-    'BallotSet' => $self->BallotSet(), Active => $self->Active() );
+    'BallotSet' => $self->BallotSet(),
+    Active      => $self->Active()
+  );
 }
 
-sub _logstart( $self, $active ) {
+sub _logstart ( $self, $active ) {
   my $dropdescription = 'Elimination Rule is Applied to All Active Choices.';
-  if( $self->DropStyle eq 'leastwins') {
+  if ( $self->DropStyle eq 'leastwins' ) {
     $dropdescription =
       'Elimination Rule is Applied to only Choices with the Fewest Wins.';
   }
@@ -153,46 +154,46 @@ sub _logstart( $self, $active ) {
     croak "undefined dropping rule $rule requested";
   }
   $self->logt( 'CONDORCET SEQUENTIAL DROPPING METHOD',
-    'CHOICES:',
-    join( ', ', (sort keys %{$active}) ) );
+    'CHOICES:', join( ', ', ( sort keys %{$active} ) ) );
   $self->logv( "Elimination Rule: $rule", $dropdescription );
 }
 
 sub RunCondorcetDropping ( $self, $active = undef ) {
   unless ( defined $active ) { $active = $self->Active() }
-  my $roundctr   = 0;
-  my $maxround   = scalar( keys %{$active} );
-  $self->_logstart( $active);
+  my $roundctr = 0;
+  my $maxround = scalar( keys %{$active} );
+  $self->_logstart($active);
   my $result = { tie => 0, tied => undef, winner => 0 };
 DROPLOOP:
-  until ( 0 ) {
+  until (0) {
     $roundctr++;
     die "DROPLOOP infinite stopped at $roundctr" if $roundctr > $maxround;
-    my $topcount = $self->TopCount( $active );
+    my $topcount = $self->TopCount($active);
     my $round = $self->GetRound( $active, $roundctr );
     $self->logv( '---', "Round $roundctr TopCount", $topcount->RankTable() );
-    my $majority = $self->EvaluateTopCountMajority( $topcount );
+    my $majority = $self->EvaluateTopCountMajority($topcount);
     if ( defined $majority->{'winner'} ) {
       $result->{'winner'} = $majority->{'winner'};
       last DROPLOOP;
     }
     my $matrix = Vote::Count::Matrix->new(
       'BallotSet' => $self->BallotSet,
-      'Active' => $active );
+      'Active'    => $active
+    );
     $self->logv( '---', "Round $roundctr Pairings", $matrix->MatrixTable() );
-    my $cw = $matrix->CondorcetWinner() || 0 ;
-    if ( $cw ) {
+    my $cw = $matrix->CondorcetWinner() || 0;
+    if ($cw) {
       my $wstr = "*  Winner $cw  *";
-      my $rpt = length( $wstr) ;
-      $self->logt( '*'x$rpt, $wstr, '*'x$rpt );
-      $result->{'winner'} = $cw ;
+      my $rpt  = length($wstr);
+      $self->logt( '*' x $rpt, $wstr, '*' x $rpt );
+      $result->{'winner'} = $cw;
       last DROPLOOP;
     }
     my $eliminated =
       $self->SkipLoserDrop()
       ? { 'eliminations' => 0 }
       : $matrix->CondorcetLoser();
-    if( $eliminated->{'eliminations'}) {
+    if ( $eliminated->{'eliminations'} ) {
       # tracking active between iterations of matrix.
       $active = $matrix->Active();
       $self->logv( $eliminated->{'verbose'} );
@@ -200,29 +201,31 @@ DROPLOOP:
       next DROPLOOP;
     }
     my @jeapardy = ();
-    if( $self->DropStyle eq 'leastwins') {
+    if ( $self->DropStyle eq 'leastwins' ) {
       @jeapardy = $matrix->LeastWins();
-    } else { @jeapardy = keys %{$active} }
-    for my $goodbye ( $self->DropChoice( $round, @jeapardy )) {
-      delete $active->{ $goodbye };
-      $self->logv( "Eliminating $goodbye");
     }
-    my @remaining = keys $active->%* ;
-    if ( @remaining == 0) {
-      $self->logt( "All remaining Choices would be eliminated, Tie between @jeapardy");
-      $result->{'tie'} = 1;
+    else { @jeapardy = keys %{$active} }
+    for my $goodbye ( $self->DropChoice( $round, @jeapardy ) ) {
+      delete $active->{$goodbye};
+      $self->logv("Eliminating $goodbye");
+    }
+    my @remaining = keys $active->%*;
+    if ( @remaining == 0 ) {
+      $self->logt(
+        "All remaining Choices would be eliminated, Tie between @jeapardy");
+      $result->{'tie'}  = 1;
       $result->{'tied'} = \@jeapardy;
       last DROPLOOP;
-    } elsif ( @remaining == 1) {
+    }
+    elsif ( @remaining == 1 ) {
       my $winner = $remaining[0];
-      $self->logt( "Only 1 choice remains.", "** WINNER : $winner **");
+      $self->logt( "Only 1 choice remains.", "** WINNER : $winner **" );
       $result->{'winner'} = $winner;
       last DROPLOOP;
     }
-  };#infinite DROPLOOP
+  };    #infinite DROPLOOP
   return $result;
-  }
-
+}
 
 1;
 

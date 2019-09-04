@@ -12,13 +12,13 @@ use namespace::autoclean;
 
 no warnings 'experimental';
 
-our $VERSION='0.022';
+our $VERSION='0.10';
 
 =head1 NAME
 
 Vote::Count::Redact
 
-=head1 VERSION 0.022
+=head1 VERSION 0.10
 
 Methods for Redacting Ballots.
 
@@ -30,13 +30,9 @@ Redacting Ballots is useful for what-if analysis and identifying Later Harm effe
 
 =cut
 
-
-
 # ABSTRACT: Methods for Redacting Vote::Count BallotSets.
 
-use Exporter::Easy (
-       OK => [ qw( RedactSingle RedactPair RedactBullet ) ],
-   );
+use Exporter::Easy ( OK => [qw( RedactSingle RedactPair RedactBullet )], );
 
 =head2 RedactBullet
 
@@ -69,7 +65,7 @@ Return a new BallotSet truncating the ballots after the given choice.
 
 =cut
 
-sub RedactSingle( $ballotset, $A ) {
+sub RedactSingle ( $ballotset, $A ) {
   my $new     = dclone($ballotset);
   my %ballots = $new->{'ballots'}->%*;
 REDACTSINGLELOOP:
@@ -80,7 +76,7 @@ REDACTSINGLELOOP:
       my $v = shift @oldvote;
       push @newvote, $v;
       if ( $v eq $A ) { @oldvote = () }
-      else { }
+      else            { }
       $ballots{$ballot}{'votes'} = \@newvote;
     }
     $ballots{$ballot}{'votes'} = \@newvote;
@@ -113,19 +109,19 @@ REDACTPAIRLOOP:
       if ( $v eq $A ) {
         while (@oldvote) {
           my $u = shift @oldvote;
-# If the other redaction member is the present vote
-# truncate this vote from here on by setting oldvote to empty array.          
+          # If the other redaction member is the present vote
+          # truncate this vote from here on by setting oldvote to empty array.
           if ( $u eq $B ) { @oldvote = () }
-          else {push @newvote, ($u)};
+          else            { push @newvote, ($u) }
         }
       }
       elsif ( $v eq $B ) {
         while (@oldvote) {
           my $u = shift @oldvote;
-# If the other redaction member is the present vote
-# truncate this vote from here on by setting oldvote to empty array.          
+          # If the other redaction member is the present vote
+          # truncate this vote from here on by setting oldvote to empty array.
           if ( $u eq $A ) { @oldvote = () }
-          else { push @newvote, ($u)};
+          else            { push @newvote, ($u) }
         }
       }
       else { }

@@ -7,13 +7,13 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
-# use Data::Printer;
+use Data::Printer;
 use feature qw /postderef signatures/;
 
 use Path::Tiny;
 
 use Vote::Count;
-use Vote::Count::ReadBallots 'read_ballots';
+use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Vote::Count::Borda;
 
 my $VC1 = Vote::Count->new(
@@ -90,7 +90,7 @@ subtest 'bordadepth at 5, standard method' => sub {
     bordaweight => $testweight,
   );
 
-  my ( $A2 ) = $VC2->Borda(
+  my ($A2) = $VC2->Borda(
     {
       'VANILLA'   => 1,
       'CHOCOLATE' => 1,
@@ -108,10 +108,8 @@ subtest 'bordadepth at 5, standard method' => sub {
   is_deeply( $A2->RawCount(), $expectA2,
     "Borda counted a small set with AN active list" );
 
-  is_deeply(
-    $A2->RawCount()->{'CHOCOLATE'}, 50 ,
-    'test a value on the Borda Ranking table.'
-  );
+  is_deeply( $A2->RawCount()->{'CHOCOLATE'},
+    50, 'test a value on the Borda Ranking table.' );
 };
 
 subtest 'tests with default borda weighting' => sub {
@@ -134,7 +132,7 @@ subtest 'tests with default borda weighting' => sub {
     VANILLA    => 72
   };
 
-  my ( $B1Rank ) = $BC1->Borda();
+  my ($B1Rank) = $BC1->Borda();
 
   is_deeply( $B1Rank->RawCount(), $expectB1,
     "Small set no active list default depth of 0" );
@@ -147,10 +145,27 @@ subtest 'tests with default borda weighting' => sub {
     CHERRY    => 24,
     VANILLA   => 24,
   };
-  my ( $C1Rank ) = $BC1->Borda($activeset);
+  my ($C1Rank) = $BC1->Borda($activeset);
   is_deeply( $C1Rank->RawCount(), $activeset,
     "small set WITH active list default depth of 0" );
 
+};
+
+my $RangeElection = Vote::Count->new(
+  BallotSet  => read_range_ballots('t/data/tennessee.range.json') 
+  );
+my $rangescored = $RangeElection->Score();
+
+subtest 'Score Range Ballots' => sub {
+  note "Testing Range Ballot Scoring with Tennessee.";
+  is( $rangescored->{'ordered'}{'MEMPHIS'}, 4, 'Memphis scores 4th in ordered');
+  is( $rangescored->{'rawcount'}{'CHATTANOOGA'}, 289, 'CHATTANOOGA scored 289');
+  is( $rangescored->ArrayTop()->[0], 'NASHVILLE', 'ArrayTop returns Nashville');
+  is( scalar $rangescored->ArrayTop()->@*, 1, 'ArrayTop has only 1 element');
+  is( $rangescored->ArrayBottom()->[0], 'MEMPHIS', 'Memphis is in the bottom array');
+  is( scalar $rangescored->ArrayBottom()->@*, 1, 'ArrayBottom has only 1 element');
+  my $ranked = $rangescored->HashByRank();
+  is( $ranked->{2}[0], "KNOXVILLE", 'From hashbyrank see that Knoxville is 2nd');
 };
 
 done_testing();
