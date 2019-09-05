@@ -12,13 +12,13 @@ use Sort::Hash;
 # use boolean;
 # use Data::Printer;
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =cut
 

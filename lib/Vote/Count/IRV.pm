@@ -13,13 +13,13 @@ with 'Vote::Count::TieBreaker';
 
 use Storable 3.15 'dclone';
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =cut
 
@@ -71,8 +71,6 @@ sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
       $tiebreaker = 'all';
     }
   }
-  if( $self->BallotSetType() eq 'range') {
-    return $self->_irvrange ( $active, $tiebreaker) }
   my $roundctr = 0;
   my $maxround = scalar( keys %{$active} );
   $self->logt( "Instant Runoff Voting",

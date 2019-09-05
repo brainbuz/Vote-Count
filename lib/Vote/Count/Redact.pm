@@ -12,13 +12,13 @@ use namespace::autoclean;
 
 no warnings 'experimental';
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::Redact
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 Methods for Redacting Ballots.
 
@@ -90,6 +90,10 @@ REDACTSINGLELOOP:
 For a Ballot Set and two choices, on each ballot where both appear it removes the later one and all subsequent choices, returning a completely independent new BallotSet. It is necessary to remove later choices, because otherwise the ballot would be voting against the target later choice, not merely not voting for.
 
   my $newBallotSet = RedactPair( $VoteCountObject->BallotSet(), 'A', 'B');
+
+=head3 Todo for RedactPair
+
+Add options to only apply to first choice votes, either making them bullets or only redacting the opposing choice from first choice votes.
 
 =cut
 

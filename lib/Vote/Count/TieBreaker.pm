@@ -11,13 +11,13 @@ no warnings 'experimental';
 use List::Util qw( min max sum );
 use Data::Printer;
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::TieBreaker
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =cut
 

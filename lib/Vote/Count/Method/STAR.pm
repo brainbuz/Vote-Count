@@ -9,12 +9,13 @@ use Moose;
 extends 'Vote::Count';
 
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::Method::STAR
-=head1 VERSION 0.10
+
+=head1 VERSION 0.11
 
 =cut
 
@@ -42,7 +43,7 @@ Scores the Range Ballots, then holds a runoff between the two highest scored cho
 
 =head2 Function Name: STAR
 
-Conducts and Logs STAR.
+Conducts and Logs STAR. Returns the winner or 0 in the event of a tie.
 
 =head2 Criteria
 

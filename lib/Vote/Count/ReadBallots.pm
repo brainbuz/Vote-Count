@@ -12,23 +12,25 @@ use Data::Printer;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =head1 SYNOPSIS
 
-  Vote::Count::ReadBallots 'read_ballots';
+  Vote::Count::ReadBallots;
 
   my $data1 = read_ballots('t/data/data1.txt');
 
 =head1 Description
 
 Reads a file containing vote data. Retruns a HashRef of a Vote::Count BallotSet.
+
+All public methods are exported.
 
 =head1 BallotSet Data Structure
 
@@ -114,7 +116,7 @@ Takes three parameters, a BallotSet, a file location, and a value of 'json' or '
 
 =cut
 
-use Exporter::Easy ( OK =>
+use Exporter::Easy ( EXPORT =>
     [qw( read_ballots write_ballots read_range_ballots write_range_ballots)],
 );
 

@@ -20,7 +20,7 @@ use feature qw /postderef signatures/;
 
 # use Path::Tiny;
 use Vote::Count;
-use Vote::Count::ReadBallots 'read_ballots';
+use Vote::Count::ReadBallots;
 use Vote::Count::Method::CondorcetDropping;
 
 # example uses biggerset1 from the distribution test data.

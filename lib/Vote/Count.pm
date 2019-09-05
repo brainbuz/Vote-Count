@@ -17,14 +17,14 @@ use Storable 3.15 'dclone';
 
 no warnings 'experimental';
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 =head1 NAME
 
 Vote::Count
 
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =cut
 
@@ -150,7 +150,7 @@ This is also extremely useful to researchers who may want to study multiple meth
   use feature qw /postderef signatures/;
 
   use Vote::Count;
-  use Vote::Count::ReadBallots 'read_ballots';
+  use Vote::Count::ReadBallots;
   use Vote::Count::Method::CondorcetDropping;
 
   # example uses biggerset1 from the distribution test data.

@@ -21,7 +21,7 @@ use Try::Tiny;
 
 use Data::Printer;
 
-our $VERSION='0.10';
+our $VERSION='0.11';
 
 # no warnings 'uninitialized';
 no warnings qw/experimental/;
@@ -30,7 +30,7 @@ no warnings qw/experimental/;
 
 Vote::Count::Method::CondorcetVsIRV
 
-=head1 VERSION 0.10
+=head1 VERSION 0.11
 
 =cut
 
@@ -97,13 +97,21 @@ Meets Condorcer Winner, Condorcet Loser, and Smith.
 
 Because this method chooses between the outcomes of two different methods, it inherits the consistency failings of both. It improves clone handling versus IRV, because in cases where the most supported clone loses IRV, it is often a Condorcet Winner. Likely there is overall improvement vs IRV.
 
+=head2 Criticism and Response
+
+Condorcet Vs IRV almost always picks the IRV Winner over the Condorcet Winner, on those occaisions that it does overturn IRV it should be considered a success.
+
+The ability to allow an optional tolerance for Later Harm is unique and powerful. The importance of Later Harm is the incentive it creates for strategic voting. To obtain sincere ballots in an election that is likely to be close with more than two significant choices, the voters must percieve the risk of not ranking a supported choice to be greater than the later harm risk. The relaxed option creates a reasonable tolerance for later harm. Notably in the Burlington 2009 Mayor Election where disatisfaction with winner resulted in the repeal of IRV, the Later Harm effect was significant and Condorcet Vs IRV confirms the IRV winner, use of Condorcet Vs IRV would have shown why the IRV decision was correct.
+
+There is a todo note in L<Vote::Count::Redact> to add more options for pair redacting that would only apply redaction to the first choice, these options would slightly increase the frequency of confirming the Condorcet Winner.
+
 =head1 Implementation
 
 Details specific to this implementation.
 
 The Tie Breaker is defaulted to (modified) Grand Junction for resolvability. Any Tie Breaker supported by Vote::Count::TieBreaker may be used, except that 'all' should not be used.
 
-There are two other important options: relaxed and smithsetirv.
+There are two other important options: relaxed and smithsetirv. Options may be added in the future to limit redaction to the first choice.
 
 =head2 Function Name: CondorcetVsIRV
 

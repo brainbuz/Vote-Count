@@ -10,10 +10,11 @@ use Data::Printer;
 # use Data::Dumper;
 
 use Path::Tiny;
+use Try::Tiny;
 use Storable 'dclone';
 
 use Vote::Count 0.020;
-use Vote::Count::ReadBallots 'read_ballots';
+use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
@@ -161,6 +162,25 @@ subtest 'tie resolution' => sub {
   # p $b6junction;
   # note $B6->logv();
   # note $b4all->logv();
+};
+
+my $fastfood =
+  Vote::Count->new(
+  BallotSet => read_range_ballots('t/data/fastfood.range.json') );
+
+todo "Range Ballot not yet implemented" => sub {
+# subtest 'Range Ballot' => sub {
+   my $fastexpect = {
+    'threshold' => 45,
+    'votes'     => 89,
+    'winner'    => "INNOUT",
+    'winvotes'  => 89
+  };
+  is_deeply(
+    try { $fastfood->RunIRV() },
+    $fastexpect,
+    'Ran IRV on a Range BallotSet' );
+  note $fastfood->logv();
 };
 
 done_testing();
