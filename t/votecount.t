@@ -17,7 +17,8 @@ use Vote::Count::ReadBallots 'read_ballots';
 
 my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data1.txt'), );
 
-is( $VC1->BallotSet()->{'options'}{'rcv'}, 1, 'BallotSet option is set to rcv' );
+is( $VC1->BallotSet()->{'options'}{'rcv'},
+  1, 'BallotSet option is set to rcv' );
 
 is( $VC1->VotesCast(), 10, 'Count the number of ballots in the set' );
 

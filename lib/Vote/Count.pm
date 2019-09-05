@@ -108,7 +108,7 @@ with 'Vote::Count::Approval',
   'Vote::Count::Floor',
   'Vote::Count::IRV',
   'Vote::Count::Log',
-  'Vote::Count::Range',  
+  'Vote::Count::Range',
   'Vote::Count::TieBreaker',
   'Vote::Count::TopCount',
   ;
@@ -118,11 +118,13 @@ sub VotesCast ( $self ) {
 }
 
 sub BallotSetType ( $self ) {
-  if( $self->BallotSet()->{'options'}{'rcv'} ) {
-    return 'rcv'
-  } elsif ( $self->BallotSet()->{'options'}{'range'} ) {
-    return 'range'
-  } else {
+  if ( $self->BallotSet()->{'options'}{'rcv'} ) {
+    return 'rcv';
+  }
+  elsif ( $self->BallotSet()->{'options'}{'range'} ) {
+    return 'range';
+  }
+  else {
     die "BallotSetType is undefined or unknown type.";
   }
 }

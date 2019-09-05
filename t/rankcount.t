@@ -43,7 +43,7 @@ my %tiedset = (
 my $counted1 = Vote::Count::RankCount->Rank( \%set1 );
 my $tied1    = Vote::Count::RankCount->new( \%tiedset );
 my $brexit =
-    Vote::Count->new( BallotSet => read_ballots('t/data/brexit1.txt'), );
+  Vote::Count->new( BallotSet => read_ballots('t/data/brexit1.txt'), );
 
 # p $counted1;
 isa_ok(

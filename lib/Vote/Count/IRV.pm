@@ -48,15 +48,20 @@ sub _ResolveTie ( $self, $active, $tiebreaker, @choices ) {
   # use map to remove winner(s) from @choices.
   # warning about sort interpreted as function fixed
   my @low = sort map {
-      if   ( $high{$_} ) { }
-      else               { $_ }
-  } @choices ;
+    if   ( $high{$_} ) { }
+    else               { $_ }
+  } @choices;
   return @low;
 }
 
 sub _irvrange ( $self, $active, $tiebreaker = undef ) {
   ...;
 }
+
+sub _checkmajority( ) { }
+
+#   if( $self->BallotSetType() eq 'range') {
+# return $self->_irvrange ( $active, $tiebreaker) }
 
 sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
   # external $active should not be changed.

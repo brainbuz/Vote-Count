@@ -13,8 +13,6 @@ use Vote::Count::RankCount;
 use TextTableTiny 'generate_markdown_table';
 
 use Math::BigRat try => 'GMP';
-# use bigrat try => 'GMP';
-# use boolean;
 use Storable 'dclone';
 use Data::Printer;
 
@@ -48,6 +46,8 @@ TopCount supports both Ranked and Range Ballot Types.
 
 Since Range Ballots often allow ranking choices equally, those equal votes need to be split. To prevent Rounding errors in the addition on large sets the fractions are added as Rational Numbers. The totals are converted to floating point numbers with a precision of 3 places. Three was arbitrarily chosen because it is reasonable for display, but precise enough as a truncation point to be unlikely to cause an error.
 
+It is recommended to install Math::BigInt::GMP to improve performance on the Rational Number math used for Top Count on Range Ballots.
+
 =cut
 
 sub _RangeTopCount ( $self, $active = undef ) {
@@ -55,10 +55,10 @@ sub _RangeTopCount ( $self, $active = undef ) {
   my %topcount = ( map { $_ => Math::BigRat->new(0) } keys( $active->%* ) );
 TOPCOUNTRANGEBALLOTS:
   for my $b ( $self->BallotSet()->{'ballots'}->@* ) {
-    my $vv = dclone $b->{'votes'};
+    my $vv    = dclone $b->{'votes'};
     my %votes = $vv->%*;
     for my $v ( keys %votes ) {
-      delete $votes{ $v } unless defined $active->{$v};
+      delete $votes{$v} unless defined $active->{$v};
     }
     next TOPCOUNTRANGEBALLOTS unless keys %votes;
     my $max = max( values %votes );
@@ -66,11 +66,12 @@ TOPCOUNTRANGEBALLOTS:
     for my $c ( keys %votes ) {
       if ( $votes{$c} == $max ) { push @top, $c }
     }
-    my $topvalue =  Math::BigRat->new( $b->{'count'} / scalar(@top)) ;
-    for (@top ) { $topcount{ $_ } += $topvalue }
+    my $topvalue = Math::BigRat->new( $b->{'count'} / scalar(@top) );
+    for (@top) { $topcount{$_} += $topvalue }
   }
   for my $k ( keys %topcount ) {
-    $topcount{$k} = $topcount{$k}->as_float(3)->numify() }
+    $topcount{$k} = $topcount{$k}->as_float(3)->numify();
+  }
   return Vote::Count::RankCount->Rank( \%topcount );
 }
 
@@ -94,9 +95,10 @@ TOPCOUNTBALLOTS:
 
 sub TopCount ( $self, $active = undef ) {
   if ( $self->BallotSet()->{'options'}{'rcv'} == 1 ) {
-    return $self-> _RCVTopCount( $active );
-  } elsif ( $self->BallotSet()->{'options'}{'range'} == 1 ) {
-    return $self-> _RangeTopCount( $active );
+    return $self->_RCVTopCount($active);
+  }
+  elsif ( $self->BallotSet()->{'options'}{'range'} == 1 ) {
+    return $self->_RangeTopCount($active);
   }
 }
 

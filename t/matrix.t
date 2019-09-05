@@ -45,10 +45,9 @@ my $KnotSet =
   Vote::Count::Matrix->new( 'BallotSet' => read_ballots('t/data/knot1.txt'),
   );
 
-my $FastFood =  
-  Vote::Count::Matrix->new( 
-    'BallotSet' => read_range_ballots('t/data/fastfood.range.json'),
-  );
+my $FastFood =
+  Vote::Count::Matrix->new(
+  'BallotSet' => read_range_ballots('t/data/fastfood.range.json'), );
 
 isa_ok( $M1, ['Vote::Count::Matrix'], 'The matrix is a Vote::Count::Matrix' );
 
@@ -265,31 +264,28 @@ subtest 'GreatestLoss' => sub {
 };
 
 subtest 'Range Ballots' => sub {
-  my $ffr = $FastFood->_conduct_pair ( 'BURGERKING', 'CHICKFILA' ); 
+  my $ffr = $FastFood->_conduct_pair( 'BURGERKING', 'CHICKFILA' );
   my $expectffrpair = {
-  BURGERKING  => 11,
-  CHICKFILA   => 3,
-  loser       => "CHICKFILA",
-  margin      => 8,
-  tie         => 0,
-  winner      => "BURGERKING"
+    BURGERKING => 11,
+    CHICKFILA  => 3,
+    loser      => "CHICKFILA",
+    margin     => 8,
+    tie        => 0,
+    winner     => "BURGERKING"
   };
-  is_deeply( $ffr, $expectffrpair, 'check pairing result _conduct_pair');
-  is ( 
-    $FastFood->GetPairWinner( 'BURGERKING', 'MCDONALDS'),
-    'BURGERKING',
-    'use GetPairWinner to find winner of a pairing'
-    );
-  my $FastFood2 = Vote::Count::Matrix->new ( 
-    TieBreakMethod =>'approval',
-    BallotSet => $FastFood->BallotSet() 
-    );
+  is_deeply( $ffr, $expectffrpair, 'check pairing result _conduct_pair' );
+  is( $FastFood->GetPairWinner( 'BURGERKING', 'MCDONALDS' ),
+    'BURGERKING', 'use GetPairWinner to find winner of a pairing' );
+  my $FastFood2 = Vote::Count::Matrix->new(
+    TieBreakMethod => 'approval',
+    BallotSet      => $FastFood->BallotSet()
+  );
   my $scored1 = $FastFood->ScoreMatrix();
   my $scored2 = $FastFood2->ScoreMatrix();
-  is( $scored1->{'CHICKFILA'}, 4,
-    'scoretable count wins for a choice with no tiebreaker');
-  is( $scored2->{'CHICKFILA'}, 6,
-    'scoretable count wins for same choice with approval tiebreaker');  
+  is( $scored1->{'CHICKFILA'},
+    4, 'scoretable count wins for a choice with no tiebreaker' );
+  is( $scored2->{'CHICKFILA'},
+    6, 'scoretable count wins for same choice with approval tiebreaker' );
 };
 
 done_testing();

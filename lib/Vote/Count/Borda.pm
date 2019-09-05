@@ -183,16 +183,14 @@ sub Score ( $self, $active = undef ) {
   $active = $self->Active() unless defined $active;
   my %scores = ( map { $_ => 0 } keys( $active->%* ) );
   for my $ballot ( $self->BallotSet()->{'ballots'}->@* ) {
-    for my $choice ( keys %scores) {
-      if( defined $ballot->{'votes'}{$choice} ) {
-        $scores{ $choice } += $ballot->{'count'} * $ballot->{'votes'}{$choice};
+    for my $choice ( keys %scores ) {
+      if ( defined $ballot->{'votes'}{$choice} ) {
+        $scores{$choice} += $ballot->{'count'} * $ballot->{'votes'}{$choice};
       }
     }
   }
-  return Vote::Count::RankCount->Rank(\%scores);
+  return Vote::Count::RankCount->Rank( \%scores );
 }
-
-
 
 1;
 

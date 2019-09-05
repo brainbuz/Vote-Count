@@ -9,7 +9,6 @@ no warnings 'experimental';
 use List::Util qw( min max sum);
 use TextTableTiny qw/generate_markdown_table/;
 use Sort::Hash;
-# use boolean;
 # use Data::Printer;
 
 our $VERSION='0.11';
@@ -139,7 +138,6 @@ sub Leader ( $I ) {
   else                   { die "Does not compute in sub RankCount->Leader\n" }
   return \%return;
 }
-
 
 sub RankTable( $self ) {
   my @rows   = ( [ 'Rank', 'Choice', 'Votes' ] );

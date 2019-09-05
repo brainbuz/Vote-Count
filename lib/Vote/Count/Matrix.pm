@@ -68,8 +68,8 @@ sub _untie ( $I, $A, $B ) {
 }
 
 sub _pairwinner_rcv ( $ballots, $A, $B ) {
-  my $countA  = 0;
-  my $countB  = 0;
+  my $countA = 0;
+  my $countB = 0;
 FORVOTES:
   for my $b ( keys $ballots->%* ) {
     for my $v ( values $ballots->{$b}{'votes'}->@* ) {
@@ -83,7 +83,7 @@ FORVOTES:
       }
     }
   }    # FORVOTES
-  return ( $countA, $countB);
+  return ( $countA, $countB );
 }
 
 sub _conduct_pair ( $I, $A, $B ) {
@@ -91,11 +91,11 @@ sub _conduct_pair ( $I, $A, $B ) {
   my $countA  = 0;
   my $countB  = 0;
   $I->logv("Pairing: $A vs $B");
-  if ( $I->BallotSet()->{'options'}{'range'}) {
+  if ( $I->BallotSet()->{'options'}{'range'} ) {
     ( $countA, $countB ) = $I->RangeBallotPair( $A, $B );
   }
   else {
-    ( $countA, $countB ) = _pairwinner_rcv ( $ballots, $A, $B );
+    ( $countA, $countB ) = _pairwinner_rcv( $ballots, $A, $B );
   }
   my %retval = (
     $A       => $countA,

@@ -8,7 +8,6 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-
 our $VERSION='0.11';
 
 =head1 NAME
@@ -85,45 +84,47 @@ use Sort::Hash;
 # also be desired.
 
 sub _best_two ( $I, $scores ) {
-  my %sv = $scores->RawCount()->%* ;
-  my @order = sort_hash( 'desc', \%sv );
-  my @toptwo = ( shift @order, shift @order );
-  my %tied = ( map { $_ => $sv{ $_ } } @toptwo );
+  my %sv      = $scores->RawCount()->%*;
+  my @order   = sort_hash( 'desc', \%sv );
+  my @toptwo  = ( shift @order, shift @order );
+  my %tied    = ( map { $_ => $sv{$_} } @toptwo );
   my $lastval = $sv{ $toptwo[1] };
-  while( $sv{ $order[0] } == $lastval ) {
+  while ( $sv{ $order[0] } == $lastval ) {
     my $tieit = shift @order;
-    $tied{ $tieit } = $sv{ tieit };
+    $tied{$tieit} = $sv{tieit};
   }
-  if( scalar( keys %tied ) > 2 ) {
-    $I->logt( "Unhandled Situation, there is a tie in determining the top two for Automatic Runoff.");
-    $I->logt( join( ', ', ( sort keys %tied )));
+  if ( scalar( keys %tied ) > 2 ) {
+    $I->logt(
+"Unhandled Situation, there is a tie in determining the top two for Automatic Runoff."
+    );
+    $I->logt( join( ', ', ( sort keys %tied ) ) );
     $I->logd( $scores->RankTable() );
     # $I->logd( Dumper $I );
     return ();
   }
-  return @toptwo ;
+  return @toptwo;
 }
 
-sub STAR ( $self, $active=undef ){
+sub STAR ( $self, $active = undef ) {
   $active = $self->Active() unless defined $active;
-  my $scores = $self->Score( $active );
+  my $scores = $self->Score($active);
   $self->logv( $scores->RankTable() );
-  my ( $A, $B ) = $self->_best_two( $scores );
-  unless( defined $A ) {
+  my ( $A, $B ) = $self->_best_two($scores);
+  unless ( defined $A ) {
     return 0;
   }
   my ( $countA, $countB ) = $self->RangeBallotPair( $A, $B );
   if ( $countA > $countB ) {
-    $self->logt( "Automatic Runoff Winner: $A [ $A: $countA -- $B: $countB ]");
+    $self->logt("Automatic Runoff Winner: $A [ $A: $countA -- $B: $countB ]");
     return $A;
   }
   elsif ( $countA < $countB ) {
-    $self->logt( "Automatic Runoff Winner: $B [ $B: $countB -- $A: $countA ]");
+    $self->logt("Automatic Runoff Winner: $B [ $B: $countB -- $A: $countA ]");
     return $A;
   }
   else {
-    $self->logt( "Automatic Runoff TIE: [ $A: $countA -- $B: $countB ]");
-    return 0 ;
+    $self->logt("Automatic Runoff TIE: [ $A: $countA -- $B: $countB ]");
+    return 0;
   }
 }
 

@@ -34,11 +34,12 @@ subtest 'test read of small good file' => sub {
     { 'rcv' => 1 },
     'parsed ballot set rcv in options'
   );
-  is( $data1->{'votescast'}, 10, 'confirm count of votescast' );
-  is( $data1->{'options'}{'rcv'}, 1, 'option for rcv ballot should be set');
-  # test2 isnt barfs at undef, even though undef doesn't match the value provided
-  my $optionrange = $data1->{'options'}{'range'} ? $data1->{'options'}{'range'} : 0;
-  isnt( $optionrange , 1 , 'option for range ballot should NOT be set');  
+  is( $data1->{'votescast'},      10, 'confirm count of votescast' );
+  is( $data1->{'options'}{'rcv'}, 1,  'option for rcv ballot should be set' );
+# test2 isnt barfs at undef, even though undef doesn't match the value provided
+  my $optionrange =
+    $data1->{'options'}{'range'} ? $data1->{'options'}{'range'} : 0;
+  isnt( $optionrange, 1, 'option for range ballot should NOT be set' );
   note 'votescast ' . $data1->{'votescast'};
 };
 
@@ -121,10 +122,11 @@ subtest 'read score/range ballots' => sub {
   is( $tr2->{'votescast'}, 100, 'check count of votescast' );
   is( $tr2->{'ballots'}[2]{'votes'}{'MEMPHIS'}, 1, 'check a nested value' );
 
-  # test2 isnt barfs at undef, even though undef doesn't match the value provided
+# test2 isnt barfs at undef, even though undef doesn't match the value provided
   my $optionrcv = $tr2->{'options'}{'rcv'} ? $tr2->{'options'}{'rcv'} : 0;
-  isnt( $optionrcv , 1 , 'option for rcv ballot should NOT be set');   
-  is( $tr2->{'options'}{'range'}, 1, 'option for range ballot should be set');
+  isnt( $optionrcv, 1, 'option for rcv ballot should NOT be set' );
+  is( $tr2->{'options'}{'range'}, 1,
+    'option for range ballot should be set' );
 };
 
 subtest 'write score/range ballots' => sub {

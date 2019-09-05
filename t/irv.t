@@ -168,19 +168,27 @@ my $fastfood =
   Vote::Count->new(
   BallotSet => read_range_ballots('t/data/fastfood.range.json') );
 
-todo "Range Ballot not yet implemented" => sub {
-# subtest 'Range Ballot' => sub {
-   my $fastexpect = {
-    'threshold' => 45,
-    'votes'     => 89,
+my $tenrange =
+  Vote::Count->new(
+  BallotSet => read_range_ballots('t/data/tennessee.range.json') );
+
+subtest 'Range Ballot' => sub {
+  my $fastexpect = {
+    'threshold' => 8,
+    'votes'     => 15,
     'winner'    => "INNOUT",
-    'winvotes'  => 89
+    'winvotes'  => 8
   };
-  is_deeply(
-    try { $fastfood->RunIRV() },
-    $fastexpect,
-    'Ran IRV on a Range BallotSet' );
-  note $fastfood->logv();
+  my $expecttenr = {
+    threshold => 51,
+    votes     => 100,
+    winner    => "KNOXVILLE",
+    winvotes  => 58
+  };
+  is_deeply( try { $fastfood->RunIRV() },
+    $fastexpect, 'Ran IRV on fastfood Range BallotSet' );
+  is_deeply( try { $tenrange->RunIRV() },
+    $expecttenr, 'Ran IRV on converted Tennessee Range BallotSet' );
 };
 
 done_testing();
