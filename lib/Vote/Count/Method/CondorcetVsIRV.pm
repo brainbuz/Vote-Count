@@ -21,7 +21,7 @@ use Try::Tiny;
 
 use Data::Printer;
 
-our $VERSION='0.11';
+our $VERSION='0.12';
 
 # no warnings 'uninitialized';
 no warnings qw/experimental/;
@@ -30,7 +30,7 @@ no warnings qw/experimental/;
 
 Vote::Count::Method::CondorcetVsIRV
 
-=head1 VERSION 0.11
+=head1 VERSION 0.12
 
 =cut
 

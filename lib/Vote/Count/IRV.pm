@@ -13,13 +13,13 @@ with 'Vote::Count::TieBreaker';
 
 use Storable 3.15 'dclone';
 
-our $VERSION='0.11';
+our $VERSION='0.12';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.11
+=head1 VERSION 0.12
 
 =cut
 

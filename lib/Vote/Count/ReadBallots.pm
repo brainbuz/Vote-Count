@@ -12,13 +12,13 @@ use Data::Printer;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='0.11';
+our $VERSION='0.12';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 0.11
+=head1 VERSION 0.12
 
 =head1 SYNOPSIS
 

@@ -12,13 +12,13 @@ use Data::Printer;
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
 
-our $VERSION='0.11';
+our $VERSION='0.12';
 
 =head1 NAME
 
 Vote::Count::Start
 
-=head1 VERSION 0.11
+=head1 VERSION 0.12
 
 =cut
 
@@ -28,12 +28,15 @@ Vote::Count::Start
 
   use Vote::Count::Start;
 
-  my $Election = Vote::Count::Start->new(
+  my $Election = StartElection(
     BallotFile => $filepath,
     FloorRule => 'TopCount',
     FloorValue => 2,
+    LogPath -> '/some/path',
     ...
   );
+
+  $Election->WriteLog();
 
 =head1 Description
 
@@ -189,21 +192,21 @@ sub _do_matrix( $Election) {
 }
 
 sub _do_irv ( $Election, $floorset ) {
-  my $IRV = Vote::Count->new(
-    'BallotSet' => $Election->BallotSet(),
-    'Active'    => $floorset
-  );
-  my $IRVResult = try { $IRV->RunIRV() }
+  # my $IRV = Vote::Count->new(
+  #   'BallotSet' => $Election->BallotSet(),
+  #   'Active'    => $floorset
+  # );
+  my $IRVResult = try { $Election->RunIRV() }
   catch { croak "RunIRV exploded" };
-  if ( $IRVResult->{'winner'} ) {
-    $Election->logt(
-      'IRV (Eliminate All for Ties) Winner: ' . $IRVResult->{'winner'} );
-    return $IRVResult->{'winner'};
-  }
-  else {
-    $Election->logt( 'IRV Tie: ' . join( ', ', $IRVResult->{'tied'}->@* ) );
-    return '';
-  }
+#   if ( $IRVResult->{'winner'} ) {
+#     $Election->logt(
+#       'IRV (Eliminate All for Ties) Winner: ' . $IRVResult->{'winner'} );
+#     return $IRVResult->{'winner'};
+#   }
+#   else {
+#     $Election->logt( 'IRV Tie: ' . join( ', ', $IRVResult->{'tied'}->@* ) );
+#     return '';
+#   }
 }
 
 sub StartElection ( %ARGS ) {
