@@ -119,8 +119,3 @@ path('t/data/tennessee.range.json')->spew( $coder->encode($tennessee) );
 path('t/data/tennessee.range.yml')->spew( Dump $tennessee);
 path('t/data/fastfood.range.json')->spew( $coder->encode($fastfood) );
 path('t/data/fastfood.range.yml')->spew( Dump $fastfood);
-
-# 15:CHATTANOOGA:KNOXVILLE:NASHVILLE:MEMPHIS
-# 17:KNOXVILLE:CHATTANOOGA:NASHVILLE:MEMPHIS
-# 26:NASHVILLE:CHATTANOOGA:KNOXVILLE:MEMPHIS
-# 42:MEMPHIS:NASHVILLE:CHATTANOOGA:KNOXVILLE

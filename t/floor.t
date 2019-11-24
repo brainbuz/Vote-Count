@@ -11,7 +11,7 @@ use Data::Printer;
 use Path::Tiny;
 
 use Vote::Count;
-use Vote::Count::ReadBallots 'read_ballots';
+use Vote::Count::ReadBallots;
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
@@ -64,5 +64,42 @@ my $B4Approval = do {
   }
   $total;
 };
+
+my $Range1 =
+  Vote::Count->new(
+  BallotSet => read_range_ballots('t/data/fastfood.range.json') );
+
+my $Range2 =
+  Vote::Count->new(
+  BallotSet => read_range_ballots('t/data/fastfood.range.json') );
+
+my $e1 = {
+  BURGERKING => 1,
+  CARLS      => 1,
+  CHICKFILA  => 1,
+  FIVEGUYS   => 1,
+  INNOUT     => 1,
+  KFC        => 1,
+  MCDONALDS  => 1,
+  POPEYES    => 1,
+  QUICK      => 1,
+  TACOBELL   => 1,
+  WENDYS     => 1
+};
+
+is_deeply( $Range1->ApprovalFloor(15),
+  $e1, 'check a range ballot with approval floor' );
+
+my $e2 = {
+  BURGERKING => 1,
+  CHICKFILA  => 1,
+  FIVEGUYS   => 1,
+  INNOUT     => 1,
+  MCDONALDS  => 1,
+  QUICK      => 1,
+  WENDYS     => 1
+};
+is_deeply( $Range2->ApprovalFloor( 15, 2 ),
+  $e2, 'same range ballot with a cutoff leaves fewer choices' );
 
 done_testing();

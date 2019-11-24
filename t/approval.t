@@ -61,16 +61,15 @@ my $expectR1A = {
 is_deeply( $R1A->RawCount(), $expectR1A,
   'counted approval for a range ballotset' );
 
-
-  my $R1B       = $Range1->Approval(
-    { KNOXVILLE => 1, MEMPHIS => 1, NASHVILLE => 1 }, 3);
-  my $expectR1B = {
-    KNOXVILLE   => 58,
-    MEMPHIS     => 42,
-    NASHVILLE   => 100
-  };
-  is_deeply( $R1B->RawCount(), $expectR1B,
-    'appplied activeset and cutoff to same range ballotset' );
+my $R1B =
+  $Range1->Approval( { KNOXVILLE => 1, MEMPHIS => 1, NASHVILLE => 1 }, 3 );
+my $expectR1B = {
+  KNOXVILLE => 58,
+  MEMPHIS   => 42,
+  NASHVILLE => 100
+};
+is_deeply( $R1B->RawCount(), $expectR1B,
+  'appplied activeset and cutoff to same range ballotset' );
 
 my $Range2 =
   Vote::Count->new(
@@ -93,22 +92,22 @@ my $expectR2A = {
 is_deeply( $R2A->RawCount(), $expectR2A,
   'counted approval for a second range ballotset' );
 
-my $R2B       = $Range2->Approval( undef, 2 );
+my $R2B = $Range2->Approval( undef, 2 );
 my $expectR2B = {
-    "FIVEGUYS"   => 6,
-    "MCDONALDS"  => 3,
-    "WIMPY"      => 0,
-    "WENDYS"     => 3,
-    "QUICK"      => 3,
-    "BURGERKING" => 3,
-    "INNOUT"     => 10,
-    "CARLS"      => 1,
-    "KFC"        => 1,
-    "TACOBELL"   => 1,
-    "CHICKFILA"  => 2,
-    "POPEYES"    => 0,
-  };
-  is_deeply( $R2B->RawCount(), $expectR2B,
-    'counted approval with a cutoff for second range ballotset' );
+  "FIVEGUYS"   => 6,
+  "MCDONALDS"  => 3,
+  "WIMPY"      => 0,
+  "WENDYS"     => 3,
+  "QUICK"      => 3,
+  "BURGERKING" => 3,
+  "INNOUT"     => 10,
+  "CARLS"      => 1,
+  "KFC"        => 1,
+  "TACOBELL"   => 1,
+  "CHICKFILA"  => 2,
+  "POPEYES"    => 0,
+};
+is_deeply( $R2B->RawCount(), $expectR2B,
+  'counted approval with a cutoff for second range ballotset' );
 
 done_testing();
