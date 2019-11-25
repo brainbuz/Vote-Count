@@ -17,14 +17,14 @@ use Storable 3.15 'dclone';
 
 no warnings 'experimental';
 
-our $VERSION='0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count
 
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -640,7 +640,7 @@ L<Vote::Count::Start|https://metacpan.org/pod/Vote::Count::Start>
 
 =head1 Call for Contributions
 
-This project needs contributions from Programmers and Mathematicians. Review and citations from Mathematicians are urgently requested, because in addition to being a Tool-set for implementing vote counting this documentation will for many also be the manual. From coders there is a lot of help that could be given: any well known method could use a write up if it is easy to implement with the toolkit (see Benham) or a code submission if it is not. Currently Tiedeman, SSD, and Kemmeny-Young are unimplemented. In addition support for Range Ballots will require significant effort.
+This project needs contributions from Programmers and Mathematicians. Review and citations from Mathematicians are urgently requested, because in addition to being a Tool-set for implementing vote counting this documentation will for many also be the manual. From coders there is a lot of help that could be given: any well known method could use a write up if it is easy to implement with the toolkit (see Benham) or a code submission if it is not. Currently Tiedeman, SSD, and Kemmeny-Young are unimplemented.
 
 
 =head1 Advice, Recommendations, Opinion
@@ -659,7 +659,7 @@ I<Smith Set IRV> meets all three key criteria for Condorcet Methods and has less
 
 If you like I<Borda> or prefer a I<Range Ballot>, my pick is for I<STAR>.
 
-STAR is handcountable but requires a Range Ballot. Range methods like STAR have considerably less Later Harm effect than other Borda Methods.
+STAR is handcountable but requires a Range Ballot. Range methods like STAR have less Later Harm effect than Borda Methods.
 
 I<Redacting Condorcet Methods> are the B<best> for a conventional Ranked Choice Ballot. If a Condorcet Winner does not create a Later Harm violation they will always be chosen. They can create a gauge of the later harm effect that then allows for the establishment of a Later Harm tolerance. The steps for I<Condorcet Vs IRV> are easy to understand but the number of steps qualifies it as somewhat complex. Other methods in the family (not yet implemented) will be more complex.
 

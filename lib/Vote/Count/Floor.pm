@@ -11,13 +11,13 @@ use Moose::Role;
 
 no warnings 'experimental';
 
-our $VERSION='0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count::Floor
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -52,7 +52,7 @@ sub _DoFloor ( $self, $ranked, $cutoff ) {
 # Approval Floor is Approval votes vs total
 # votes cast -- not total of approval votes.
 # so floor is the same as for topcount floor.
-sub ApprovalFloor ( $self, $floorpct = 5, $rangecutoff=0 ) {
+sub ApprovalFloor ( $self, $floorpct = 5, $rangecutoff = 0 ) {
   my $votescast = $self->VotesCast();
   $self->logt( "Applying Floor Rule of $floorpct\% "
       . "Approval Count. vs Ballots Cast of $votescast." );
@@ -105,9 +105,9 @@ Requires a percent of votes cast in Approval or TopCount. The default is 5% for 
 
 Both of these methods take an optional parameter which is the percentage for the floor. If the parameter is 1 or greater the parameter will be interpreted as a percentage, if it is less than 1 it will be interpreted as a decimal fraction, .1 and 10 will both result in a 10% floor.
 
-For Range Ballots there is an additional optional value for cutoff available for approval only.
+For Range Ballots using ApprovalFloor there is an additional optional value for cutoff that sets the score below which choices are not considered approved of.
 
-  # Applies 5% floor with cutoff 5 (appropriate for Range 1-10)
+  # Applies 5% floor with cutoff 5 (appropriate for Range 0-10)
   my $active = $Range->ApprovalFloor( 5, 5 );
 
 =head2 TCA (TopCount-Approval)

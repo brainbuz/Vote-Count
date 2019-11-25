@@ -13,13 +13,13 @@ with 'Vote::Count::TieBreaker';
 
 use Storable 3.15 'dclone';
 
-our $VERSION='0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -53,15 +53,6 @@ sub _ResolveTie ( $self, $active, $tiebreaker, @choices ) {
   } @choices;
   return @low;
 }
-
-sub _irvrange ( $self, $active, $tiebreaker = undef ) {
-  ...;
-}
-
-sub _checkmajority( ) { }
-
-#   if( $self->BallotSetType() eq 'range') {
-# return $self->_irvrange ( $active, $tiebreaker) }
 
 sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
   # external $active should not be changed.

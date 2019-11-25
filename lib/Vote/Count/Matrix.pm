@@ -25,13 +25,13 @@ use Sort::Hash;
 
 use YAML::XS;
 
-our $VERSION='0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count::Matrix
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -259,9 +259,10 @@ GREATESTLOSSLOOP:
   return $bigloss;
 }
 
-sub RankGreatestLoss ( $self ) {
+sub RankGreatestLoss ( $self, $active = undef ) {
   my %loss = ();
-  for my $A ( keys $self->Active()->%* ) {
+  $active = $self->Active() unless defined $active;
+  for my $A ( keys $active->%* ) {
     $loss{$A} = $self->GreatestLoss($A);
   }
   return Vote::Count::RankCount->Rank( \%loss );

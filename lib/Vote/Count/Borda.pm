@@ -10,13 +10,13 @@ use Moose::Role;
 # use Storable 3.15 qw(dclone);
 # use Try::Tiny;
 
-our $VERSION='0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count::Borda
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -165,12 +165,7 @@ sub Borda ( $self, $active = undef ) {
     my $bcount = $ballots{$b}->{'count'};
     for ( my $i = 0 ; $i < scalar(@votes) ; $i++ ) {
       my $c = $votes[$i];
-      if ( defined $BordaTable{$c} ) {
-        $BordaTable{$c}->{ $i + 1 } += $bcount;
-      }
-      else {
-        $BordaTable{$c}->{ $i + 1 } = $bcount;
-      }
+      $BordaTable{$c}->{ $i + 1 } += $bcount;
     }
   }
   my $BordaCounted = _dobordacount( $self, \%BordaTable, $active );

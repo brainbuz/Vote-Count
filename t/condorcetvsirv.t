@@ -58,11 +58,6 @@ subtest 'case where regular irv drops smith irv IRV winner' => sub {
     'CHOCOLATE', 'The normal IRV winner.' );
   is( $S2smith->CondorcetVsIRV( 'smithsetirv' => 1 )->{'winner'},
     'VANILLA', 'The better IRV winner.' );
-
-  # note( '*'x60 . "\n" . '*'x60);
-  # note $S2smith->logv();
-  # $S2smith->Election()->WriteLog();
-
   my $S2tca = Vote::Count::Method::CondorcetVsIRV->new(
     'BallotSet'      => $ballots_smithirvunequal,
     'TieBreakMethod' => 'grandjunction',
@@ -75,30 +70,15 @@ subtest 'case where regular irv drops smith irv IRV winner' => sub {
 };
 
 subtest 'condorcet winner does not violate later harm (evils)' => sub {
-
-  # note( '*'x60 . "\n" . '*'x60);
-
   my $T1 = Vote::Count::Method::CondorcetVsIRV->new(
     'BallotSet'      => $ballots_evils,
     'TieBreakMethod' => 'none',
   );
   my $T1run1 = $T1->CondorcetVsIRV( 'smithsetirv' => 0 );
   is( $T1run1->{'winner'}, 'LESSER_EVIL', 'LESSER_EVIL is the winner.' );
-  # note $T1->logd();
-  # note $T1->Election()->logt();
-
-  #  my $T1 = Vote::Count::Method::CondorcetVsIRV->new(
-  #      'BallotSet' => $ballots_tennessee,
-  #      'TieBreakMethod' => 'none',
-  #    );
-  #  my $T1run1 = $T1->CondorcetVsIRV( 'smithsetirv' => 0 );
-  #  is( $T1run1, 'NASHVILLE', 'NASHVILLE is the winner.');
-  #  note $T1->logt();
 };
 
 subtest 'condorcet winner does violate later harm (burlington2009)' => sub {
-
-  # note( '*'x60 . "\n" . '*'x60);
   my $T2 = Vote::Count::Method::CondorcetVsIRV->new(
     'BallotSet'      => $ballots_burlington,
     'TieBreakMethod' => 'none',
@@ -129,6 +109,88 @@ subtest 'test relaxed' => sub {
   is( $T2run1->{'winner'}, 'KISS', 'KISS is the winner.' );
 
   ok 1;
+};
+
+subtest 'coverage set/reset active' => sub {
+  note
+    "setactive and resetactive were poorly covered. testing those functions";
+
+  my $T1 = Vote::Count::Method::CondorcetVsIRV->new(
+    'BallotSet'      => $ballots_tennessee,
+    'TieBreakMethod' => 'none',
+  );
+  $T1->CreateRedactedElection( 'NASHVILLE', 'KNOXVILLE' );
+  is_deeply(
+    $T1->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      MEMPHIS     => 1,
+      NASHVILLE   => 1
+    },
+    'check active before setting it.'
+  );
+
+  is_deeply(
+    $T1->RedactedElection()->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      MEMPHIS     => 1,
+      NASHVILLE   => 1
+    },
+    'check the redacted election before setting it.'
+  );
+
+  $T1->SetActive(
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      NASHVILLE   => 1
+    }
+  );
+
+  is_deeply(
+    $T1->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      NASHVILLE   => 1
+    },
+    'check active after setting it.'
+  );
+  is_deeply(
+    $T1->RedactedElection()->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      NASHVILLE   => 1
+    },
+    'check active in redacted election after setting it.'
+  );
+
+  $T1->ResetActive();
+  is_deeply(
+    $T1->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      MEMPHIS     => 1,
+      NASHVILLE   => 1
+    },
+    'check active after resetting it.'
+  );
+  is_deeply(
+    $T1->RedactedElection->Active(),
+    {
+      CHATTANOOGA => 1,
+      KNOXVILLE   => 1,
+      MEMPHIS     => 1,
+      NASHVILLE   => 1
+    },
+    'check active in redacted after resetting it.'
+  );
+
 };
 
 done_testing();

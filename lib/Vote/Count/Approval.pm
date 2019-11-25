@@ -11,13 +11,13 @@ no warnings 'experimental';
 use Data::Printer;
 use Carp;
 
-our $VERSION = '0.12';
+our $VERSION='1.00';
 
 =head1 NAME
 
 Vote::Count::Approval
 
-=head1 VERSION 0.12
+=head1 VERSION 1.00
 
 =cut
 
@@ -51,40 +51,40 @@ For Ranked Ballots the cutoff is ignored. If a cutoff is desired for Ranked Ball
 =cut
 
 sub _approval_rcv_do ( $active, $ballots ) {
-    my %approval = ( map { $_ => 0 } keys( $active->%* ) );
-    for my $b ( keys %{$ballots} ) {
-        my @votes = $ballots->{$b}->{'votes'}->@*;
-        for my $v (@votes) {
-            if ( defined $approval{$v} ) {
-                $approval{$v} += $ballots->{$b}{'count'};
-            }
-        }
+  my %approval = ( map { $_ => 0 } keys( $active->%* ) );
+  for my $b ( keys %{$ballots} ) {
+    my @votes = $ballots->{$b}->{'votes'}->@*;
+    for my $v (@votes) {
+      if ( defined $approval{$v} ) {
+        $approval{$v} += $ballots->{$b}{'count'};
+      }
     }
-    return Vote::Count::RankCount->Rank( \%approval );
+  }
+  return Vote::Count::RankCount->Rank( \%approval );
 }
 
 sub _approval_range_do ( $active, $ballots, $depth, $cutoff ) {
-    my %approval = ( map { $_ => 0 } keys( $active->%* ) );
-    for my $b ( @{$ballots} ) {
-    APPROVALKEYSC: for my $c ( keys $b->{'votes'}->%* ) {
-            # croak "key is $c " . "value is $b->{'votes'}{$c}";
-            next APPROVALKEYSC if $b->{'votes'}{$c} < $cutoff;
-            $approval{$c} += $b->{'count'} if defined $approval{$c};
-        }
+  my %approval = ( map { $_ => 0 } keys( $active->%* ) );
+  for my $b ( @{$ballots} ) {
+  APPROVALKEYSC: for my $c ( keys $b->{'votes'}->%* ) {
+      # croak "key is $c " . "value is $b->{'votes'}{$c}";
+      next APPROVALKEYSC if $b->{'votes'}{$c} < $cutoff;
+      $approval{$c} += $b->{'count'} if defined $approval{$c};
     }
-    return Vote::Count::RankCount->Rank( \%approval );
+  }
+  return Vote::Count::RankCount->Rank( \%approval );
 }
 
 sub Approval ( $self, $active = undef, $cutoff = 0 ) {
-    my %BallotSet = $self->BallotSet()->%*;
-    $active = $self->Active() unless defined $active;
-    if ( $BallotSet{'options'}{'rcv'} ) {
-        return _approval_rcv_do( $active, $BallotSet{'ballots'} );
-    }
-    elsif ( $BallotSet{'options'}{'range'} ) {
-        _approval_range_do( $active, $BallotSet{'ballots'},
-            $BallotSet{'depth'}, $cutoff );
-    }
+  my %BallotSet = $self->BallotSet()->%*;
+  $active = $self->Active() unless defined $active;
+  if ( $BallotSet{'options'}{'range'} ) {
+    _approval_range_do( $active, $BallotSet{'ballots'},
+      $BallotSet{'depth'}, $cutoff );
+  }
+  else {
+    return _approval_rcv_do( $active, $BallotSet{'ballots'} );
+  }
 }
 
 1;

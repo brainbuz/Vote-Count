@@ -87,7 +87,7 @@ my $e1 = {
   WENDYS     => 1
 };
 
-is_deeply( $Range1->ApprovalFloor(15),
+is_deeply( $Range1->ApprovalFloor(.15),
   $e1, 'check a range ballot with approval floor' );
 
 my $e2 = {

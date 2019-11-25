@@ -256,6 +256,8 @@ subtest 'GetPairResult' => sub {
 };
 
 subtest 'GreatestLoss' => sub {
+  is( $M1->RankGreatestLoss()->Leader()->{'winner'}, 'CARAMEL', 
+    'CARAMEL had greatest loss and is reported as the winner');
   $M1->ResetActive();
   is( $M1->GreatestLoss('FUDGESWIRL'), 2, 'M1 fudgeswirl' );
   $KnotSet->ResetActive();
@@ -283,9 +285,15 @@ subtest 'Range Ballots' => sub {
   my $scored1 = $FastFood->ScoreMatrix();
   my $scored2 = $FastFood2->ScoreMatrix();
   is( $scored1->{'CHICKFILA'},
-    4, 'scoretable count wins for a choice with no tiebreaker' );
+    4, 'scorematrix count wins for a choice with no tiebreaker' );
   is( $scored2->{'CHICKFILA'},
-    6, 'scoretable count wins for same choice with approval tiebreaker' );
+    6, 'scorematrix count wins for same choice with approval tiebreaker' );
+};
+
+subtest 'ScoreTable' => sub {
+  my $st = $FastFood->ScoreTable();
+  like( $st, qr/\| INNOUT     \| 11    \|/, 
+    'check an expected formated line from ScoreTable');
 };
 
 done_testing();

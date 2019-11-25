@@ -55,4 +55,12 @@ is_deeply(
   'Updated Matrix only scores current choices'
 );
 
+$VC2->UpdatePairMatrix( { 'CARAMEL' => 1, 'VANILLA' => 2 });
+is_deeply(
+  $VC2->PairMatrix()->ScoreMatrix(),
+  { 'CARAMEL' => 0, 'VANILLA' => 1 },
+  'UpdatePairMatrix with an explicit active set'
+);
+
+
 done_testing();

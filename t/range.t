@@ -20,8 +20,8 @@ my $VC1 =
   BallotSet => read_range_ballots('t/data/fastfood.range.json') );
 
 subtest 'RangeBallotPair' => sub {
-  is( $VC1->BallotSet()->{'options'}{'range'},
-    1, 'BallotSetType option is set to range' );
+  is( $VC1->BallotSetType(),
+    'range', 'BallotSetType option is set to range' );
   my ( $votesKFC, $votesTACOBELL ) =
     $VC1->RangeBallotPair( 'KFC', 'TACOBELL' );
   is( $votesKFC,      0, 'check one of the choices' );
