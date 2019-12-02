@@ -109,6 +109,7 @@ with 'Vote::Count::Approval',
   'Vote::Count::IRV',
   'Vote::Count::Log',
   'Vote::Count::Range',
+  'Vote::Count::Score',
   'Vote::Count::TieBreaker',
   'Vote::Count::TopCount',
   ;

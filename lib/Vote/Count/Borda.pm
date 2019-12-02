@@ -52,11 +52,6 @@ has 'bordadepth' => (
   );
   my $bordacount = $RCV->Borda();
 
-  my $RangeElection = Vote::Count->new(
-    BallotSet  => read_range_ballots('t/data/tennessee.range.json')
-    );
-  my $scored = $RangeElection->Score();
-
 =head1 Borda Count
 
 Scores Choices based on their position on the Ballot. The first choice candidate gets a score equal to the number of choices, each lower choice recieves 1 less.
@@ -97,7 +92,7 @@ Returns a RankCount Object with the choices scored using the scores set by the v
 
 =head1 To Do
 
-Since there are so many variations of Borda, it would be nice to offer a large array of presets. Currently options are only handled by passing a coderef at object creation. Borda for RCV is not a priority for the developer. Range Ballot Scoring uses values set by the voters, and doesn't need any further options.
+Since there are so many variations of Borda, it would be nice to offer a large array of presets. Currently options are only handled by passing a coderef at object creation. Borda for RCV is not a priority for the developer.
 
 =cut
 
@@ -170,21 +165,6 @@ sub Borda ( $self, $active = undef ) {
   }
   my $BordaCounted = _dobordacount( $self, \%BordaTable, $active );
   return Vote::Count::RankCount->Rank($BordaCounted);
-}
-
-sub Score ( $self, $active = undef ) {
-  my $depth = $self->BallotSet()->{'depth'};
-  # my @Ballots = $self->BallotSet()->{'ballots'}->@*;
-  $active = $self->Active() unless defined $active;
-  my %scores = ( map { $_ => 0 } keys( $active->%* ) );
-  for my $ballot ( $self->BallotSet()->{'ballots'}->@* ) {
-    for my $choice ( keys %scores ) {
-      if ( defined $ballot->{'votes'}{$choice} ) {
-        $scores{$choice} += $ballot->{'count'} * $ballot->{'votes'}{$choice};
-      }
-    }
-  }
-  return Vote::Count::RankCount->Rank( \%scores );
 }
 
 1;

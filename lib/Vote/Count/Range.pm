@@ -10,7 +10,7 @@ use Moose::Role;
 no warnings 'experimental';
 use Data::Printer;
 
-our $VERSION = '0.02411';
+our $VERSION='0.00';
 
 sub RangeBallotPair ( $self, $A, $B ) {
   my $countA   = 0;
