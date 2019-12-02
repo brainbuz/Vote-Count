@@ -201,11 +201,6 @@ This is also extremely useful to researchers who may want to study multiple meth
   say "Winner: $Winner";
 
 
-=head1 Preview Release
-
-This distribution is almost ready for production, but there may be changes made without notice up to stable release. Before putting it into production you should develop a suite of tests against test data. This will warn you of future changes that will break your code, so you can either update or freeze to an earlier version on BackPAN.
-
-
 =head1 Overview
 
 
@@ -215,7 +210,7 @@ Several alternatives have been proposed to the simple vote for a single choice m
 
 I<Vote for One> ballots may be resolved by one of two methods: I<Majority> and I<Plurality>. Majority vote requires a majority of votes to win (but frequently produces no winner), and Plurality which selects the choice with the most votes.
 
-Numerous methods have been proposed and tried for I<Ranked Choice Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group several of the criteria into a single group: Consistency. Finally typically Mathematicians do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
+Numerous methods have been proposed and tried for I<Ranked Choice Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
 
 
 =head3 The Criteria for Resolving Ranked Choice (including Score) Ballots
@@ -232,7 +227,7 @@ I<Condorcet Loser> states that a method should not choose a winner that would be
 
 I<Condorcet Winner> states a choice which defeats all others in direct matchups should be the Winner.
 
-I<Smith Criteria> if there is a set of choices which defeats all others in direct matchups the winner should be one of those choices.
+I<Smith Criteria> the winner should belong to the smallest set of choices which defeats all choices outside of that set.
 
 
 =head4 Consistency Criteria
@@ -243,7 +238,7 @@ To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cr
 
 Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win.
 
-The cases described above: Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as seperate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
+The cases described above: Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as separate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
 
 There is a specific Criteria that is sometimes called Consistency, in this discussion consistency is discussed in the broad context. No method passes every possible consistency criteria, from a policy perspective a method is consistent if it has no major consistency failures.
 
@@ -260,7 +255,7 @@ I<Majority> meets all of the above criteria, however, unless votes are restricte
 
 =head4 Incentive for Strategic Voting
 
-Voting systems have weaknesses which can incentivize voter to vote in an insincere manner. Later Harm Violation is a strong driver for tactical voting. Inconsistency may create circumstances by which a block of voters by voting in certain ways can boost or harm a choice, this vulnerability type is often referred to as an attack, because successful exploitation violates the expectation that all voters have an equal impact on the outcome.
+Voting systems have weaknesses which can incentivize voters to vote in an insincere manner. Later Harm Violation is a strong driver for tactical voting. Inconsistency may create circumstances by which a block of voters by voting in certain ways can boost or harm a choice, this vulnerability type is often referred to as an attack.
 
 
 =head3 Arrow's Theorem
@@ -271,7 +266,7 @@ Arrows Theorem states that it is impossible to have a system that can resolve Ra
 =head3 Popular Ranked Choice Resolution Systems
 
 
-=head4 Instant Runoff Voting (IRV also known as Alternative Vote)
+=head4 Instant Runoff Voting (IRV is also known as Hare System, Alternative Vote)
 
 Seeks a Majority Winner. If there is none the lowest choice is eliminated until there is a Majority Winner or all remaining choices have the same number of votes.
 
@@ -300,9 +295,13 @@ Fails many Consistency Criteria (The example given for Consistency can happen wi
 =back
 
 
-=head4 Borda Count
+=head4 Borda Count and Scoring
 
-Scores choices on a ballot based on their position. Borda supporters often disagree about the weighting rule to use in the scoring. Iterative Borda Methods (Baldwin, Nansen) eliminate the lowest choice(s) and recalculate the Borda score ignoring  eliminated choices (if your second choice is eliminated your third choice is promoted).
+When Range (Cardinal) Ballots are used, the scores assigned by the voters are tallied to score the choices.
+
+Since Scoring is native to Range Ballots, to use the approach to resolve Ranked Ballots requires a method of assigning scores.
+
+Borda Count Scores choices on a ballot based on their position. Borda supporters often disagree about the weighting rule to use in the scoring. Iterative Borda Methods (Baldwin, Nansen) eliminate the lowest choice(s) and recalculate the Borda score ignoring eliminated choices (if your second choice is eliminated your third choice is promoted).
 
 =over
 
@@ -323,12 +322,12 @@ Fails Condorcet Winner.
 
 =item *
 
-Inconsistant.
+Inconsistent.
 
 
 =item *
 
-The basic Borda Method is vulnerable to a Cloning Attack.
+The basic Borda Method is vulnerable to a Cloning Attack, but not Range Ballot Scoring and iterative Borda methods.
 
 
 =back
@@ -371,7 +370,9 @@ When a Condorcet Winner is present Consistency is very high. When there is no Co
 
 =head3 Range (Score) Voting Systems
 
-Most Methods for Ranked Choice Ballots can be used for Range Ballots. Score Voting proposals typically implement I<Borda Count>, with a fixed depth of choices. I<STAR>, creates a virtual runoff between the top two I<Borda Count> Choices.
+Most Methods for Ranked Choice Ballots can be used for Range Ballots. Incentive for Strategic Voting
+
+Score Voting proposals typically implement I<Borda Count>, with a fixed depth of choices. I<STAR>, creates a virtual runoff between the top two I<Borda Count> Choices.
 
 Advocates claim that this Ballot Style is a better expression of voter preference. Where it shows a clear advantage is in allowing Voters to directly mitigate Later Harm by ranking a strongly favored choice with the highest score and weaker choices with the lowest.
 
@@ -382,7 +383,7 @@ Voters may find the Range Ballot to be more complex than the Ranked Choices Ball
 
 =head1 Objective and Motivation
 
-I wanted to be able to evaluate alternative methods for resolving elections and couldn't find a flexible enough existing libary in any of the popular general purpose and web development languages: Perl, PHP, Python, Ruby, JavaScript, nor in the newer language Julia (created as an alternative to R and other math languages). More recently I was writing a bylaws proposal to use RCV and found that the existing libraries and services were not only constrained in what options they can provide, but also didn't always document them clearly, making it a challenge to have a method described in bylaws where it could be guaranteed hand and machine counts would agree.
+I wanted to be able to evaluate alternative methods for resolving elections and couldn't find a flexible enough existing library in any of the popular general purpose and web development languages: Perl, PHP, Python, Ruby, JavaScript, nor in the newer language Julia (created as an alternative to R and other math languages). More recently I was writing a bylaws proposal to use RCV and found that the existing libraries and services were not only constrained in what options they can provide, but also didn't always document them clearly, making it a challenge to have a method described in bylaws where it could be guaranteed hand and machine counts would agree.
 
 The objective is to have a library that can handle any of the myriad variants that one might consider either from a study perspective or what is called for by the elections rules of our entity.
 
@@ -538,6 +539,11 @@ L<Vote::Count::Redact|https://metacpan.org/pod/Vote::Count::Redact>
 
 =item *
 
+L<Vote::Count::Score|https://metacpan.org/pod/Vote::Count::Score>
+
+
+=item *
+
 L<Vote::Count::TieBreaker|https://metacpan.org/pod/Vote::Count::TieBreaker>
 
 
@@ -664,7 +670,7 @@ STAR is handcountable but requires a Range Ballot. Range methods like STAR have 
 
 I<Redacting Condorcet Methods> are the B<best> for a conventional Ranked Choice Ballot. If a Condorcet Winner does not create a Later Harm violation they will always be chosen. They can create a gauge of the later harm effect that then allows for the establishment of a Later Harm tolerance. The steps for I<Condorcet Vs IRV> are easy to understand but the number of steps qualifies it as somewhat complex. Other methods in the family (not yet implemented) will be more complex.
 
-B<STAR> and B<Redacting Condorcet> (Condorcet Vs IRV being the only one available here at the moment) are my preference. If you need to hand count, Benham is your Condorcet Method and IRV is your Later Harm Protected Method. Smith Set IRV is a simple Condorcet Method that is better on Later Harm than any other non-redacting Condorcer Method, it is a much better choice than Benham. If Later Harm compliance is required a Redacting Condorcet Method is your best choice, and IRV your choice if they're too complex.
+B<Redacting Condorcet> (Condorcet Vs IRV being the only one available here at the moment) is my preference. B<STAR> is my preferred Scoring method. If you need to hand count, Benham is your Condorcet Method and IRV is your Later Harm Protected Method. Smith Set IRV is a simple Condorcet Method that is better on Later Harm than any other non-redacting Condorcer Method, it is a much better choice than Benham. If Later Harm compliance is required a Redacting Condorcet Method is your best choice, and IRV your choice if they're too complex.
 
 
 =head2 Floor Rules and Tie Breakers

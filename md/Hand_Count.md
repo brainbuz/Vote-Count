@@ -92,7 +92,7 @@ Implemented in [Vote::Count::Method::CondorcetDropping](https://metacpan.org/pod
 
 ## Note
 
-The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolveable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
+The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolvable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
 
 Your Election Rules should specify a tiebreaker, the default is Eliminate All; the modified Grand Junction Tie Breaker provides the maximum possible resolvability.
 
@@ -101,7 +101,7 @@ Your Election Rules should specify a tiebreaker, the default is Eliminate All; t
 * Count the number of first, second, and so on votes for the choices.
 * If unranked choices have a default rank other than 0, make sure to tally the values for unranked choices. (Currently Vote::Count only implements 0)
 * Determine the weight, unless the weighting is fixed it will change with the number of choices.
-* Multiply the wieght of each ranking times the number of votes and total these scores for each choice.
+* Multiply the weight of each ranking times the number of votes and total these scores for each choice.
 * Highest Score Wins.
 
 Beware of variations in weighting rules.

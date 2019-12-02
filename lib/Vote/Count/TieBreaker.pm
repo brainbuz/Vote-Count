@@ -127,7 +127,7 @@ This method is superficially similar to Borda. However, it only scores the best 
 
 =head1 TieBreaker
 
-Implements some basic methods for resolving ties. The default value for IRV is 'all', and the default value for Matrix is 'none'. 'all' is inapproriate for Matrix, and 'none' is inappropriate for IRV.
+Implements some basic methods for resolving ties. The default value for IRV is 'all', and the default value for Matrix is 'none'. 'all' is inappropriate for Matrix, and 'none' is inappropriate for IRV.
 
   my @keep = $self->TieBreaker( $tiebreaker, $active, @choices );
 

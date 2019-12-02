@@ -59,12 +59,19 @@ sub generate_table {
                              map { defined($row->[$_]) ? $row->[$_] : '' } (0..$max_index)
                             ));
 
-        push(@table, $row_sep) if $params{separate_rows} && (!$params{top_and_tail} || $row_number < $last_line_number);
+ ###       push(@table, $row_sep) if $params{separate_rows} && (!$params{top_and_tail} || $row_number < $last_line_number);
 
     }
 
     # this will have already done the bottom if called explicitly
-    push(@table, $row_sep) unless $params{separate_rows} || $params{top_and_tail};
+ ###   push(@table, $row_sep) unless $params{separate_rows} || $params{top_and_tail};
+# push(@table, $row_sep) unless $params{separate_rows} || $params{top_and_tail};
+# if ($params{separate_rows} || $params{top_and_tail} ) {
+
+# } else {
+#   push(@table, $row_sep)
+# }
+
     return join("\n",grep {$_} @table);
 }
 

@@ -168,7 +168,7 @@ Implemented in L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod
 
 =head2 Note
 
-The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolveable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
+The original method specified Random as a Tie Breaker, this has the advantage of making the system fully resolvable, but at the extreme Consistency expense of making it possible to get different results with the same ballots.
 
 Your Election Rules should specify a tiebreaker, the default is Eliminate All; the modified Grand Junction Tie Breaker provides the maximum possible resolvability.
 
@@ -194,7 +194,7 @@ Determine the weight, unless the weighting is fixed it will change with the numb
 
 =item *
 
-Multiply the wieght of each ranking times the number of votes and total these scores for each choice.
+Multiply the weight of each ranking times the number of votes and total these scores for each choice.
 
 
 =item *
