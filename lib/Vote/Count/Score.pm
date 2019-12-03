@@ -62,6 +62,30 @@ sub Score ( $self, $active = undef ) {
   return Vote::Count::RankCount->Rank( \%scores );
 }
 
+=head2 Method RangeBallotPair
+
+Used for pairings against Range Ballots. Used by Condorcet and STAR.
+
+  where $I is a Vote::Count object created with a Range Ballot Set.
+
+  my ( $countA, $countB ) = $I->RangeBallotPair( $A, $B) ;
+
+=cut
+
+sub RangeBallotPair ( $self, $A, $B ) {
+  my $countA   = 0;
+  my $countB   = 0;
+  my $approval = $self->Approval();
+  for my $ballot ( $self->BallotSet()->{'ballots'}->@* ) {
+    my $prefA = $ballot->{'votes'}{$A} || 0;
+    my $prefB = $ballot->{'votes'}{$B} || 0;
+    if    ( $prefA > $prefB ) { $countA += $ballot->{'count'} }
+    elsif ( $prefA < $prefB ) { $countB += $ballot->{'count'} }
+    else                      { }
+  }
+  return ( $countA, $countB );
+}
+
 1;
 
 #FOOTER
