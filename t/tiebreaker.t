@@ -101,4 +101,25 @@ subtest 'object tiebreakers' => sub {
   is( @resolve7, 0, 'None, returnes an empty array.' );
 };
 
+subtest 'Precedence' => sub {
+  $ties->PrecedenceFile( 't/data/tiebreakerprecedence.txt');
+  $ties->TieBreakMethod( 'precedence' );
+
+  ok 1;
+
+  # make a test for a bad precedence file by passing a fake choice
+
+  my @all4ties =
+    qw(VANILLA CHOCOLATE STRAWBERRY FUDGESWIRL PISTACHIO ROCKYROAD MINTCHIP CARAMEL RUMRAISIN BUBBLEGUM CHERRY CHOCCHUNK);
+
+  my $allintie = $ties->TieBreakerPrecedence(@all4ties);
+#   is( $allintie->{'winner'}, 0, 'tiebreaker with no winner returned 0' );
+#   is( $allintie->{'tie'},    1, 'tiebreaker with no winner tie is true' );
+#   is_deeply(
+#     $allintie->{'tied'},
+#     [ 'FUDGESWIRL', 'VANILLA' ],
+# 'tiebreaker (multi tie) with no winner tied contains remaining tied choices'
+#   );
+};
+
 done_testing();

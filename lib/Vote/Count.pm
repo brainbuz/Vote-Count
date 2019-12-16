@@ -63,6 +63,13 @@ has TieBreakMethod => (
   required => 0,
 );
 
+# This is only used for the precedence tiebreaker!
+has PrecedenceFile => (
+  is       => 'rw',
+  isa      => 'Str',
+  required => 0,
+);
+
 has 'PairMatrix' => (
   is      => 'ro',
   isa     => 'Object',

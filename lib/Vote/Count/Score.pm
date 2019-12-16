@@ -37,11 +37,11 @@ use Vote::Count::RankCount;
     );
   my $scored = $RangeElection->Score();
 
-=head1 Score
+=head1 Range Score Methods
 
 When Range (Cardinal) Ballots are used, it is simple and obvious to total the scores provided by the voters. This contrasts to the related Borda Method which assigns scores based on position on a Ranked Ballot.
 
-=head1 Method Score
+=head2 Score
 
 Returns a RankCount Object with the choices scored using the scores set by the voters, for Range Ballots.
 
@@ -62,7 +62,7 @@ sub Score ( $self, $active = undef ) {
   return Vote::Count::RankCount->Rank( \%scores );
 }
 
-=head2 Method RangeBallotPair
+=head2 RangeBallotPair
 
 Used for pairings against Range Ballots. Used by Condorcet and STAR.
 
