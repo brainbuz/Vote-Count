@@ -170,9 +170,10 @@ sub TieBreakerPrecedence ( $I, @choices ) {
   my %ordered = ();
   my $start = 0;
   for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
+    $_ =~ s/\s//g; #strip out any accidental whitespace
     $ordered{ $_ } = $start++ ;
   }
-  my $ballots = $self->BallotSet()->{'ballots'};
+  my $ballots = $I->BallotSet()->{'ballots'};
   my $winner = $choices[0];
   for my $c ( @choices ) {
     unless( defined $ordered{$c} ) { die "Choice $c missing from precedence file\n" }
@@ -202,6 +203,10 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
     if    ( $GJ->{'winner'} ) { return ( $GJ->{'winner'} ) }
     elsif ( $GJ->{'tie'} )    { return $GJ->{'tied'}->@* }
     else { die "unexpected (or no) result from $tiebreaker!\n" }
+  }
+  elsif ( $tiebreaker eq 'precedence' ) {
+    # The one nice thing about precedence is that there is always a winner.
+    return $I->TieBreakerPrecedence( @choices )->{'winner'};
   }
   else { die "undefined tiebreak method $tiebreaker!\n" }
   my @highchoice = ();

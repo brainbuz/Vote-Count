@@ -5,6 +5,7 @@ use 5.022;
 # since later versions may break things.
 use Test2::V0;
 use Test2::Bundle::More;
+use Test::Exception ;
 # use Test::Exception;
 use Data::Printer;
 # use Data::Dumper;
@@ -102,24 +103,35 @@ subtest 'object tiebreakers' => sub {
 };
 
 subtest 'Precedence' => sub {
-  $ties->PrecedenceFile( 't/data/tiebreakerprecedence.txt');
   $ties->TieBreakMethod( 'precedence' );
-
-  ok 1;
-
-  # make a test for a bad precedence file by passing a fake choice
+  $ties->PrecedenceFile( 't/data/tiebreakerprecedence1.txt');
 
   my @all4ties =
-    qw(VANILLA CHOCOLATE STRAWBERRY FUDGESWIRL PISTACHIO ROCKYROAD MINTCHIP CARAMEL RUMRAISIN BUBBLEGUM CHERRY CHOCCHUNK);
+    qw(VANILLA CHOCOLATE STRAWBERRY PISTACHIO FUDGESWIRL ROCKYROAD MINTCHIP CARAMEL RUMRAISIN BUBBLEGUM CHERRY CHOCCHUNK);
 
   my $allintie = $ties->TieBreakerPrecedence(@all4ties);
-#   is( $allintie->{'winner'}, 0, 'tiebreaker with no winner returned 0' );
-#   is( $allintie->{'tie'},    1, 'tiebreaker with no winner tie is true' );
-#   is_deeply(
-#     $allintie->{'tied'},
-#     [ 'FUDGESWIRL', 'VANILLA' ],
-# 'tiebreaker (multi tie) with no winner tied contains remaining tied choices'
-#   );
+  is ( $allintie->{'winner'}, 'FUDGESWIRL',
+    'all choices in tie chose #1 precedence choice');
+  my @mostinties =
+    qw(VANILLA CHOCOLATE STRAWBERRY MINTCHIP CARAMEL RUMRAISIN BUBBLEGUM CHERRY CHOCCHUNK);
+  my @mosttied = $ties->TieBreaker(
+      $ties->TieBreakMethod(), $ties->Active(), @mostinties );
+  is_deeply ( \@mosttied, ['MINTCHIP'],
+    'shorter choices without precedence leaders returned right choice' );
+
+  diag( 'switching precedence file');
+  $ties->PrecedenceFile( 't/data/tiebreakerprecedence2.txt');
+  my @tryagain = $ties->TieBreaker(
+      $ties->TieBreakMethod(), $ties->Active(), qw( BUBBLEGUM CARAMEL) );
+  is_deeply ( \@tryagain, ['CARAMEL'],
+    'shorter choices without precedence leaders returned right choice' );
+  dies_ok(
+    sub {
+      $ties->TieBreaker(
+      $ties->TieBreakMethod(), $ties->Active(), qw( FUDGESWIRL CARAMEL)) ;
+    },
+    "choice missing in precedence file is fatal"
+  );
 };
 
 done_testing();
