@@ -14,13 +14,13 @@ extends 'Vote::Count';
 # use Moose;
 # extends 'Vote::Count';
 
-our $VERSION='1.01';
+our $VERSION='1.02';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 1.01
+=head1 VERSION 1.02
 
 =cut
 

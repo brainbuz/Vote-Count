@@ -20,7 +20,10 @@ my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data1.txt'), );
 is( $VC1->BallotSet()->{'options'}{'rcv'},
   1, 'BallotSet option is set to rcv' );
 
-is( $VC1->VotesCast(), 10, 'Count the number of ballots in the set' );
+is( $VC1->VotesCast(), 10, 'Get the number of ballots in the set' );
+is( $VC1->VotesActive(), $VC1->VotesCast(), 'with default active set votesactive should match votescast');
+$VC1->SetActiveFromArrayRef( [ qw( CHOCOLATE STRAWBERRY PISTACHIO ROCKYROAD) ]);
+is( $VC1->VotesActive(), 3, 'with short activelist VotesActive is only 3');
 
 $VC1->logt('A Terse Entry');
 $VC1->logv('A Verbose Entry');
@@ -61,6 +64,7 @@ is_deeply(
   { 'CARAMEL' => 0, 'VANILLA' => 1 },
   'UpdatePairMatrix with an explicit active set'
 );
+
 
 
 done_testing();

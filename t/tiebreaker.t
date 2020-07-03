@@ -7,8 +7,8 @@ use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception ;
 # use Test::Exception;
-use Data::Printer;
-# use Data::Dumper;
+# use Data::Printer;
+use Data::Dumper;
 
 use Path::Tiny;
 # use Storable 'dclone';
@@ -61,10 +61,10 @@ subtest 'Modified GrandJunction TieBreaker' => sub {
 
 subtest 'object tiebreakers' => sub {
   my $active = {
-    PISTACHIO => 0,
-    ROCKYROAD => 0,
-    CHOCOLATE => 0,
-    VANILLA   => 0,
+    PISTACHIO => 1,
+    ROCKYROAD => 1,
+    CHOCOLATE => 1,
+    VANILLA   => 1,
   };
   my $I5 = Vote::Count->new( BallotSet => read_ballots('t/data/irvtie.txt') );
   my @resolve1 =
@@ -99,7 +99,12 @@ subtest 'object tiebreakers' => sub {
 
   my @resolve7 =
     $I5->TieBreaker( 'none', $active, ( 'VANILLA', 'ROCKYROAD' ) );
-  is( @resolve7, 0, 'None, returnes an empty array.' );
+
+note( Dumper @resolve7 );
+
+
+
+  is( @resolve7, 0, 'None, returns an empty array.' );
 };
 
 subtest 'Precedence' => sub {
@@ -119,7 +124,7 @@ subtest 'Precedence' => sub {
   is_deeply ( \@mosttied, ['MINTCHIP'],
     'shorter choices without precedence leaders returned right choice' );
 
-  diag( 'switching precedence file');
+#   diag( 'switching precedence file');
   $ties->PrecedenceFile( 't/data/tiebreakerprecedence2.txt');
   my @tryagain = $ties->TieBreaker(
       $ties->TieBreakMethod(), $ties->Active(), qw( BUBBLEGUM CARAMEL) );
