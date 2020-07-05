@@ -21,7 +21,7 @@ use Try::Tiny;
 
 use Data::Printer;
 
-our $VERSION = '1.03';
+our $VERSION='1.03';
 
 # no warnings 'uninitialized';
 no warnings qw/experimental/;

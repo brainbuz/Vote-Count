@@ -10,7 +10,7 @@ use Moose::Role;
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
-use TextTableTiny 'generate_markdown_table';
+use Vote::Count::TextTableTiny 'generate_markdown_table';
 
 use Math::BigRat try => 'GMP';
 use Storable 'dclone';
