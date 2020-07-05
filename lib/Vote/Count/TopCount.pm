@@ -18,13 +18,13 @@ use Data::Printer;
 
 # ABSTRACT: TopCount and related methods for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='1.02';
+our $VERSION='1.03';
 
 =head1 NAME
 
 Vote::Count::TopCount
 
-=head1 VERSION 1.02
+=head1 VERSION 1.03
 
 =head1 Synopsis
 

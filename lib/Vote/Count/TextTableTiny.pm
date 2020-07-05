@@ -1,7 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
-package TextTableTiny;
+package Vote::Count::TextTableTiny;
 
 use parent 'Exporter';
 use List::Util qw();
@@ -9,8 +9,7 @@ use Carp qw/ croak /;
 
 our @EXPORT_OK = qw/ generate_table generate_markdown_table /;
 
-# ABSTRACT: makes simple tables from two-dimensional arrays, with limited templating options
-
+# ABSTRACT: This is forked from Text::Table::Tiny for a pull request that was never accepted. This will go away when it is addressed.
 
 our $COLUMN_SEPARATOR = '|';
 our $ROW_SEPARATOR = '-';
@@ -81,7 +80,7 @@ sub generate_markdown_table {
   $HEADER_CORNER_MARKER = '|';
   my @ARGS = (@_);
   unshift @ARGS, ( header_row => 1, top_and_tail => 1 );
-  return TextTableTiny::generate_table(@ARGS);
+  return Vote::Count::TextTableTiny::generate_table(@ARGS);
 }
 
 sub _maxwidths {
@@ -127,9 +126,9 @@ __END__
 
 =pod
 
-=head1 TextTableTiny
+=head1 Vote::Count::TextTableTiny
 
-This is a temporary fork of Neil Bowen's module to support a method I added to set all of the flags for markdown compatible tables. While waiting on Neil to accept or reject the pull request I wanted Vote::Count to be work on other systems.
+This is a temporary fork of Text::Table::Tiny to support a method I added to set all of the flags for markdown compatible tables. At whatever point the pull request is accepted, or a comparable feature added to the original this module will be withdrawn.
 
 =head1 NAME
 

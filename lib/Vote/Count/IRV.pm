@@ -13,13 +13,13 @@ with 'Vote::Count::TieBreaker';
 
 use Storable 3.15 'dclone';
 
-our $VERSION='1.02';
+our $VERSION='1.03';
 
 =head1 NAME
 
 Vote::Count::IRV
 
-=head1 VERSION 1.02
+=head1 VERSION 1.03
 
 =cut
 
@@ -27,11 +27,7 @@ Vote::Count::IRV
 
 no warnings 'experimental';
 use List::Util qw( min max );
-
-# use Vote::Count::RankCount;
-# use Try::Tiny;
-use TextTableTiny 'generate_markdown_table';
-# use Data::Printer;
+use Vote::Count::TextTableTiny 'generate_markdown_table';
 #use Data::Dumper;
 
 sub _ResolveTie ( $self, $active, $tiebreaker, @choices ) {
