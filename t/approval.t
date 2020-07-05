@@ -38,13 +38,14 @@ my $expectNonA1 = {
   VANILLA    => 5
 };
 
-is_deeply( $VC1->Approval()->RawCount(), $expectA1,
-  "Approval counted for a small set with no active list" );
+is_deeply( $VC1->Approval()->RawCount(),
+  $expectA1, "Approval counted for a small set with no active list" );
 
 # done_testing();
 # =pod
 
-is_deeply( $VC1->NonApproval()->RawCount(), $expectNonA1, "the NonApproval count from the same set" );
+is_deeply( $VC1->NonApproval()->RawCount(),
+  $expectNonA1, "the NonApproval count from the same set" );
 
 my $A2 = $VC1->Approval(
   {
@@ -144,7 +145,5 @@ my $expectR2B = {
 };
 is_deeply( $R2B->RawCount(), $expectR2B,
   'counted approval with a cutoff for second range ballotset' );
-
-
 
 done_testing();
