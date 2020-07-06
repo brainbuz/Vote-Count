@@ -8,7 +8,7 @@ orbs:
 workflows:
   main:
     jobs:
-      - perl/build:
+      - perl/build
         # codecov: false
         # save-to-artifacts: false
         # save-to-workspace: false
