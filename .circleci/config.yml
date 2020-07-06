@@ -8,18 +8,21 @@ workflows:
   main:
     jobs:
       - perl/build:
-          codecov: false
-          save-to-artifacts: false
-          save-to-workspace: false
-      - perl/test-linux:
-          matrix:
-            parameters:
-              perl-version:
-                - '5.22'
-                - '5.24'
-                - '5.26'
-                - '5.28'
-                - '5.30'
-                - '5.32'
-          requires:
-            - perl/build
+        codecov: false
+        save-to-artifacts: false
+        save-to-workspace: false
+        steps:
+          - checkout
+          - run: perl -E 'say "Hello, World"'
+      # - perl/test-linux:
+      #     matrix:
+      #       parameters:
+      #         perl-version:
+      #           - '5.22'
+      #           - '5.24'
+      #           - '5.26'
+      #           - '5.28'
+      #           - '5.30'
+      #           - '5.32'
+      #     requires:
+      #       - perl/build
