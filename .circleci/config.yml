@@ -3,17 +3,17 @@ version: 2.1
 
 orbs:
   perl: circleci/perl@1.0.0
-workflows:
-  main:
-    jobs:
-      - perl/build
+
+jobs:
+  build:
+    perl/build:
         # codecov: false
         # save-to-artifacts: false
-        # save-to-workspace: false
-        # steps:
-        #   - checkout
-      # - shellcheck/check # job defined within the orb so no further config necessary
-
+      save-to-workspace: false
+      # steps:
+      #  - checkout
+      #  - run: 
+      
       # - perl/test-linux:
       #     matrix:
       #       parameters:
