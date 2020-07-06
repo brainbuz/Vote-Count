@@ -13,7 +13,6 @@ workflows:
         save-to-workspace: false
         steps:
           - checkout
-          - run: perl -E 'say "Hello, World"'
       # - perl/test-linux:
       #     matrix:
       #       parameters:
