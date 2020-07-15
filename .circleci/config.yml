@@ -1,30 +1,40 @@
-# Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
+---
 version: 2.1
-
-orbs:
-  perl: circleci/perl@1.0.0
-
 jobs:
+
+  buildtest:
+    parameters:
+      perlv:
+        description: "The Perl version we want to do the build and test with"
+        # default: "5.32"
+        type: string
+    docker:
+      # - image: perldocker/perl-tester:<< pipeline.parameters.perlv >>
+      - image: perldocker/perl-tester:<< parameters.perlv >>
+    steps:
+      - checkout
+      - run:
+          command: perl -V; pwd;
+          # working_directory: Hello
+      - run:
+          # description: Install Hello dependencies
+          command: pwd; dzil listdeps | xargs cpanm;
+          # working_directory: Hello
+      - run:
+          description: Test Hello
+          command: prove -l t/*.t
+          # working_directory: Hello
+
+workflows:
   build:
-    perl/build:
-        # codecov: false
-        # save-to-artifacts: false
-      save-to-workspace: false
-      # steps:
-      #  - checkout
-      #  - run: 
-      
-      # - perl/test-linux:
-      #     matrix:
-      #       parameters:
-      #         perl-version:
-      #           - '5.22'
-      #           - '5.24'
-      #           - '5.26'
-      #           - '5.28'
-      #           - '5.30'
-      #           - '5.32'
-      #     requires:
-      #       - perl/build
-
-
+    jobs:
+      - buildtest:
+          matrix:
+            parameters:
+              perlv:
+                - '5.22'
+                - '5.24'
+                - '5.26'
+                - '5.28'
+                - '5.30'
+                - '5.32'
