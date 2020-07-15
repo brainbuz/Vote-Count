@@ -17,6 +17,8 @@ jobs:
           command: perl -V; pwd;
           # working_directory: Hello
       - run:
+          command: cpanm Dist::Zilla::Plugin::CheckChangeLog
+      - run:
           # description: Install Hello dependencies
           command: pwd; dzil listdeps | xargs cpanm;
           # working_directory: Hello
