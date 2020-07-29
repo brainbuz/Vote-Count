@@ -242,7 +242,7 @@ Most Components will take an argument for $activeset or default to the current A
 
 Directory of Vote Counting Methods linking to the Vote::Count module for it.
 
-  * [Catalog](https://metacpan.org/pod/distribution/Vote-Count/Catalog.pod)
+  * [Catalog](https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Catalog.pod)
 
 ### Consumed As Roles By Vote::Count
 
