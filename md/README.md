@@ -285,6 +285,11 @@ Directory of Vote Counting Methods linking to the Vote::Count module for it.
 * [Multi Member](https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/MultiMember.pod)
 * [Vote::Count::Start](https://metacpan.org/pod/Vote::Count::Start)
 
+# Support for Older Perl Versions
+
+Vote::Count will drop support for versions of Perl more than 2 years old for failing CPAN testing or CI testing. 
+
+Vote::Count uses Moose. When COR is stable, it is likely that a switch will be made from Moose to COR. At that time, the minimum supported Perl will be the current stable 7.x version.
 
 # Call for Contributions
 

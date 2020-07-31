@@ -703,6 +703,13 @@ L<Vote::Count::Start|https://metacpan.org/pod/Vote::Count::Start>
 =back
 
 
+=head1 Support for Older Perl Versions
+
+Vote::Count will drop support for versions of Perl more than 2 years old for failing CPAN testing or CI testing. 
+
+Vote::Count uses Moose. When COR is stable, it is likely that a switch will be made from Moose to COR. At that time, the minimum supported Perl will be the current stable 7.x version.
+
+
 =head1 Call for Contributions
 
 This project needs contributions from Programmers and Mathematicians. Review and citations from Mathematicians are urgently requested, because in addition to being a Tool-set for implementing vote counting this documentation will for many also be the manual. From coders there is a lot of help that could be given: any well known method could use a write up if it is easy to implement with the toolkit (see Benham) or a code submission if it is not. Currently Tiedeman, SSD, and Kemmeny-Young are unimplemented.
