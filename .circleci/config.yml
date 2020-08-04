@@ -1,36 +1,69 @@
 ---
+# Use version 2.1 to enable orb usage.
 version: 2.1
-jobs:
 
-  buildtest:
+orbs:
+  # The Windows orb give you everything you need to start using
+  # the Windows executor.
+  win: circleci/windows@2.2.0
+
+jobs:
+  # name of your job
+  proveonwindows:
+    executor:
+      name: win/default
+      size: "medium"
+    environment:
+      PATH: C:\ProgramData\chocolatey\bin;C:\Program Files\Git\cmd;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Strawberry\c\bin;C:\Strawberry\perl\site\bin;C:\Strawberry\perl\bin;
+
+    steps:
+      # Commands are run in a Windows virtual machine environment
+      - checkout
+      - run:
+          command: 'echo %PATH%'
+          shell: cmd.exe
+      - run:
+          command: choco install strawberryperl
+          shell: cmd.exe
+      - run:
+          command: dir c:\strawberry\perl\bin\
+          shell: cmd.exe
+      # Install dependencies from last release.
+      - run:
+          command: c:\strawberry\perl\bin\cpanm.bat --installdeps Vote::Count
+          shell: cmd.exe
+      - run:
+          command: c:\strawberry\perl\bin\perl -v
+          shell: cmd.exe
+      - run:
+          command: c:\strawberry\perl\bin\prove.bat -l t/*.t
+          shell: cmd.exe
+
+  proveonlinux:
     parameters:
       perlv:
         description: "The Perl version we want to do the build and test with"
         # default: "5.32"
         type: string
     docker:
-      # - image: perldocker/perl-tester:<< pipeline.parameters.perlv >>
       - image: perldocker/perl-tester:<< parameters.perlv >>
     steps:
       - checkout
       - run:
           command: perl -V; pwd;
-          # working_directory: Hello
       - run:
           command: cpanm Dist::Zilla::Plugin::CheckChangeLog
       - run:
-          # description: Install Hello dependencies
           command: pwd; dzil listdeps | xargs cpanm;
-          # working_directory: Hello
       - run:
           description: Test Hello
           command: prove -l t/*.t
-          # working_directory: Hello
 
 workflows:
   build:
     jobs:
-      - buildtest:
+      - proveonwindows
+      - proveonlinux:
           matrix:
             parameters:
               perlv:
