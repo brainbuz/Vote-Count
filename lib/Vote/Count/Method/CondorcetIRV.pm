@@ -14,13 +14,13 @@ extends 'Vote::Count';
 # use Moose;
 # extends 'Vote::Count';
 
-our $VERSION='1.07';
+our $VERSION='1.08';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 1.07
+=head1 VERSION 1.08
 
 =cut
 
@@ -43,7 +43,7 @@ Provides Common Basic Condorcet-IRV Methods. These methods are simple and beat o
 
 This module exports the methods it provides which expect a Vote::Count object as an argument.
 
-=head1 Method Common Name: SmithSet IRV
+=head1 Method Common Name: Smith Set IRV
 
 Identifies the Smith Set and runs IRV on it.
 
@@ -74,6 +74,12 @@ Meets Condorcer Winner, Condorcet Loser, and Smith.
 By meeting the three Condorcet Criteria a level of consistency is guaranteed. When there is no Condorcet Winner the resolution has all of the weaknesses of IRV, as discussed in the Later Harm topic above restricting IRV to the Smith Set would appear to provide a consistency gain over basic IRV.
 
 Smith Set IRV is therefore substantially more consistent than basic IRV, but less consistent than Condorcet methods like SSD that focus on Consistency.
+
+=head1 Method Common Name: Woodhull Method (Currently Unimplemented)
+
+The Woodhull method is similar to Smith Set IRV. The difference is: instead of eliminating the choices outside the Smith Set, Woodhull does not permit them to win. Since, it has to deal with the situation where an ineligible choice wins via IRV, it becomes slightly more complex. In addition, group elimination of all unwinnable choices slightly improves consistency, which is another advantage to Smith Set IRV. As for possible differences in Later Harm effect, the Later Harm comes from the restriction of the victor to the Smith Set, which is the same effect for both methods. 
+
+The argument in favor of Woodhull over Smith would be that: Anything which alters the dropping order can alter the outcome of IRV, and Woodhull preserves the IRV dropping. Since, a dropping order change (not directly involving the preferred choice) has an equal possiblity of helping or hurting one's preferred choice, this side-effect is a random flaw. Removing the least consequential choices is preventing them from impacting the election (in a random manner), thus the author sees it as an advantage for Smith Set IRV.
 
 =cut
 
