@@ -262,8 +262,8 @@ sub CreateRedactedElection ( $self, $WonCondorcet, $WonIRV, $simpleflag=0 ) {
   );
   $self->logd(
     'Created Redacted Election.',
-    $self->{'RedactedElection'}->PairingVotesTable(),
-    $self->{'RedactedElection'}->MatrixTable(),
+    $self->{'RedactedElection'}->PairMatrix()->PairingVotesTable(),
+    $self->{'RedactedElection'}->PairMatrix()->MatrixTable(),
     );
 }
 
