@@ -134,18 +134,6 @@ subtest
             'CONDORCET1',
             "The first Condorcet winner should be the winner not the second.");
     };
-
-# my $pre =  Vote::Count->new(
-#         'BallotSet'      => $ballots_redactfixloop,
-#         'TieBreakMethod' => 'grandjunction',
-#     );
-# my $pre2 =  Vote::Count->new(
-#         'BallotSet'      => read_ballots('t/data/redactfixloop_redacted.txt'),
-#         'TieBreakMethod' => 'none',
-#     );
-# my @pre1smith = sort keys $pre->PairMatrix->SmithSet()->%*;
-# note( "Condorcet 1 SmithSet is @pre1smith" ) ;
-# note( "Condorcet 2 Winner is " . $pre2->PairMatrix->CondorcetWinner() ) ;
         my $fixloop = $fixesloop->CondorcetVsIRV( 'simple' => 1);
         is($fixloop->{'winner'}, 
             'IRV', 
