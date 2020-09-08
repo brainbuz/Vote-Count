@@ -110,7 +110,7 @@ Your Election Rules should specify a tiebreaker, the default is Eliminate All; t
 
 * Determine the IRV Winner. 
 
-* Follow the General Hand Count Condorcet Process, start with the IRV Winner in your first pairing, and prefer the IRV Winner for the next pairing choice.
+* Follow the General Hand Count Condorcet Process, start with the IRV Winner in your first pairing, and prefer the IRV Winner for the next pairing choice. If the IRV race was decided in a final pairing, don't forget to mark it on your sheet.
 
 * If there is no Condorcet Winner or the Condorcet Winner is the IRV Winner, elect the IRV Winner.
 
