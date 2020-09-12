@@ -19,7 +19,7 @@ A catalog of common Vote Counting Systems and their implementation in Vote::Coun
 
 =head2 Borda Count
 
-And other Methods which assign scores to choices by their ranking. 
+And other Methods which assign scores to choices by their ranking.
 
 =over
 
@@ -131,7 +131,7 @@ SSD: I<unimplemented>
 
 =item *
 
-Kemmeny-Young: I<unimplemented>
+Kemeny-Young: I<unimplemented>
 
 
 =back
