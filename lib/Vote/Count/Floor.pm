@@ -9,7 +9,7 @@ use Moose::Role;
 
 no warnings 'experimental';
 
-our $VERSION='1.08';
+our $VERSION = '1.08';
 
 =head1 NAME
 
@@ -24,22 +24,42 @@ Vote::Count::Floor
 # load the roles providing the underlying ops.
 with 'Vote::Count::Approval', 'Vote::Count::TopCount',;
 
-sub _FloorMin ( $self, $floorpct ) {
-  my $pct = $floorpct >= 1 ? $floorpct / 100 : $floorpct;
-  return int( $self->VotesCast() * $pct );
+has 'FloorRounding' => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => 'up'
+);
+
+sub _FloorRnd ( $I, $num ) {
+  if ( $I->FloorRounding eq 'down' ) {
+    return int($num);
+  }
+  elsif ( $I->FloorRounding eq 'up' ) {
+    return int( $num ) if ( $num == int( $num ) );
+    return int( $num + 1 );
+  }  
+  elsif ( $I->FloorRounding eq 'round' ) {
+    return int( $num + 0.5 );
+  }
+  else { die 'unknown FloorRounding method requested: ' . $I->FloorRounding };
 }
 
-sub _DoFloor ( $self, $ranked, $cutoff ) {
+sub _FloorMin ( $I, $floorpct ) {
+  my $pct = $floorpct >= 1 ? $floorpct / 100 : $floorpct;
+  return $I->_FloorRnd( $I->VotesCast() * $pct );
+}
+
+sub _DoFloor ( $I, $ranked, $cutoff ) {
   my @active = ();
   my @remove = ();
   for my $s ( keys $ranked->%* ) {
     if ( $ranked->{$s} >= $cutoff ) { push @active, $s }
     else {
       push @remove, $s;
-      $self->logv("Removing: $s: $ranked->{$s}, minimum is $cutoff.");
+      $I->logv("Removing: $s: $ranked->{$s}, minimum is $cutoff.");
     }
   }
-  $self->logt(
+  $I->logt(
     "Floor Rule Eliminated: ",
     join( ', ', @remove ),
     "Remaining: ", join( ', ', @active ),
@@ -64,19 +84,23 @@ sub TopCountFloor ( $self, $floorpct = 2 ) {
     $self->_FloorMin($floorpct) );
 }
 
-sub TCA( $self ) {
+sub TCA ( $self, $floor = .5 ) {
+  if ( $floor > 1 ) {
+    my $m = "Floor value $floor is greater than 1";
+    $self->logt($m);
+    die "$m\n";
+  }
   $self->logt(
-    'Applying Floor Rule: Approval Must be at least ',
-    '50% of the Most First Choice votes for any Choice.'
+    'Applying Floor Rule: Approval Must at least ',
+    "$floor times the Most First Choice votes. "
   );
   my $tc = $self->TopCount();
   # arraytop returns a list in case of tie.
   my $winner = shift( $tc->ArrayTop->@* );
   my $tcraw  = $tc->RawCount()->{$winner};
-  my $cutoff = int( $tcraw / 2 );
+  my $cutoff = $self->_FloorRnd( $tcraw * $floor );
   $self->logv( "The most first choice votes for any choice is $tcraw.",
     "Cutoff will be $cutoff" );
-  my $ac = $self->Approval()->RawCount();
   return $self->_DoFloor( $self->Approval()->RawCount(), $cutoff );
 }
 
@@ -89,6 +113,15 @@ In real elections it is common to have choices with very little support, the rig
   my $Election = Vote::Count->new( BallotSet => $someballotset );
   my $ChoicesAfterFloor = $Election->ApprovalFloor();
   $Election->SetActive( $ChoicesAfterFloor ); # To apply the floor
+
+=head1 Rounding
+
+The default rounding is up. If a calculated cutoff is 11.2, the cutoff will become greater than or equal to 12. Set FloorRounding to 'down' to change this to round down for 11.9 to become 11. Set FloorRounding to 'round' to change this to round .5 or greater up.
+
+  # When creating the Election.
+  my $Election = Vote::Count->new( FloorRounding => 'round', ... );
+  # Before applying the floor.
+  $Election->FloorRounding( 'down');
 
 =head1 The Floor Methods
 
@@ -112,13 +145,18 @@ For Range Ballots using ApprovalFloor there is an additional optional value for 
 
 Aggressive but (effectively) safe for Condorcet Methods. It requires the Approval for a choice be at least half of the leading Top Count Vote.
 
-This rule takes no optional arguments.
+This rule takes an optional argument to change the floor from .5.
+  
+  # uses default of 1/2
+  my $active = $Election->TCA(); 
+  # requires approval equal leader
+  my $active = $Election->TCA( 1 ); 
 
 =head3 TCA Rule Validation and Implication
 
 If there is a Loop or Condorcet Winner, either it will be/include the Top Count Leader or it must be a choice which defeats the Top Count leader. To defeat the Top Count Leader a Choice's Approval must be greater than the Lead Top Count. To be able to defeat a choice it is necessary to have more than half of the approval of that choice. Thus to be able to defeat a choice which can defeat the Top Count Leader it will be necessary to have more than half of the Approval of a choice with an Approval greater than the lead Top Count.
 
-There is a small possibility for a situation with a deeply nested knotted result that this rule could eliminate a member of the Dominant Set. For the common simple dropping rules (Approval, Top Count, Greatest Loss, Borda)  this choice would never win.
+There is a small possibility for a situation with a deeply nested knotted result that this rule could eliminate a member of the Dominant Set. For the common simple dropping rules (Approval, Top Count, Greatest Loss, Borda) this choice would never win.
 
 For IRV any choice with an Approval that is not greater than the current TopCount of any other choice will always be eliminated prior to that choice. Unfortunately, with IRV any change to dropping order can alter the result. If it is used in IRV the Election Rules must specify it. Also because it is a high Approval based Floor, it can be construed as adding a small risk of Later Harm violation. If the reason for choosing IRV was Later Harm, then the only safe floor is a TopCount floor.
 
