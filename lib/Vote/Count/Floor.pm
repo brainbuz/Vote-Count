@@ -6,16 +6,17 @@ use feature qw /postderef signatures/;
 package Vote::Count::Floor;
 use namespace::autoclean;
 use Moose::Role;
+# use Data::Dumper; 
 
 no warnings 'experimental';
 
-our $VERSION = '1.08';
+our $VERSION='1.09';
 
 =head1 NAME
 
 Vote::Count::Floor
 
-=head1 VERSION 1.08
+=head1 VERSION 1.09
 
 =cut
 
@@ -41,6 +42,9 @@ sub _FloorRnd ( $I, $num ) {
   elsif ( $I->FloorRounding eq 'round' ) {
     return int( $num + 0.5 );
   }
+  elsif ( $I->FloorRounding eq 'nextint' ) {
+    return int( $num + 1 );
+  }  
   else { die 'unknown FloorRounding method requested: ' . $I->FloorRounding };
 }
 
@@ -104,19 +108,35 @@ sub TCA ( $self, $floor = .5 ) {
   return $self->_DoFloor( $self->Approval()->RawCount(), $cutoff );
 }
 
+sub ApplyFloor ( $self, $rule, @args ) {
+  my $newset = {}; 
+  if ( $rule eq 'ApprovalFloor') {
+    $newset = $self->ApprovalFloor( @args );
+  } elsif ( $rule eq 'TopCountFloor') {
+    $newset = $self->TopCountFloor( @args );
+  } elsif ( $rule eq 'TCA') {
+    $newset = $self->TCA( @args );
+  } else { 
+    die "Bad rule provided to ApplyFloor, $rule";
+  }
+  $self->SetActive( $newset);
+  return $newset;
+}
+
 =head1 Floor Rules
 
-In real elections it is common to have choices with very little support, the right to write-in and the obligation to count write-ins can produce a large number of these choices, with iterative dropping like IRV it can take many rounds which have to be logged into the election report to work through them. A Floor Rule sets a criteria to remove the weakly supported choices early in a single operation. If you are implementing a Hand-Count compatible process having an aggressive Floor Rule can be a benefit.
+In real elections it is common to have choices with very little support, the right to write-in and the obligation to count write-ins can produce a large number of these choices, with iterative dropping like IRV it can take many rounds to work through them. A Floor Rule sets a criteria to remove the weakly supported choices early in a single operation. 
 
 =head1 SYNOPSIS
 
   my $Election = Vote::Count->new( BallotSet => $someballotset );
   my $ChoicesAfterFloor = $Election->ApprovalFloor();
   $Election->SetActive( $ChoicesAfterFloor ); # To apply the floor
+  $Election->ApplyFloor( 'TopCountFloor', @options ); # One Step
 
 =head1 Rounding
 
-The default rounding is up. If a calculated cutoff is 11.2, the cutoff will become greater than or equal to 12. Set FloorRounding to 'down' to change this to round down for 11.9 to become 11. Set FloorRounding to 'round' to change this to round .5 or greater up.
+The default rounding is up. If a calculated cutoff is 11.2, the cutoff will become greater than or equal to 12. Set FloorRounding to 'down' to change this to round down for 11.9 to become 11. Set FloorRounding to 'round' to change this to round .5 or greater up. If the comparison needs to be Greater than, a special rounding rule of 'nextint' will use the next higher integer.
 
   # When creating the Election.
   my $Election = Vote::Count->new( FloorRounding => 'round', ... );
@@ -125,7 +145,14 @@ The default rounding is up. If a calculated cutoff is 11.2, the cutoff will beco
 
 =head1 The Floor Methods
 
-All Methods in this Module apply a floor rule, log the eliminations and return the set of remaining choices as an Active Set HashRef. They do not set the Election's active set, as it is possible that a custom step is desired before doing so.
+All Methods in this Module apply a floor rule, log the eliminations and return the set of remaining choices as a HashRef. Use the ApplyFloor Method to immediately apply the results.
+
+=head2 ApplyFloor
+
+Takes as an argument the Method Name as a string of the rule to apply ( ApprovalFloor, TopCountFloor, TCA), followed by any optional arguments for the rule. Sets the Active Set as defined by that rule and returns the new Active Set as a hashref.
+
+  # Apply a TopCount Floor of 10%.
+  my $newactive = $Election->ApplyFloor( 'TopCountFloor', 10);
 
 =head2 ApprovalFloor, TopCountFloor
 

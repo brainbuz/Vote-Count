@@ -41,6 +41,12 @@ subtest '_FloorMin and FloorRounding' => sub {
   is( $E->_FloorRnd(11),   11, '_FloorRnd rounding 11 to 11' );
   is( $E->_FloorRnd(11.1), 11, '_FloorRnd rounding 11.1 to 11' );
   is( $E->_FloorRnd(11.7), 12, '_FloorRnd rounding 11.7 is 12' );
+
+  $E->FloorRounding('nextint');
+  is( $E->_FloorRnd(11),   12, '_FloorRnd nextint 11 = 12' );
+  is( $E->_FloorRnd(11.1), 12, '_FloorRnd nextint 11.1 = 12' );
+  is( $E->_FloorRnd(11.7), 12, '_FloorRnd nextint 11.7 = 12' );
+
   $E->FloorRounding('fake method');
   dies_ok( sub { $E->_FloorRnd(11.1) },
     'dies because a fake rounding method was requested' );
@@ -134,5 +140,31 @@ subtest 'Applying floors to Range ballots' => sub {
   is_deeply( $Range1->ApprovalFloor( 15, 2 ),
     $e2, 'Changing Rounding from default *up* to *down* adds a choice' );
 };
+
+subtest 'ApplyFloor' => sub {
+  my $A4 =
+    Vote::Count->new( BallotSet => read_ballots('t/data/biggerset1.txt') );
+  my $floor4 = $A4->ApplyFloor( 'TCA', .25 );
+  is_deeply( $floor4, $A4->Active(), 
+    'ApplyFloor should have set the active list it returned');
+  my @f4     = sort( keys $floor4->%* );
+  is_deeply(
+    \@f4,
+    [qw/CARAMEL CHOCOLATE MINTCHIP RUMRAISIN STRAWBERRY VANILLA/],
+    'TCA Approval on highest TopCount (.25)'
+  );
+  is_deeply( 
+    [ sort keys $A4->ApplyFloor( 'TopCountFloor' )->%* ],
+    [qw/CHOCOLATE MINTCHIP VANILLA/], 
+    'Apply a TopCount Floor '   
+    );
+  is_deeply( 
+    [ sort keys $A4->ApplyFloor( 'ApprovalFloor' )->%* ],
+    [qw/CHOCOLATE MINTCHIP VANILLA/], 
+    'Apply Approval Floor '   
+    );
+  dies_ok( sub { $A4->ApplyFloor( 'Approval' ) },
+    'invalid methodname as rule dies');
+  };
 
 done_testing();
