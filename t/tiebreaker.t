@@ -6,13 +6,14 @@ use 5.022;
 use Test2::V0;
 use Test2::Bundle::More;
 use Test::Exception;
+use File::Temp qw/tempfile tempdir/;
 # use Test::Exception;
 use Data::Dumper;
 
 use Path::Tiny;
 # use Storable 'dclone';
 
-use Vote::Count 0.020;
+use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
 
 use feature qw /postderef signatures/;
@@ -134,6 +135,39 @@ subtest 'Precedence' => sub {
         $ties->Active(), qw( FUDGESWIRL CARAMEL) );
     },
     "choice missing in precedence file is fatal"
+  );
+};
+
+subtest 'utility method to generate a Predictable Random Precedence File.' =>
+  sub {
+  unlink('/tmp/precedence.txt');
+  my @prec1 = $set4->CreatePrecedenceRandom();
+  my $expectprec1 =
+    [qw/ YODEL RINGDING DEVILDOG KRIMPET HOHO TWINKIE SUZIEQ/];
+  is_deeply( \@prec1, $expectprec1,
+    'Predictable Randomized order for ballotfile majority1.txt' );
+  my @readback = path('/tmp/precedence.txt')->lines();
+  chomp(@readback);
+  is_deeply( \@readback, $expectprec1,
+    'readback of precedence written to default /tmp/precedence.txt' );
+
+  my ( $dst, $tmp2 ) = tempfile();
+  close $dst;
+  my @prec2       = Vote::Count->new(
+      BallotSet => $ties->BallotSet )->CreatePrecedenceRandom($tmp2);
+  my $expectprec2 = [
+    qw/BUBBLEGUM CHOCOLATE PISTACHIO CARAMEL VANILLA STRAWBERRY
+      MINTCHIP RUMRAISIN FUDGESWIRL CHERRY CHOCCHUNK ROCKYROAD/
+  ];
+  is_deeply(
+    \@prec2, $expectprec2,
+    'Predictable Randomized order for ballotfile ties1.txt'
+  );
+  @readback = path($tmp2)->lines();
+  chomp(@readback);
+  is_deeply(
+    \@readback, $expectprec2,
+    "readback of precedence written to generated $tmp2"
   );
 };
 

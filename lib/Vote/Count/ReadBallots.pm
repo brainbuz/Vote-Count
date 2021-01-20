@@ -21,7 +21,7 @@ Vote::Count::ReadBallots
 
 =head1 SYNOPSIS
 
-  Vote::Count::ReadBallots;
+  use Vote::Count::ReadBallots;
 
   my $data1 = read_ballots('t/data/data1.txt');
 
@@ -49,6 +49,7 @@ All public methods are exported.
         VANILLA      1
     },
     votescast        1,
+    votevalue        1, # needed for STV support
     comment   "# Optional Comment",
     options   {
       rcv   1
@@ -136,6 +137,7 @@ sub read_ballots( $filename ) {
     'ballots'   => {},
     'options'   => { 'rcv' => 1 },
     'votescast' => 0,
+    'votevalue' => 1, # default votevalue to 1 for compatibility with STV.
     'comment'   => ''
   );
 BALLOTREADLINES:
@@ -186,7 +188,7 @@ sub write_ballots ( $BallotSet, $destination ) {
     my $cnt = $BallotSet->{'ballots'}{$k}{'count'};
     push @data, "$cnt:$k";
   }
-  for (@data) { $_ .= "\n" if $_ !~ /\n$/ }
+  for my $D (@data) { $D .= "\n" if $D !~ /\n$/ }
   path($destination)->spew(@data);
 }
 

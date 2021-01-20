@@ -34,6 +34,7 @@ subtest 'test read of small good file' => sub {
     'parsed ballot set rcv in options'
   );
   is( $data1->{'votescast'},      10, 'confirm count of votescast' );
+  is( $data1->{'votevalue'},      1,  'confirm weight defaults to 1' );
   is( $data1->{'options'}{'rcv'}, 1,  'option for rcv ballot should be set' );
 # test2 isnt barfs at undef, even though undef doesn't match the value provided
   my $optionrange =

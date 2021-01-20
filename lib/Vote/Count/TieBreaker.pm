@@ -10,7 +10,7 @@ use Moose::Role;
 no warnings 'experimental';
 use List::Util qw( min max sum );
 use Path::Tiny;
-# use Data::Dumper;
+use Data::Dumper;
 
 our $VERSION='1.09';
 
@@ -51,9 +51,11 @@ TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker
 
 The Grand Junction (also known as Bucklin) method is one of the simplest and easiest to Hand Count RCV resolution methods. Other than that it is generally not considered a good method.
 
-Because it is simple, and always resolves, except when ballots are perfectly matched up, it is a really
+Because it is simple, and always resolves, except when ballots are perfectly matched up, it is a great TieBreaker. It is not Later Harm Safe, but heavily favors higher rankings. It is the Vote::Count author's preferred Tie-Breaker.
 
 =head2 The (Standard) Grand Junction Method
+
+Only the Tie-Breaker variant is currently implemented in Vote::Count.
 
 =over
 
@@ -137,13 +139,13 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
   return { 'winner' => 0, 'tie' => 1, 'tied' => \@choices };
 }
 
-=head1 Borda-like Later Harm Protected
+# =head1 Borda-like Later Harm Protected
 
-This method is superficially similar to Borda. However, it only scores the best ranked member of the tie, ignoring the later votes. The tie member with the highest score wins. The original position on the ballot is used to score. It is subject to all of the Borda weighting problems. It is Later Harm Protected (within the tied set), but less resolvable than Modified Grand Junction.
+# This method is superficially similar to Borda. However, it only scores the best ranked member of the tie, ignoring the later votes. The tie member with the highest score wins. The original position on the ballot is used to score. It is subject to all of the Borda weighting problems. It is Later Harm Protected (within the tied set), but less resolvable than Modified Grand Junction.
 
-=head2 TieBreakerBordalikeLaterHarm ()
+# =head2 TieBreakerBordalikeLaterHarm ()
 
-  Currently unimplemented ...
+#   Currently unimplemented ...
 
 =head1 Method TieBreaker
 
@@ -180,6 +182,34 @@ sub TieBreakerPrecedence ( $I, @choices ) {
     if ( $ordered{$c} < $ordered{$winner } ) { $winner = $c }
   }
   return { 'winner' => $winner, 'tie' => 0, 'tied' => [] };
+}
+
+=head1 CreatePrecedenceRandom
+
+Creates a Predictable Psuedo Random Precedence file, and returns the list. Randomizes the choices using the number of ballots as the Random Seed for Perl's built in rand() function. For any given Ballot File, it will always return the same list. If the precedence filename argument is not given it defaults to '/tmp/precedence.txt'.
+
+  my @precedence = Vote::Count->new( BallotSet => read_ballots('somefile') )
+    ->CreatePrecedenceRandom( '/tmp/precedence.txt');
+
+=cut
+
+sub CreatePrecedenceRandom( $I, $outfile='/tmp/precedence.txt' ) {
+  my @choices = $I->GetActiveList();
+  my %randomized = ();
+  srand( $I->BallotSet()->{'votescast'} ) ;
+  while (@choices) {
+    my $next = shift @choices;
+    my $random = int(rand( 1000000 ));
+    if ( defined $randomized{$random} ) {
+      # collision, this choice needs to do again.
+      unshift @choices, ( $next );
+    } else {
+      $randomized{$random} = $next;
+    }
+  }
+  my @precedence = ( map { $randomized{$_} } sort {$a <=> $b} ( keys %randomized ) );
+  path($outfile)->spew( join( "\n", @precedence ) );
+  return @precedence;
 }
 
 sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
