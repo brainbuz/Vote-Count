@@ -137,7 +137,6 @@ sub read_ballots( $filename ) {
     'ballots'   => {},
     'options'   => { 'rcv' => 1 },
     'votescast' => 0,
-    'votevalue' => 1, # default votevalue to 1 for compatibility with STV.
     'comment'   => ''
   );
 BALLOTREADLINES:
@@ -177,6 +176,7 @@ BALLOTREADLINES:
       $data{'ballots'}{$line}{'votes'} = \@votes;
     }
   }
+  for my  $K ( keys $data{'ballots'}->%* ) { $data{'ballots'}{$K}{'votevalue'} = 1 }
   return \%data;
 }
 

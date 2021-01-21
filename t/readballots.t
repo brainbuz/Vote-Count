@@ -9,6 +9,7 @@ use Test::Exception;
 use File::Temp qw/tempfile tempdir/;
 use Try::Tiny;
 use Path::Tiny;
+use Data::Dumper;
 
 use Vote::Count::ReadBallots
   qw/read_ballots write_ballots read_range_ballots write_range_ballots/;
@@ -21,6 +22,7 @@ is_deeply(
 
 subtest 'test read of small good file' => sub {
   my $data1 = read_ballots('t/data/data1.txt');
+note( Dumper $data1 ) ;
   is( $data1->{'ballots'}{'MINTCHIP'}{'count'},
     4, 'test the count of a ballot.' );
   is_deeply(
@@ -28,13 +30,14 @@ subtest 'test read of small good file' => sub {
     [qw/CHOCOLATE MINTCHIP VANILLA/],
     'Test an array of votes'
   );
+  is( $data1->{'ballots'}{'CHOCOLATE:MINTCHIP:VANILLA'}{'votevalue'},
+    1, 'test insertion of default votevalue 1');
   is_deeply(
     $data1->{'options'},
     { 'rcv' => 1 },
     'parsed ballot set rcv in options'
   );
   is( $data1->{'votescast'},      10, 'confirm count of votescast' );
-  is( $data1->{'votevalue'},      1,  'confirm weight defaults to 1' );
   is( $data1->{'options'}{'rcv'}, 1,  'option for rcv ballot should be set' );
 # test2 isnt barfs at undef, even though undef doesn't match the value provided
   my $optionrange =

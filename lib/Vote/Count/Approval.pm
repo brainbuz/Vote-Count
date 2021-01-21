@@ -39,13 +39,15 @@ Returns a RankCount object for the current Active Set taking an optional argumen
   # to specify a cutoff on Range Ballots
   my $Approval = $Election->Approval( $activeset, $cutoff );
 
-=head1 Method NonApproval  
+For RCV, Approval respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
 
-The opposite of Approval. Returns a RankCount object for the current Active Set of the non-exhausted ballots not supporting a choice. It does not have the option to provide an Active Set. Only available for Ranked Ballots. 
+=head1 Method NonApproval
+
+The opposite of Approval. Returns a RankCount object for the current Active Set of the non-exhausted ballots not supporting a choice. It does not have the option to provide an Active Set. Only available for Ranked Ballots.
 
 =head2 Cut Off (Range Ballots Only)
 
-When counting Approval on Range Ballots it is appropriate to set a threshold below which a choice is not considered to be supported by the voter, but indicated to represent a preference to even lower or unranked choices. 
+When counting Approval on Range Ballots it is appropriate to set a threshold below which a choice is not considered to be supported by the voter, but indicated to represent a preference to even lower or unranked choices.
 
 A good value is half of the maximum possible score, however, the default action must be to treat all choices with a score as approved. With a Range of 0-10 a cutoff of 5 would be recommended, choices scored 4 or lower would not be counted for approval. If cutoff isn't provided it defaults to 0 producing the desired default behaviour.
 
@@ -59,7 +61,7 @@ sub _approval_rcv_do ( $active, $ballots ) {
     my @votes = $ballots->{$b}->{'votes'}->@*;
     for my $v (@votes) {
       if ( defined $approval{$v} ) {
-        $approval{$v} += $ballots->{$b}{'count'};
+        $approval{$v} += $ballots->{$b}{'count'} * $ballots->{$b}{'votevalue'} ;
       }
     }
   }
@@ -101,7 +103,7 @@ sub _non_approval_rcv_do ( $I, $ballots ) {
   return Vote::Count::RankCount->Rank( \%nonapproval );
 }
 
-# For each choice in the active set counts ballots 
+# For each choice in the active set counts ballots
 sub NonApproval ( $I, $cutoff = 0 ) {
   my %BallotSet = $I->BallotSet()->%*;
   my $ballots = $BallotSet{'ballots'};

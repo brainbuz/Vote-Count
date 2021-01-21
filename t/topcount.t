@@ -14,6 +14,8 @@ use Path::Tiny;
 use Vote::Count;
 use Vote::Count::ReadBallots;
 
+use Data::Dumper;
+
 my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data2.txt'), );
 
 my $tc1 = $VC1->TopCount();
@@ -156,6 +158,76 @@ subtest 'Range Ballot' => sub {
     'Check topcount majority for previous'
   );
 
+};
+
+subtest 'weighted topcount' => sub {
+  my $B1 =  read_ballots('t/data/data2.txt');
+  my %bweight = (
+    'MINTCHIP:CARAMEL:RUMRAISIN' => 11,
+    'CHOCOLATE:MINTCHIP:VANILLA' => 6,
+    'VANILLA:CHOCOLATE:STRAWBERRY' => 4,
+    'MINTCHIP' => 2,
+    'VANILLA' => 1,
+    'PISTACHIO:ROCKYROAD:MINTCHIP:VANILLA:CHOCOLATE' => 3,
+  );
+  for my $b1 ( keys %bweight ) { $B1->{'ballots'}{$b1}{'votevalue'} = $bweight{$b1} }
+  my $W1 = Vote::Count->new( BallotSet => $B1 );
+  my $W1Expect = {
+          'VANILLA' => 22,
+          'MINTCHIP' => 19,
+          'STRAWBERRY' => 0,
+          'PISTACHIO' => 6,
+          'RUMRAISIN' => 0,
+          'ROCKYROAD' => 0,
+          'CHOCOLATE' => 6,
+          'CARAMEL' => 0,
+  };
+  my $W1Result = $W1->TopCount();
+  is_deeply(
+    $W1Result->RawCount(), $W1Expect, 'Assigned Integer weights to data2' );
+  is(
+    $W1Result->Leader()->{'winner'},
+    'VANILLA',
+    'picked winner with int weights.');
+  is( $W1->TopCountMajority()->{'winner'}, undef, 'does not have majority winner');
+  is_deeply( $W1->TopCountMajority(), { 'votes' => 53, 'threshold' => 27 },
+    'check votes and threshold from TopCountMajority');
+  # Do it again with Floats.
+  %bweight = (
+    'MINTCHIP:CARAMEL:RUMRAISIN' => .5,
+    'CHOCOLATE:MINTCHIP:VANILLA' => 1.6,
+    'VANILLA:CHOCOLATE:STRAWBERRY' => 4,
+    'MINTCHIP' => 2.2,
+    'VANILLA' => 1,
+    'PISTACHIO:ROCKYROAD:MINTCHIP:VANILLA:CHOCOLATE' => 3.1,
+  );
+  for my $b1 ( keys %bweight ) { $B1->{'ballots'}{$b1}{'votevalue'} = $bweight{$b1} }
+  my $W2 = Vote::Count->new( BallotSet => $B1 );
+  my $W2Active =  {
+          'MINTCHIP' => 1,
+          'STRAWBERRY' => 1,
+          'RUMRAISIN' => 1,
+          'ROCKYROAD' => 1,
+          'CHOCOLATE' => 1,
+          'CARAMEL' => 1,
+  };
+  my $W2Expect = {
+          'MINTCHIP' => 9.3,
+          'STRAWBERRY' => 0,
+          'RUMRAISIN' => 0,
+          'ROCKYROAD' => 6.2,
+          'CHOCOLATE' => 21.6,
+          'CARAMEL' => 0,
+  };
+  my $W2Result = $W2->TopCount( $W2Active );
+  is_deeply( $W2Result->RawCount(), $W2Expect,
+    'Assigned Floating Point weights to data2 with arbitrary active set' );
+  is( $W2Result->Leader()->{'winner'},
+    'CHOCOLATE', 'picked winner with float weights and choices inactive');
+  is( $W2->TopCountMajority( $W2Result )->{'winner'},
+    'CHOCOLATE', 'has majority winner');
+  is( $W2->TopCountMajority( $W2Result )->{'votes'}, 37.1,
+     'fractional number of votes reported by TopCountMajority');
 };
 
 done_testing();

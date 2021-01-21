@@ -41,6 +41,8 @@ Returns a RankCount object containing the TopCount.
 
 TopCount supports both Ranked and Range Ballot Types.
 
+For RCV, TopCount respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
+
 =head3 Top Counting Range Ballots
 
 Since Range Ballots often allow ranking choices equally, those equal votes need to be split. To prevent Rounding errors in the addition on large sets the fractions are added as Rational Numbers. The totals are converted to floating point numbers with a precision of 3 places. Three was arbitrarily chosen because it is reasonable for display, but precise enough as a truncation point to be unlikely to cause an error.
@@ -84,7 +86,7 @@ TOPCOUNTBALLOTS:
     my @votes = $ballots{$b}->{'votes'}->@*;
     for my $v (@votes) {
       if ( defined $topcount{$v} ) {
-        $topcount{$v} += $ballots{$b}{'count'};
+        $topcount{$v} += $ballots{$b}{'count'} * $ballots{$b}{'votevalue'};
         next TOPCOUNTBALLOTS;
       }
     }
