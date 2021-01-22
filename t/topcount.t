@@ -50,6 +50,8 @@ my $expecttc2 = {
 };
 is_deeply( $tc2->RawCount(), $expecttc2,
   "Check rawcount to confirm Topcounted a small set with AN active list" );
+is_deeply( $VC1->LastTopCountBallots(), $expecttc2,
+  'for non-weighted LastTopCountBallots should match the TopCount');
 
 is_deeply(
   $VC1->TopCountMajority(),
@@ -192,6 +194,21 @@ subtest 'weighted topcount' => sub {
   is( $W1->TopCountMajority()->{'winner'}, undef, 'does not have majority winner');
   is_deeply( $W1->TopCountMajority(), { 'votes' => 53, 'threshold' => 27 },
     'check votes and threshold from TopCountMajority');
+  my $W1ExpectLastTopCountBallots = {
+          'VANILLA' => 7,
+          'MINTCHIP' => 5,
+          'STRAWBERRY' => 0,
+          'PISTACHIO' => 2,
+          'RUMRAISIN' => 0,
+          'ROCKYROAD' => 0,
+          'CHOCOLATE' => 1,
+          'CARAMEL' => 0,
+  };
+  is_deeply(
+    $W1->LastTopCountBallots(),
+    $W1ExpectLastTopCountBallots,
+    'LastTopCountBallots returns the number of ballots voting equivalent to unweighted'
+  );
   # Do it again with Floats.
   %bweight = (
     'MINTCHIP:CARAMEL:RUMRAISIN' => .5,

@@ -43,6 +43,10 @@ TopCount supports both Ranked and Range Ballot Types.
 
 For RCV, TopCount respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
 
+=head3 LastTopCountBallots
+
+Returns a hashref of the unweighted raw count from the last TopCount operation.
+
 =head3 Top Counting Range Ballots
 
 Since Range Ballots often allow ranking choices equally, those equal votes need to be split. To prevent Rounding errors in the addition on large sets the fractions are added as Rational Numbers. The totals are converted to floating point numbers with a precision of 3 places. Three was arbitrarily chosen because it is reasonable for display, but precise enough as a truncation point to be unlikely to cause an error.
@@ -50,6 +54,12 @@ Since Range Ballots often allow ranking choices equally, those equal votes need 
 It is recommended to install Math::BigInt::GMP to improve performance on the Rational Number math used for Top Count on Range Ballots.
 
 =cut
+
+has 'LastTopCountBallots' => (
+  is => 'rw',
+  isa     => 'HashRef',
+  required => 0,
+);
 
 sub _RangeTopCount ( $self, $active = undef ) {
   $active = $self->Active() unless defined $active;
@@ -81,16 +91,19 @@ sub _RCVTopCount ( $self, $active = undef ) {
   my %ballots   = ( $ballotset{'ballots'}->%* );
   $active = $self->Active() unless defined $active;
   my %topcount = ( map { $_ => 0 } keys( $active->%* ) );
+  my %lasttopcount = ( map { $_ => 0 } keys( $active->%* ) );
 TOPCOUNTBALLOTS:
   for my $b ( keys %ballots ) {
     my @votes = $ballots{$b}->{'votes'}->@*;
     for my $v (@votes) {
       if ( defined $topcount{$v} ) {
         $topcount{$v} += $ballots{$b}{'count'} * $ballots{$b}{'votevalue'};
+        $lasttopcount{$v} += $ballots{$b}{'count'};
         next TOPCOUNTBALLOTS;
       }
     }
   }
+  $self->LastTopCountBallots( \%lasttopcount );
   return Vote::Count::RankCount->Rank( \%topcount );
 }
 

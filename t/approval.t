@@ -168,6 +168,7 @@ subtest 'weighted approval' => sub {
   is_deeply( $W1Result->RawCount(), $W1Expect,
     'Assigned Integer weights to data2' );
   is( $W1Result->Leader()->{'winner'}, 'VANILLA', 'picked winner with int weights.');
+
   # Do it again with Floats.
   %bweight = (
     'MINTCHIP:CARAMEL:RUMRAISIN' => .5,
@@ -193,6 +194,9 @@ subtest 'weighted approval' => sub {
   is_deeply( $W2Result->RawCount(), $W2Expect,
     'Assigned Floating Point weights to data2' );
   is( $W2Result->Leader()->{'winner'}, 'VANILLA', 'picked winner with float weights.');
+  is_deeply( $expectA1, $W2->LastApprovalBallots(),
+      "LastApprovalBallots returns the same result as an earlier unweighted run");
+
 
 };
 

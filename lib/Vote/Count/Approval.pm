@@ -41,6 +41,10 @@ Returns a RankCount object for the current Active Set taking an optional argumen
 
 For RCV, Approval respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
 
+=head3 LastApprovalBallots
+
+Returns a hashref of the unweighted raw count from the last Approval operation.
+
 =head1 Method NonApproval
 
 The opposite of Approval. Returns a RankCount object for the current Active Set of the non-exhausted ballots not supporting a choice. It does not have the option to provide an Active Set. Only available for Ranked Ballots.
@@ -55,16 +59,25 @@ For Ranked Ballots the cutoff is ignored. If a cutoff is desired for Ranked Ball
 
 =cut
 
-sub _approval_rcv_do ( $active, $ballots ) {
+has 'LastApprovalBallots' => (
+  is => 'rw',
+  isa     => 'HashRef',
+  required => 0,
+);
+
+sub _approval_rcv_do ( $I, $active, $ballots ) {
   my %approval = ( map { $_ => 0 } keys( $active->%* ) );
+  my %lastappcount = ( map { $_ => 0 } keys( $active->%* ) );
   for my $b ( keys %{$ballots} ) {
     my @votes = $ballots->{$b}->{'votes'}->@*;
     for my $v (@votes) {
       if ( defined $approval{$v} ) {
         $approval{$v} += $ballots->{$b}{'count'} * $ballots->{$b}{'votevalue'} ;
+        $lastappcount{$v} += $ballots->{$b}{'count'};
       }
     }
   }
+  $I->LastApprovalBallots( \%lastappcount );
   return Vote::Count::RankCount->Rank( \%approval );
 }
 
@@ -88,14 +101,14 @@ sub Approval ( $self, $active = undef, $cutoff = 0 ) {
       $cutoff );
   }
   else {
-    _approval_rcv_do( $active, $BallotSet{'ballots'} );
+    $self->_approval_rcv_do( $active, $BallotSet{'ballots'} );
   }
 }
 
 sub _non_approval_rcv_do ( $I, $ballots ) {
   my $active = $I->Active();
   my %nonapproval = ( map { $_ => 0 } keys( $active->%* ) );
-  my %approval = %{_approval_rcv_do ( $active, $ballots )->RawCount()};
+  my %approval = %{$I->_approval_rcv_do ( $active, $ballots )->RawCount()};
   my $activevotes = $I->VotesActive();
   for my $A ( keys %nonapproval) {
     $nonapproval{ $A } = $activevotes - $approval{ $A };
