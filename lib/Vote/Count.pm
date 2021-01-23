@@ -32,14 +32,7 @@ Vote::Count
 
 has 'BallotSet' => ( is => 'ro', isa => 'HashRef', required => 1 );
 
-has TieBreakMethod => (
-  is       => 'rw',
-  isa      => 'Str',
-  required => 0,
-);
-
-# This is only used for the precedence tiebreaker!
-has PrecedenceFile => (
+has 'TieBreakMethod' => (
   is       => 'rw',
   isa      => 'Str',
   required => 0,

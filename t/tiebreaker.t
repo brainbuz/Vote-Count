@@ -153,21 +153,58 @@ subtest 'utility method to generate a Predictable Random Precedence File.' =>
 
   my ( $dst, $tmp2 ) = tempfile();
   close $dst;
-  my @prec2       = Vote::Count->new(
-      BallotSet => $ties->BallotSet )->CreatePrecedenceRandom($tmp2);
+  my @prec2 = Vote::Count->new( BallotSet => $ties->BallotSet )
+    ->CreatePrecedenceRandom($tmp2);
   my $expectprec2 = [
     qw/BUBBLEGUM CHOCOLATE PISTACHIO CARAMEL VANILLA STRAWBERRY
       MINTCHIP RUMRAISIN FUDGESWIRL CHERRY CHOCCHUNK ROCKYROAD/
   ];
-  is_deeply(
-    \@prec2, $expectprec2,
-    'Predictable Randomized order for ballotfile ties1.txt'
-  );
+  is_deeply( \@prec2, $expectprec2,
+    'Predictable Randomized order for ballotfile ties1.txt' );
   @readback = path($tmp2)->lines();
   chomp(@readback);
+  is_deeply( \@readback, $expectprec2,
+    "readback of precedence written to generated $tmp2" );
+  };
+
+subtest 'TieBreakerFallBackPrecedence' => sub {
+  my $ties = Vote::Count->new(
+    BallotSet                    => read_ballots('t/data/ties1.txt'),
+    TieBreakerFallBackPrecedence => 1,
+  );
+  # $ties->TieBreakerFallBackPrecedence(1);
+  ok( $ties->TieBreakerFallBackPrecedence(), 'fallback precedence is set' );
+  is( $ties->PrecedenceFile(),
+    '/tmp/precedence.txt', 'precedence file set when not provided' );
+
+  my @thetie   = qw(PISTACHIO RUMRAISIN BUBBLEGUM);
+  my $allintie = $ties->TieBreakerGrandJunction(@thetie);
+  # note( $ties->logv() );
+  is( $allintie->{'winner'}, 'PISTACHIO',
+    'GrandJunction Method goes to fallback.' );
+  note('Verify fallback with the tied TWEEDLES set');
+  my $tweedles = Vote::Count->new(
+      BallotSet                    => read_ballots('t/data/tweedles.txt'),
+      TieBreakerFallBackPrecedence => 1,
+    );
+  for my $method (qw /borda topcount approval grandjunction borda_all/) {
+    is(
+      $tweedles->TieBreaker(
+        $method, $tweedles->Active(),
+        $tweedles->GetActiveList
+      ),
+      'TWEEDLE_THREE',
+      "fallback from $method picks precedence winner"
+    );
+  }
+  my $method = 'all';
   is_deeply(
-    \@readback, $expectprec2,
-    "readback of precedence written to generated $tmp2"
+      [sort ($tweedles->TieBreaker(
+        $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
+        $tweedles->GetActiveList()
+      ))],
+      [ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
+      "fallback from all returns list of choices in tie"
   );
 };
 

@@ -12,7 +12,7 @@ use List::Util qw( min max sum );
 use Path::Tiny;
 use Data::Dumper;
 
-our $VERSION='1.09';
+our $VERSION = '1.09';
 
 =head1 NAME
 
@@ -37,15 +37,14 @@ The most important thing for a Tie Breaker to do is it should use some reproduci
 
 TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker is called internally from the resolution method via the TieBreaker function, which requires the caller to pass its TieBreakMethod.
 
-=head2 TieBreakMethod argument to Vote::Count->new
+=head1 TieBreakMethod argument to Vote::Count->new
 
   'approval'
-  'all'
+  'all' [ eliminate all tied choices ]
   'borda' [ applies Borda Count to current Active set ]
   'barda_all' [ applies Borda Count to all of the choices ]
-  'grandjunction'
-  'precedencefile' [ requires also setting PrecedenceFile]
-
+  'grandjunction' [ more resolveable than simple TopCount would be ]
+  'precedence' [ requires also setting PrecedenceFile ]
 
 =head1 Grand Junction
 
@@ -102,6 +101,31 @@ The Tie Breaking will be logged to the verbose log, any number of tied choices m
 
 =cut
 
+# This is only used for the precedence tiebreaker and fallback!
+has 'PrecedenceFile' => (
+  is       => 'rw',
+  isa      => 'Str',
+  required => 0,
+);
+
+has 'TieBreakerFallBackPrecedence' => (
+  is      => 'rw',
+  isa     => 'Bool',
+  default => 0,
+  lazy    => 0,
+  trigger => \&_triggercheckprecedence,
+);
+
+sub _triggercheckprecedence ( $I, $new, $old = undef ) {
+  if ($new) {
+    unless ( $I->PrecedenceFile() ) {
+      $I->PrecedenceFile('/tmp/precedence.txt');
+      $I->logt( "Generated FallBack TieBreaker Precedence Order: "
+          . join( ', ', $I->CreatePrecedenceRandom() ) );
+    }
+  }
+}
+
 sub TieBreakerGrandJunction ( $self, @choices ) {
   my $ballots = $self->BallotSet()->{'ballots'};
   my %current = ( map { $_ => 0 } @choices );
@@ -136,7 +160,13 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
     }
     $round++;
   }
-  return { 'winner' => 0, 'tie' => 1, 'tied' => \@choices };
+  if ( $self->TieBreakerFallBackPrecedence() ) {
+    $self->logv( 'Applying Precedence fallback') if $self->can('logv');
+    return $self->TieBreakerPrecedence(@choices);
+  }
+  else {
+    return { 'winner' => 0, 'tie' => 1, 'tied' => \@choices };
+  }
 }
 
 # =head1 Borda-like Later Harm Protected
@@ -164,51 +194,57 @@ The Precedence list takes the choices of the election one per line. Choices defe
  my $Election = Vote::Count->new(
    BallotSet => read_ballots('somefile'),
    TieBreakMethod => 'precedence',
-   PrecedenceFile => 'precedencefile');
+   PrecedenceFile => '/path/to/precedencefile');
+
+=head2 CreatePrecedenceRandom
+
+Creates a Predictable Psuedo Random Precedence file, and returns the list. Randomizes the choices using the number of ballots as the Random Seed for Perl's built in rand() function. For any given Ballot File, it will always return the same list. If the precedence filename argument is not given it defaults to '/tmp/precedence.txt'. This is the best solution to use where the Rules call for Random, in a large election the number of ballots cast will be sufficiently random, while anyone with access to Perl can reproduce the Precedence file.
+
+  my @precedence = Vote::Count->new( BallotSet => read_ballots('somefile') )
+    ->CreatePrecedenceRandom( '/tmp/precedence.txt');
+
+=head2 TieBreakerFallBackPrecedence
+
+This optional argument enables or disables using precedence as a fallback, generates /tmp/precedence.txt if no PrecedenceFile is specified. Default is off.
 
 =cut
 
 sub TieBreakerPrecedence ( $I, @choices ) {
   my %ordered = ();
-  my $start = 0;
+  my $start   = 0;
   for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
-    $_ =~ s/\s//g; #strip out any accidental whitespace
-    $ordered{ $_ } = $start++ ;
+    $_ =~ s/\s//g;    #strip out any accidental whitespace
+    $ordered{$_} = $start++;
   }
   my $ballots = $I->BallotSet()->{'ballots'};
-  my $winner = $choices[0];
-  for my $c ( @choices ) {
-    unless( defined $ordered{$c} ) { die "Choice $c missing from precedence file\n" }
-    if ( $ordered{$c} < $ordered{$winner } ) { $winner = $c }
+  my $winner  = $choices[0];
+  for my $c (@choices) {
+    unless ( defined $ordered{$c} ) {
+      die "Choice $c missing from precedence file\n";
+    }
+    if ( $ordered{$c} < $ordered{$winner} ) { $winner = $c }
   }
   return { 'winner' => $winner, 'tie' => 0, 'tied' => [] };
 }
 
-=head1 CreatePrecedenceRandom
-
-Creates a Predictable Psuedo Random Precedence file, and returns the list. Randomizes the choices using the number of ballots as the Random Seed for Perl's built in rand() function. For any given Ballot File, it will always return the same list. If the precedence filename argument is not given it defaults to '/tmp/precedence.txt'.
-
-  my @precedence = Vote::Count->new( BallotSet => read_ballots('somefile') )
-    ->CreatePrecedenceRandom( '/tmp/precedence.txt');
-
-=cut
-
-sub CreatePrecedenceRandom( $I, $outfile='/tmp/precedence.txt' ) {
-  my @choices = $I->GetActiveList();
+sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
+  my @choices    = $I->GetActiveList();
   my %randomized = ();
-  srand( $I->BallotSet()->{'votescast'} ) ;
+  srand( $I->BallotSet()->{'votescast'} );
   while (@choices) {
-    my $next = shift @choices;
-    my $random = int(rand( 1000000 ));
+    my $next   = shift @choices;
+    my $random = int( rand(1000000) );
     if ( defined $randomized{$random} ) {
       # collision, this choice needs to do again.
-      unshift @choices, ( $next );
-    } else {
+      unshift @choices, ($next);
+    }
+    else {
       $randomized{$random} = $next;
     }
   }
-  my @precedence = ( map { $randomized{$_} } sort {$a <=> $b} ( keys %randomized ) );
-  path($outfile)->spew( join( "\n", @precedence ) );
+  my @precedence =
+    ( map { $randomized{$_} } sort { $a <=> $b } ( keys %randomized ) );
+  path($outfile)->spew( join( "\n", @precedence ) . "\n" );
   return @precedence;
 }
 
@@ -216,7 +252,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
   if ( $tiebreaker eq 'all' )  { return @choices }
   if ( $tiebreaker eq 'none' ) { return () }
   my $choices_hashref = { map { $_ => 1 } @choices };
-  my $ranked = undef;
+  my $ranked          = undef;
   if ( $tiebreaker eq 'borda' ) {
     $ranked = $I->Borda($active);
   }
@@ -225,18 +261,19 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
   }
   elsif ( $tiebreaker eq 'approval' ) {
     $ranked = $I->Approval($choices_hashref);
-  } elsif ( $tiebreaker eq 'topcount') {
-      $ranked = $I->TopCount( $choices_hashref );
+  }
+  elsif ( $tiebreaker eq 'topcount' ) {
+    $ranked = $I->TopCount($choices_hashref);
   }
   elsif ( $tiebreaker eq 'grandjunction' ) {
     my $GJ = $I->TieBreakerGrandJunction(@choices);
-    if    ( $GJ->{'winner'} ) { return ( $GJ->{'winner'} ) }
+    if    ( $GJ->{'winner'} ) { return $GJ->{'winner'}   }
     elsif ( $GJ->{'tie'} )    { return $GJ->{'tied'}->@* }
     else { die "unexpected (or no) result from $tiebreaker!\n" }
   }
   elsif ( $tiebreaker eq 'precedence' ) {
     # The one nice thing about precedence is that there is always a winner.
-    return $I->TieBreakerPrecedence( @choices )->{'winner'};
+    return $I->TieBreakerPrecedence(@choices)->{'winner'};
   }
   else { die "undefined tiebreak method $tiebreaker!\n" }
   my @highchoice = ();
@@ -260,7 +297,12 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
     'terse'   => $terse,
     'verbose' => $ranked->RankTable(),
   };
-  return @highchoice;
+  if ( @highchoice > 1 ) {
+    if ( $I->TieBreakerFallBackPrecedence() ) {
+      return( $I->TieBreakerPrecedence(@choices)->{'winner'} );
+    }
+  }
+  return( @highchoice );
 }
 
 1;
