@@ -68,11 +68,11 @@ subtest 'object tiebreakers' => sub {
   };
   my $I5 = Vote::Count->new( BallotSet => read_ballots('t/data/irvtie.txt') );
   my @resolve1 =
-    sort $I5->TieBreaker( 'all', $active, ( 'VANILLA', 'CHOCOLATE' ) );
+    sort $I5->TieBreaker( 'none', $active, ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
     \@resolve1,
     [ 'CHOCOLATE', 'VANILLA' ],
-    'All returns both tied choices'
+    'none returns both tied choices'
   );
   my @resolve2 =
     sort $I5->TieBreaker( 'borda', $active, ( 'VANILLA', 'CHOCOLATE' ) );
@@ -98,11 +98,11 @@ subtest 'object tiebreakers' => sub {
   is_deeply( \@resolve6, ['VANILLA'], 'modified grand junction' );
 
   my @resolve7 =
-    $I5->TieBreaker( 'none', $active, ( 'VANILLA', 'ROCKYROAD' ) );
+    $I5->TieBreaker( 'all', $active, ( 'VANILLA', 'ROCKYROAD' ) );
 
   note( Dumper @resolve7 );
 
-  is( @resolve7, 0, 'None, returns an empty array.' );
+  is( @resolve7, 0, 'all returns an empty array.' );
 };
 
 subtest 'Precedence' => sub {
@@ -193,7 +193,7 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
         $method, $tweedles->Active(),
         $tweedles->GetActiveList
       ),
-      'TWEEDLE_THREE',
+      ('TWEEDLE_THREE'),
       "fallback from $method picks precedence winner"
     );
   }
@@ -203,9 +203,20 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
         $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
         $tweedles->GetActiveList()
       ) ],
+      [],
+      "fallback from all returns list of choices in tie"
+  );
+  $method = 'none';
+  is_deeply(
+      [ $tweedles->TieBreaker(
+        $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
+        $tweedles->GetActiveList()
+      ) ],
       [ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
       "fallback from all returns list of choices in tie"
   );
 };
+
+      #$[ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
 
 done_testing();

@@ -44,6 +44,7 @@ TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker
   'borda' [ applies Borda Count to current Active set ]
   'barda_all' [ applies Borda Count to all of the choices ]
   'grandjunction' [ more resolveable than simple TopCount would be ]
+  'none' [ eliminate no choices ]
   'precedence' [ requires also setting PrecedenceFile ]
 
 =head1 Grand Junction
@@ -183,7 +184,7 @@ Implements some basic methods for resolving ties. The default value for IRV is '
 
   my @keep = $self->TieBreaker( $tiebreaker, $active, @tiedchoices );
 
-TieBreaker returns a list containing the winner, if the method is 'none' the list is empty, if 'all' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
+TieBreaker returns a list containing the winner, if the method is 'all' the list is empty, if 'none' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
 
 =head1 Precedence
 
@@ -249,8 +250,8 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
 }
 
 sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
-  if ( $tiebreaker eq 'all' )  { return @tiedchoices }
-  if ( $tiebreaker eq 'none' ) { return () }
+  if ( $tiebreaker eq 'none' )  { return @tiedchoices }
+  if ( $tiebreaker eq 'all' ) { return () }
   my $choices_hashref = { map { $_ => 1 } @tiedchoices };
   my $ranked          = undef;
   if ( $tiebreaker eq 'borda' ) {
