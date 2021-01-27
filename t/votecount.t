@@ -19,9 +19,9 @@ my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data1.txt') );
 
 my @ChoicesVC1 = sort ( qw/VANILLA CHOCOLATE STRAWBERRY PISTACHIO ROCKYROAD MINTCHIP CARAMEL RUMRAISIN/);
 is_deeply(
-  [$VC1->Choices()],
+  [$VC1->GetChoices()],
   \@ChoicesVC1,
-  'Choices method returns expected list' );
+  'GetChoices method returns expected list' );
 
 is( $VC1->BallotSet()->{'options'}{'rcv'},
   1, 'BallotSet option is set to rcv' );
@@ -88,5 +88,8 @@ is_deeply( [ $VC2->GetActiveList() ],
 $VC2->SetActiveFromArrayRef( [ 'CHOCOLATE', 'MINTCHIP' ]);
 is_deeply( $VC2->Active(), { 'CHOCOLATE' => 1, 'MINTCHIP' => 1},
   'SetActiveFromArrayRef' );
+
+is( $VC2->GetBallots()->{'VANILLA'}{'count'}, 2,
+  'Confirm a value from GetBallots');
 
 done_testing();

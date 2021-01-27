@@ -229,4 +229,6 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
   );
 };
 
+      #$[ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
+
 done_testing();

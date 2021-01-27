@@ -12,7 +12,7 @@ use Storable 3.15 'dclone';
 
 # ABSTRACT: Role shared by Count and Matrix for common functionality. See Vote::Count Documentation.
 
-our $VERSION='1.10';
+our $VERSION = '1.10';
 
 =head1 NAME
 
@@ -33,9 +33,15 @@ has 'Active' => (
   builder => '_defaultactive',
 );
 
-# use Data::Dumper;
-# sub Choices ( $self ) { die Dumper keys( $self->BallotSet()->{'choices'}->%* ) }
-sub Choices ( $self ) { return sort keys( $self->BallotSet()->{'choices'}->%* ) }
+has 'VoteValue' => (
+  is      => 'ro',
+  isa     => 'Int',
+  default => 1,
+);
+
+sub GetChoices ( $self ) {
+  return sort keys( $self->BallotSet()->{'choices'}->%* );
+}
 
 sub _defaultactive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
 
@@ -43,8 +49,8 @@ sub SetActive ( $self, $active ) {
   # Force deref
   $self->{'Active'} = dclone $active;
   # if there is a child PairMatrix, update it too.
-  if ( defined $self->{'PairMatrix'}) {
-    $self->{'PairMatrix'}{'Active'} = $self->{'Active'}
+  if ( defined $self->{'PairMatrix'} ) {
+    $self->{'PairMatrix'}{'Active'} = $self->{'Active'};
   }
 }
 
@@ -65,7 +71,7 @@ sub GetActive ( $self ) {
 
 # this deref also happens a lot
 sub GetActiveList( $self ) {
-  return( sort( keys( $self->Active->%* ) ) );
+  return ( sort( keys( $self->Active->%* ) ) );
 }
 
 sub VotesCast ( $self ) {
@@ -74,20 +80,20 @@ sub VotesCast ( $self ) {
 
 sub VotesActive ( $self ) {
   unless ( $self->BallotSet()->{'options'}{'rcv'} ) {
-    die "VotesActive Method only supports rcv"
+    die "VotesActive Method only supports rcv";
   }
   my $set         = $self->BallotSet();
   my $active      = $self->Active();
   my $activeCount = 0;
 LOOPVOTESACTIVE:
-    for my $B ( values $set->{ballots}->%* ) {
-        for my $V ( $B->{'votes'}->@* ) {
-            if ( defined $active->{$V} ) {
-                $activeCount += $B->{'count'};
-                next LOOPVOTESACTIVE;
-            }
-        }
+  for my $B ( values $set->{ballots}->%* ) {
+    for my $V ( $B->{'votes'}->@* ) {
+      if ( defined $active->{$V} ) {
+        $activeCount += $B->{'count'};
+        next LOOPVOTESACTIVE;
+      }
     }
+  }
   return $activeCount;
 }
 
@@ -103,8 +109,11 @@ sub BallotSetType ( $self ) {
   }
 }
 
-1;
+sub GetBallots ( $self ) {
+  return $self->BallotSet()->{'ballots'};
+}
 
+1;
 
 =head2 Usage
 
@@ -135,11 +144,9 @@ Returns a simple array of the members of the Active Set.
 
 Sets the Active Set to the full choices list of the BallotSet.
 
-
 =head3 SetActive
 
 Sets the Active Set to provided HashRef. The values to the hashref should evaluate as True.
-
 
 =head3 SetActiveFromArrayRef
 
@@ -150,6 +157,9 @@ Same as SetActive except it takes an ArrayRef of the choices to be set as Active
 
 Get BallotSet
 
+=head3 GetBallots
+
+Get just the Ballots from the BallotSet.
 
 =head3 PairMatrix
 
@@ -169,6 +179,12 @@ Returns the number of votes cast.
 =head3 VotesActive
 
 Returns the number of non-exhausted ballots based on the current Active Set.
+
+=head3 VoteValue
+
+Sets a VoteValue for use in weighted systems like STV. The default value is 1. Approval and TopCount are aware of VoteValue for RCV ballots.
+
+=cut
 
 #FOOTER
 

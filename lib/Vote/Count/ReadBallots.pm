@@ -36,6 +36,7 @@ All public methods are exported.
     ballots   {
         CHOCOLATE:MINTCHIP:VANILLA {
             count   1,
+            votevalue   1, # needed for STV support
             votes   [
                 [0] "CHOCOLATE",
                 [1] "MINTCHIP",
@@ -49,7 +50,6 @@ All public methods are exported.
         VANILLA      1
     },
     votescast        1,
-    votevalue        1, # needed for STV support
     comment   "# Optional Comment",
     options   {
       rcv   1

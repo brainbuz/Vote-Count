@@ -43,7 +43,7 @@ TopCount supports both Ranked and Range Ballot Types.
 
 For RCV, TopCount respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
 
-=head3 LastTopCountBallots
+=head3 LastTopCountUnWeighted
 
 Returns a hashref of the unweighted raw count from the last TopCount operation.
 
@@ -55,7 +55,7 @@ It is recommended to install Math::BigInt::GMP to improve performance on the Rat
 
 =cut
 
-has 'LastTopCountBallots' => (
+has 'LastTopCountUnWeighted' => (
   is => 'rw',
   isa     => 'HashRef',
   required => 0,
@@ -94,26 +94,44 @@ sub _RCVTopCount ( $self, $active = undef ) {
   my %lasttopcount = ( map { $_ => 0 } keys( $active->%* ) );
 TOPCOUNTBALLOTS:
   for my $b ( keys %ballots ) {
+    # reset topchoice so that if there is none the value will be false.
+    $ballots{$b}{'topchoice'} = 'NONE';
     my @votes = $ballots{$b}->{'votes'}->@*;
     for my $v (@votes) {
       if ( defined $topcount{$v} ) {
         $topcount{$v} += $ballots{$b}{'count'} * $ballots{$b}{'votevalue'};
         $lasttopcount{$v} += $ballots{$b}{'count'};
+        $ballots{$b}{'topchoice'} = $v;
         next TOPCOUNTBALLOTS;
       }
     }
   }
-  $self->LastTopCountBallots( \%lasttopcount );
+  $self->LastTopCountUnWeighted( \%lasttopcount );
   return Vote::Count::RankCount->Rank( \%topcount );
 }
 
 sub TopCount ( $self, $active = undef ) {
+  # An STV method was performing a TopCount to reset the topchoices
+  # after elimination. Decided it was better to check here.
+  unless( keys( $self->Active()->%* ) or defined( $active) ) {
+    return { 'error' => 'no active choices'};
+  }
   if ( $self->BallotSet()->{'options'}{'rcv'} == 1 ) {
     return $self->_RCVTopCount($active);
   }
   elsif ( $self->BallotSet()->{'options'}{'range'} == 1 ) {
     return $self->_RangeTopCount($active);
   }
+}
+
+=head3 TopChoice( $ballot_identifier )
+
+Returns the Top Choice on a ballot from the last TopCount operation
+
+=cut
+
+sub TopChoice( $self, $ballot ) {
+  return $self->BallotSet()->{ballots}{$ballot}{topchoice};
 }
 
 =head2 Method TopCountMajority
