@@ -126,9 +126,9 @@ sub _triggercheckprecedence ( $I, $new, $old = undef ) {
   }
 }
 
-sub TieBreakerGrandJunction ( $self, @choices ) {
+sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
   my $ballots = $self->BallotSet()->{'ballots'};
-  my %current = ( map { $_ => 0 } @choices );
+  my %current = ( map { $_ => 0 } @tiedchoices );
   my $deepest = 0;
   for my $b ( keys $ballots->%* ) {
     my $depth = scalar $ballots->{$b}{'votes'}->@*;
@@ -144,28 +144,28 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
       }
     }
     my $max = max( values %current );
-    for my $c ( sort @choices ) {
+    for my $c ( sort @tiedchoices ) {
       $self->logv("\t$c: $current{$c}") if $self->can('logv');
     }
-    for my $c ( sort @choices ) {
+    for my $c ( sort @tiedchoices ) {
       if ( $current{$c} < $max ) {
         delete $current{$c};
         $self->logv("Tie Breaker $c eliminated") if $self->can('logv');
       }
     }
-    @choices = ( sort keys %current );
-    if ( 1 == @choices ) {
-      $self->logv("Tie Breaker Won By: $choices[0]") if $self->can('logv');
-      return { 'winner' => $choices[0], 'tie' => 0, 'tied' => [] };
+    @tiedchoices = ( sort keys %current );
+    if ( 1 == @tiedchoices ) {
+      $self->logv("Tie Breaker Won By: $tiedchoices[0]") if $self->can('logv');
+      return { 'winner' => $tiedchoices[0], 'tie' => 0, 'tied' => [] };
     }
     $round++;
   }
   if ( $self->TieBreakerFallBackPrecedence() ) {
     $self->logv( 'Applying Precedence fallback') if $self->can('logv');
-    return $self->TieBreakerPrecedence(@choices);
+    return $self->TieBreakerPrecedence(@tiedchoices);
   }
   else {
-    return { 'winner' => 0, 'tie' => 1, 'tied' => \@choices };
+    return { 'winner' => 0, 'tie' => 1, 'tied' => \@tiedchoices };
   }
 }
 
@@ -181,9 +181,9 @@ sub TieBreakerGrandJunction ( $self, @choices ) {
 
 Implements some basic methods for resolving ties. The default value for IRV is 'all', and the default value for Matrix is 'none'. 'all' is inappropriate for Matrix, and 'none' is inappropriate for IRV.
 
-  my @keep = $self->TieBreaker( $tiebreaker, $active, @choices );
+  my @keep = $self->TieBreaker( $tiebreaker, $active, @tiedchoices );
 
-TieBreaker returns a list containing the winner, if the method is 'none' the list is empty, if 'all' the original @choices list is returned. If the TieBreaker is a tie there will be multiple elements.
+TieBreaker returns a list containing the winner, if the method is 'none' the list is empty, if 'all' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
 
 =head1 Precedence
 
@@ -209,7 +209,7 @@ This optional argument enables or disables using precedence as a fallback, gener
 
 =cut
 
-sub TieBreakerPrecedence ( $I, @choices ) {
+sub TieBreakerPrecedence ( $I, @tiedchoices ) {
   my %ordered = ();
   my $start   = 0;
   for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
@@ -217,8 +217,8 @@ sub TieBreakerPrecedence ( $I, @choices ) {
     $ordered{$_} = $start++;
   }
   my $ballots = $I->BallotSet()->{'ballots'};
-  my $winner  = $choices[0];
-  for my $c (@choices) {
+  my $winner  =  $tiedchoices[0];
+  for my $c (@tiedchoices) {
     unless ( defined $ordered{$c} ) {
       die "Choice $c missing from precedence file\n";
     }
@@ -248,10 +248,10 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
   return @precedence;
 }
 
-sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
-  if ( $tiebreaker eq 'all' )  { return @choices }
+sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
+  if ( $tiebreaker eq 'all' )  { return @tiedchoices }
   if ( $tiebreaker eq 'none' ) { return () }
-  my $choices_hashref = { map { $_ => 1 } @choices };
+  my $choices_hashref = { map { $_ => 1 } @tiedchoices };
   my $ranked          = undef;
   if ( $tiebreaker eq 'borda' ) {
     $ranked = $I->Borda($active);
@@ -266,20 +266,20 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
     $ranked = $I->TopCount($choices_hashref);
   }
   elsif ( $tiebreaker eq 'grandjunction' ) {
-    my $GJ = $I->TieBreakerGrandJunction(@choices);
+    my $GJ = $I->TieBreakerGrandJunction(@tiedchoices);
     if    ( $GJ->{'winner'} ) { return $GJ->{'winner'}   }
     elsif ( $GJ->{'tie'} )    { return $GJ->{'tied'}->@* }
     else { die "unexpected (or no) result from $tiebreaker!\n" }
   }
   elsif ( $tiebreaker eq 'precedence' ) {
     # The one nice thing about precedence is that there is always a winner.
-    return $I->TieBreakerPrecedence(@choices)->{'winner'};
+    return $I->TieBreakerPrecedence(@tiedchoices)->{'winner'};
   }
   else { die "undefined tiebreak method $tiebreaker!\n" }
   my @highchoice = ();
   my $highest    = 0;
   my $counted    = $ranked->RawCount();
-  for my $c (@choices) {
+  for my $c (@tiedchoices) {
     if ( $counted->{$c} > $highest ) {
       @highchoice = ($c);
       $highest    = $counted->{$c};
@@ -290,7 +290,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
   }
   my $terse =
       "Tie Breaker $tiebreaker: "
-    . join( ', ', @choices )
+    . join( ', ', @tiedchoices )
     . "\nwinner(s): "
     . join( ', ', @highchoice );
   $I->{'last_tiebreaker'} = {
@@ -299,7 +299,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @choices ) {
   };
   if ( @highchoice > 1 ) {
     if ( $I->TieBreakerFallBackPrecedence() ) {
-      return( $I->TieBreakerPrecedence(@choices)->{'winner'} );
+      return( $I->TieBreakerPrecedence(@tiedchoices)->{'winner'} );
     }
   }
   return( @highchoice );

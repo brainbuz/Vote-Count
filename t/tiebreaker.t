@@ -199,10 +199,10 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
   }
   my $method = 'all';
   is_deeply(
-      [sort ($tweedles->TieBreaker(
+      [ $tweedles->TieBreaker(
         $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
         $tweedles->GetActiveList()
-      ))],
+      ) ],
       [ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
       "fallback from all returns list of choices in tie"
   );
