@@ -12,13 +12,13 @@ use List::Util qw( min max sum );
 use Path::Tiny;
 use Data::Dumper;
 
-our $VERSION = '1.09';
+our $VERSION='1.10';
 
 =head1 NAME
 
 Vote::Count::TieBreaker
 
-=head1 VERSION 1.09
+=head1 VERSION 1.10
 
 =head1 Synopsis
 
@@ -118,7 +118,7 @@ has 'TieBreakerFallBackPrecedence' => (
 );
 
 sub _triggercheckprecedence ( $I, $new, $old = undef ) {
-  if ($new) {
+  if ($new) { # uncoverable statement
     unless ( $I->PrecedenceFile() ) {
       $I->PrecedenceFile('/tmp/precedence.txt');
       $I->logt( "Generated FallBack TieBreaker Precedence Order: "
@@ -137,7 +137,7 @@ sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
   }
   my $round = 1;
   while ( $round <= $deepest ) {
-    $self->logv("Tie Breaker Round: $round") if $self->can('logv');
+    $self->logv("Tie Breaker Round: $round");
     for my $b ( keys $ballots->%* ) {
       my $pick = $ballots->{$b}{'votes'}[ $round - 1 ] or next;
       if ( defined $current{$pick} ) {
@@ -146,23 +146,23 @@ sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
     }
     my $max = max( values %current );
     for my $c ( sort @tiedchoices ) {
-      $self->logv("\t$c: $current{$c}") if $self->can('logv');
+      $self->logv("\t$c: $current{$c}");
     }
     for my $c ( sort @tiedchoices ) {
       if ( $current{$c} < $max ) {
         delete $current{$c};
-        $self->logv("Tie Breaker $c eliminated") if $self->can('logv');
+        $self->logv("Tie Breaker $c eliminated");
       }
     }
     @tiedchoices = ( sort keys %current );
     if ( 1 == @tiedchoices ) {
-      $self->logv("Tie Breaker Won By: $tiedchoices[0]") if $self->can('logv');
+      $self->logv("Tie Breaker Won By: $tiedchoices[0]");
       return { 'winner' => $tiedchoices[0], 'tie' => 0, 'tied' => [] };
     }
     $round++;
   }
   if ( $self->TieBreakerFallBackPrecedence() ) {
-    $self->logv( 'Applying Precedence fallback') if $self->can('logv');
+    $self->logv( 'Applying Precedence fallback');
     return $self->TieBreakerPrecedence(@tiedchoices);
   }
   else {

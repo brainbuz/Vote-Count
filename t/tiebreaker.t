@@ -172,11 +172,9 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
     BallotSet                    => read_ballots('t/data/ties1.txt'),
     TieBreakerFallBackPrecedence => 1,
   );
-  # $ties->TieBreakerFallBackPrecedence(1);
   ok( $ties->TieBreakerFallBackPrecedence(), 'fallback precedence is set' );
   is( $ties->PrecedenceFile(),
     '/tmp/precedence.txt', 'precedence file set when not provided' );
-
   my @thetie   = qw(PISTACHIO RUMRAISIN BUBBLEGUM);
   my $allintie = $ties->TieBreakerGrandJunction(@thetie);
   # note( $ties->logv() );
@@ -184,9 +182,9 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
     'GrandJunction Method goes to fallback.' );
   note('Verify fallback with the tied TWEEDLES set');
   my $tweedles = Vote::Count->new(
-      BallotSet                    => read_ballots('t/data/tweedles.txt'),
-      TieBreakerFallBackPrecedence => 1,
+      BallotSet => read_ballots('t/data/tweedles.txt'),
     );
+  $tweedles->TieBreakerFallBackPrecedence(1);
   for my $method (qw /borda topcount approval grandjunction borda_all/) {
     is(
       $tweedles->TieBreaker(
@@ -195,6 +193,20 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
       ),
       ('TWEEDLE_THREE'),
       "fallback from $method picks precedence winner"
+    );
+  }
+
+  $tweedles->PrecedenceFile( 't/data/tweedlesprecedence2.txt');
+  # Coverage: Making sure the trigger is tested when changing precedence file.
+  $tweedles->TieBreakerFallBackPrecedence(1);
+  for my $method (qw /borda topcount approval grandjunction borda_all/) {
+    is(
+      $tweedles->TieBreaker(
+        $method, $tweedles->Active(),
+        $tweedles->GetActiveList
+      ),
+      ('TWEEDLE_DUM'),
+      "fallback from $method picks winner with different precedence file"
     );
   }
   my $method = 'all';
@@ -216,7 +228,5 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
       "fallback from all returns list of choices in tie"
   );
 };
-
-      #$[ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
 
 done_testing();
