@@ -33,18 +33,22 @@ has 'Active' => (
   builder => '_defaultactive',
 );
 
+# use Data::Dumper;
+# sub Choices ( $self ) { die Dumper keys( $self->BallotSet()->{'choices'}->%* ) }
+sub Choices ( $self ) { return sort keys( $self->BallotSet()->{'choices'}->%* ) }
+
 sub _defaultactive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
 
 sub SetActive ( $self, $active ) {
   # Force deref
   $self->{'Active'} = dclone $active;
   # if there is a child PairMatrix, update it too.
-  if ( defined $self->{'PairMatrix'}) { 
-    $self->{'PairMatrix'}{'Active'} = $self->{'Active'} 
+  if ( defined $self->{'PairMatrix'}) {
+    $self->{'PairMatrix'}{'Active'} = $self->{'Active'}
   }
 }
 
-sub ResetActive ( $self ) { 
+sub ResetActive ( $self ) {
   $self->{'Active'} = $self->_defaultactive();
 }
 
@@ -63,7 +67,6 @@ sub GetActive ( $self ) {
 sub GetActiveList( $self ) {
   return( sort( keys( $self->Active->%* ) ) );
 }
-
 
 sub VotesCast ( $self ) {
   return $self->BallotSet()->{'votescast'};
@@ -119,6 +122,9 @@ Get Active Set as HashRef to the active set. Changing the new HashRef will chang
 
 Returns a hashref containing a copy of the Active Set.
 
+=head3 Choices
+
+Returns an array of all of the Choices in the Ballot Set.
 
 =head3 GetActiveList
 
@@ -152,7 +158,7 @@ Get a Matrix Object for the Active Set. Generated and cached on the first reques
 
 =head3 UpdatePairMatrix
 
-Regenerate and cache Matrix with current Active Set. 
+Regenerate and cache Matrix with current Active Set.
 
 
 =head3 VotesCast

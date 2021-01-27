@@ -15,7 +15,13 @@ use Data::Dumper;
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
 
-my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data1.txt'), );
+my $VC1 = Vote::Count->new( BallotSet => read_ballots('t/data/data1.txt') );
+
+my @ChoicesVC1 = sort ( qw/VANILLA CHOCOLATE STRAWBERRY PISTACHIO ROCKYROAD MINTCHIP CARAMEL RUMRAISIN/);
+is_deeply(
+  [$VC1->Choices()],
+  \@ChoicesVC1,
+  'Choices method returns expected list' );
 
 is( $VC1->BallotSet()->{'options'}{'rcv'},
   1, 'BallotSet option is set to rcv' );
@@ -28,7 +34,7 @@ $VC1->SetActiveFromArrayRef(
 is( $VC1->VotesActive(), 3, 'with short activelist VotesActive is only 3' );
 
 $VC1->ResetActive();
-is_deeply( 
+is_deeply(
   $VC1->GetActive(),
   $VC1->BallotSet()->{'choices'},
   'After resetting active the Active Set matches the BallotSet choices'  );
@@ -58,13 +64,13 @@ ok( stat("$tmp/vc2\.brief"),
 
 isa_ok( $VC2->PairMatrix(), ['Vote::Count::Matrix'], 'Confirm Matrix' );
 
-is_deeply( [ $VC2->GetActiveList() ], 
+is_deeply( [ $VC2->GetActiveList() ],
            [ $VC2->PairMatrix->GetActiveList() ],
            'active lists are the same between main object and pairmatrix');
 
 $VC2->SetActive( { 'CHOCOLATE' => 1, 'CARAMEL' => 1, 'VANILLA' => 1 } );
 
-is_deeply( [ $VC2->GetActiveList() ], 
+is_deeply( [ $VC2->GetActiveList() ],
            [ $VC2->PairMatrix->GetActiveList() ],
            'after SetActive to main object, active lists are the same between main object and pairmatrix');
 
@@ -75,7 +81,7 @@ is_deeply(
 );
 
 # is_deeply needs the array as an arrayref
-is_deeply( [ $VC2->GetActiveList() ], 
+is_deeply( [ $VC2->GetActiveList() ],
            [ qw/CARAMEL CHOCOLATE VANILLA/],
            'GetActiveList returns list of active choices');
 
