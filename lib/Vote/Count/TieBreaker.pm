@@ -102,6 +102,12 @@ The Tie Breaking will be logged to the verbose log, any number of tied choices m
 
 =cut
 
+has 'TieBreakMethod' => (
+  is       => 'rw',
+  isa      => 'Str',
+  required => 0,
+);
+
 # This is only used for the precedence tiebreaker and fallback!
 has 'PrecedenceFile' => (
   is       => 'rw',
@@ -118,13 +124,11 @@ has 'TieBreakerFallBackPrecedence' => (
 );
 
 sub _triggercheckprecedence ( $I, $new, $old = undef ) {
-  if ($new) { # uncoverable statement
     unless ( $I->PrecedenceFile() ) {
       $I->PrecedenceFile('/tmp/precedence.txt');
       $I->logt( "Generated FallBack TieBreaker Precedence Order: "
           . join( ', ', $I->CreatePrecedenceRandom() ) );
     }
-  }
 }
 
 sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
