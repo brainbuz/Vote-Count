@@ -67,6 +67,10 @@ When more than one choice is Pending the rules call for a full Stage to elect ea
 
 Small discrepencies with the stages data available for testing have been seen, which are likely to be rounding issues. Until further review can be taken, this code should be considered a preview.
 
+=head1 The Rules
+
+L<The Official Rules|http://www.opsi.gov.uk/legislation/scotland/ssi2007/ssi_20070042_en.pdf>
+
 =cut
 
 has 'VoteValue' => (
@@ -75,12 +79,6 @@ has 'VoteValue' => (
   default => 100000,
 );
 
-# Vote::Charge quota
-# sub SetQuota ($I) {
-#   my $numerator = $I->BallotSet->{'votescast'} * $I->VoteValue;
-#   my $denominator = $I->Seats() +1;
-#   return( 1 + int( $numerator /$denominator ) );
-# }
 sub _SetWIGQuota ( $I, $ballots = 0 ) {
   $ballots = $I->VotesCast() unless $ballots;
   my $denominator = $I->Seats() + 1;

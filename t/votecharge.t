@@ -123,11 +123,8 @@ subtest 'Charge' => sub {
   # These 2 need to be done before every new Charge.
   $E->ResetVoteValue();    # undo partial charging from previous.
   $E->TopCount();          # init topcounts.
-  like(
-    dies { $E->Charge( 'VANILLA', 3000, 1 ) },
-    qr/undercharge error/,
-    "UnderCharge Error"
-  );
+  is( $E->Charge( 'VANILLA', 3000, 1 )->{'surplus'}, -2997,
+    'undercharge shows negative surplus');
   $E->ResetVoteValue();    # undo partial charging from previous.
   $E->TopCount();          # init topcounts.
   my $E1 = $E->Charge( 'MINTCHIP', 3000, 1000 );

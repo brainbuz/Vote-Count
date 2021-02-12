@@ -242,10 +242,10 @@ CHARGECHECKBALLOTS:
   }
   $I->{'choice_status'}->{$choice}{'votes'} += $charged;
   $surplus = $I->{'choice_status'}->{$choice}{'votes'} - $quota;
-# warn Dumper $ballots;
-  croak
-    "undercharge error $choice surplus $surplus charge $charge is too low.\n"
-    if $surplus < 0 && $charge > 0 ;
+# # warn Dumper $ballots;
+#   croak
+#     "undercharge error $choice surplus $surplus charge $charge is too low.\n"
+#     if $surplus < 0 && $charge > 0 ;
   $I->{'choice_status'}->{$choice}{'votes'} = $charged;
   return (
       { choice => $choice, surplus => $surplus, ballotschrgd => \@ballotschrgd,
@@ -393,6 +393,10 @@ Takes a reference as argument to add that reference to an Event History. This ne
 =head2 WriteSTVEvent
 
 Writes JSON and YAML logs (path based on LogTo) of the STVEvents.
+
+=head2 Charge
+
+Charges Ballots for election of choice, parameters are $choice, $quota and $charge (defaults to VoteValue ). The method validates that at least the quota is charged returning an exception when it failes. When an undercharge is permitted either reduce the quota to 0 or set the charge to 0. When the charge is set to 0, the remaining Vote Value from each ballot will be charged and the quota check will be skipped.
 
 =cut
 
