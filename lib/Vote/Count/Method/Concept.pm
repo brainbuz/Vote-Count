@@ -15,6 +15,11 @@ use Mojo::Template;
 use Sort::Hash;
 use Data::Dumper;
 use Try::Tiny;
+use JSON::MaybeXS;
+use YAML::XS;
+use Path::Tiny;
+use Carp;
+use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
 
 our $VERSION = '1.10';
 
@@ -32,119 +37,160 @@ has 'VoteValue' => (
   default => 100000,
 );
 
+has 'IterationLog' => (
+  is    => 'rw',
+  isa   => 'Str',
+  required => 0,
+);
+
 sub BUILD {
-  my $I = shift ;
-  $I->{'roundstatus'} = { 0 => { } };
+  my $I = shift;
+  $I->{'roundstatus'}  = { 0 => {} };
   $I->{'currentround'} = 0;
 }
 
+our $coder = JSON->new->ascii->pretty;
+
 sub Round($I) { return $I->{'currentround'}; }
 
-sub NewRound ($I) {
+sub NewRound ( $I, $quota = 0, $charge = {} ) {
   my $round = ++$I->{'currentround'};
-  $I->{'roundstatus'}{$round} = {
-    'charge' => {},
-    'quota' => undef,
+  $I->{'roundstatus'}{ $round - 1 } = {
+    'charge' => $charge,
+    'quota'  => $quota,
   };
   return $round;
 }
 
 sub SetQuota ($I) {
   # insure up to date TopCount before finding abandoned.
-  my $abandoned = $I->CountAbandoned();
-  my $abndnvotes = $abandoned->{'value_abandoned'};
-  my $cast = $I->BallotSet->{'votescast'};
-  my $numerator = ( $cast * $I->VoteValue ) - $abndnvotes ;
-  my $denominator = $I->Seats() +1;
-  return( 1 + int( $numerator /$denominator ) );
+  my $abandoned   = $I->CountAbandoned();
+  my $abndnvotes  = $abandoned->{'value_abandoned'};
+  my $cast        = $I->BallotSet->{'votescast'};
+  my $numerator   = ( $cast * $I->VoteValue ) - $abndnvotes;
+  my $denominator = $I->Seats() + 1;
+  return ( 1 + int( $numerator / $denominator ) );
 }
 
-
-sub _preEstimate( $I, $quota, @elected ) {
-  my $lastround = $I->{'currentround'} ? $I->{'currentround'} -1 : 0 ;
+sub _preEstimate ( $I, $quota, @elected ) {
+  my $lastround  = $I->{'currentround'} ? $I->{'currentround'} - 1 : 0;
   my $lastcharge = $I->{'roundstatus'}{$lastround}{'charge'};
-  my $unw = $I->LastTopCountUnWeighted();
+  my $unw        = $I->LastTopCountUnWeighted();
+  die 'LastTopCountUnWeighted failed' unless ( keys $unw->%* );
   my %estimate = ();
-  my %caps = ();
-  for my $e (@elected ) {
-    if( $lastcharge->{$e} ) {
-      $estimate{ $e} = $lastcharge->{$e};
-      $caps{$e} = $lastcharge->{$e};
-    } else {
-      $estimate{ $e} = int( $quota / $unw->{ $e} );
-      $caps{$e} = $I->VoteValue;
+  my %caps     = ();
+  for my $e (@elected) {
+    if ( $lastcharge->{$e} ) {
+      $estimate{$e} = $lastcharge->{$e};
+      $caps{$e}     = $lastcharge->{$e};
+    }
+    else {
+      $estimate{$e} = int( $quota / $unw->{$e} );
+      $caps{$e}     = $I->VoteValue;
     }
   }
-  return (\%estimate, \%caps);
+  return ( \%estimate, \%caps );
 }
 
-sub FullCharge ( $ballots, $cost, $active, $votevalue ) {
-  for my $b ( keys $ballots->%* ) {
-    $ballots->{$b}->{'votevalue'} = $votevalue; }
-  my %chargedval = map { $_ => { value => 0, count => 0, surplus => 0 } } ( keys $cost->%* );
-FullChargeBALLOTLOOP1:
-  for my $V ( values $ballots->%* ) {
-    unless ( $V->{'votevalue'} > 0 ) { next FullChargeBALLOTLOOP1 }
-FullChargeBALLOTLOOP2:
-    for my $C ( $V->{'votes'}->@* ) {
-      if ( $active->{$C} ) { last FullChargeBALLOTLOOP2 }
-      elsif ( $cost->{$C} ) {
-        my $charge = do {
-            if ( $V->{'votevalue'} >= $cost->{$C} ) { $cost->{$C} }
-            else { $V->{'votevalue'} }
-          };
-        $V->{'votevalue'} -= $charge;
-        $chargedval{$C}{'value'} += $charge * $V->{'count'};
-        $chargedval{$C}{'count'} += $V->{'count'};
+sub QuotaElectDo ( $I, $quota ) {
+  my %TC        = $I->TopCount()->RawCount()->%*;
+  my @Electable = ();
+  for my $C ( keys %TC ) {
+    if ( $TC{$C} >= $quota ) {
+      $I->Elect($C);
+      push @Electable, $C;
+    }
+  }
+  return @Electable;
+}
+
+# Produce a better estimate than the previous by running
+# FullCascadeCharge of the last estimate. Clones a copy of
+# Ballots for the Cascade Charge.
+sub _chargeInsight ( $I, $quota, $est, $cap, $bottom, $freeze, @elected ) {
+  my $active = $I->GetActive();
+  my %estnew = ();
+  # make sure a new freeze is applied before charge evaluation.
+  for my $froz ( keys $freeze->%* ) {
+    $est->{$froz} = $freeze->{$froz} if $freeze->{$froz};
+  }
+  my %elect = map { $_ => 1 } (@elected);
+  my $B     = dclone $I->GetBallots();
+  my $charge =
+    FullCascadeCharge( $B, $quota, $est, $active, $I->VoteValue() );
+LOOPINSIGHT: for my $E (@elected) {
+
+if ( $I->{'DEBUG'} ) {
+if( $E eq 'Allan_GRAHAM_Lab' ) {
+  warn "Allan_GRAHAM_Lab:***\n charge ***\n" . Dumper $charge;
+  warn "FREEZE\n" . Dumper $freeze;
+  warn "ESTIMATE \n" . Dumper $est;
+}}
+    if ( $freeze->{$E} ) {    # if frozen stay frozen.
+      $estnew{$E} = $freeze->{$E};
+      next LOOPINSIGHT;
+    }
+    elsif ( $charge->{$E}{'surplus'} >= 0 ) {
+      $estnew{$E} =
+        $est->{$E} - int( $charge->{$E}{'surplus'} / $charge->{$E}{'count'} );
+    }
+    else {
+      $estnew{$E} = $est->{$E} -
+        ( int( $charge->{$E}{'surplus'} / $charge->{$E}{'count'} ) ) + 1 ;
+    }
+    $estnew{$E} = $cap->{$E} if $cap->{$E} < $estnew{$E};    # apply cap.
+    $estnew{$E} = $bottom->{$E}
+      if $bottom->{$E} > $estnew{$E};                        # apply bottom.
+  }
+  return { 'result' => $charge, 'estimate' => \%estnew };
+}
+
+sub _write_iteration_log ( $I, $round, $data ) {
+  if( $I->IterationLog() ) {
+    my $jsonpath = $I->IterationLog() . ".$round.json";
+    my $yamlpath = $I->IterationLog() . ".$round.yaml";
+    path( $jsonpath )->spew( $coder->encode( $data ) );
+    path( $yamlpath )->spew( Dump $data );
+  }
+}
+
+sub CalcCharge ( $I, $quota ) {
+  my @elected   = $I->Elected();
+  my $round     = $I->Round();
+  my $estimates = {};
+  my $iteration = 0;
+  my $freeze    = { map { $_ => 0 } @elected };
+  my $bottom    = { map { $_ => 0 } @elected };
+  my ( $estimate, $cap ) = _preEstimate( $I, $quota, @elected );
+  $estimates->{$iteration} = $estimate;
+  my $done = 0;
+  my $charged = undef ; # the last value from loop is needed for log.
+  until ( $done or $iteration > 10 ) {
+    ++$iteration;
+    # for ( $estimate, $cap, $bottom, $freeze, @elected ) { warn Dumper $_}
+    $charged =
+      _chargeInsight( $I, $quota, $estimate, $cap, $bottom, $freeze,
+      @elected );
+    $estimate                = $charged->{'estimate'};
+    $estimates->{$iteration} = $charged->{'estimate'};
+    $done                    = 1;
+    for my $V (@elected) {
+      my $est1 = $estimates->{$iteration}{$V};
+      my $est2 = $estimates->{ $iteration - 1 }{$V};
+      if ( $est1 == $est2 ) {
+        $freeze->{$V} = $estimate->{$V} unless $freeze->{$V};
+      }
+      else {
+        $done = 0;
       }
     }
   }
-  return \%chargedval;
-}
-
-sub _chargeInsight ( $I, $quota, $est, $cap, $freeze, @elected ) {
-  my $active = $I->GetActive();
-  my %estnew = ();
-  my %elect = map { $_ => 1 } (@elected);
-  my $B = dclone $I->GetBallots();
-  my %charge = FullCharge ( $B, $est, $active, $I->VoteValue() )->%*;
-  for my $E ( @elected ) {
-    $charge{$E}{'surplus'} = $charge{$E}{'value'} - $quota ;
-    $charge{$E}{'charge'} = $est->{$E};
-    if ( $freeze->{$E} ) { $estnew{$E} = $freeze->{$E} } # if frozen stay frozen.
-    elsif ( $charge{$E}{'surplus'} >= 0 ) {
-      $estnew{$E}  =  $est->{$E} - int ( $charge{$E}{'surplus'} / $charge{$E}{'count'} );
-    } else { $estnew{$E}
-      = $est->{$E} - ( int( $charge{$E}{'surplus'} / $charge{$E}{'count'})) + 1 ;
-    }
-    $estnew{$E} = $cap->{$E} if $cap->{$E} < $estnew{$E} ; # apply cap.
-  }
-  return { 'result' => \%charge, 'est' => \%estnew };
-}
-
-sub CalcCharge ($I, $quota ) {
-  my @elected = $I->Elected();
-  my $round = $I->Round();
-  my $estimates = {};
-  my $iteration = 0;
-  my $freeze = {};
-  my ( $estimate, $cap )= _preEstimate( $I, $quota, @elected );
-  $estimates->{0} = $estimate ;
-  my $done = 0;
-  until( $done or $iteration > 10 ) {
-    ++$iteration;
-    $I->ResetVoteValue();
-    for my $E (@elected ) {
-      my $TC = $I->TopCount();
-      my $ballotsfor = $I->LastTopCountUnWeighted()->{$E};
-      my $charged = $I->Charge( $E, $quota, $estimate->{$E} );
-warn Dumper $charged;
-
-    }
-    last;
-  }
-
-return $estimate;
+  _write_iteration_log( $I, $round, {
+    estimates => $estimates,
+    quota => $quota,
+    charge => $freeze,
+    detail => $charged->{'result'} } );
+  return $estimate;
 }
 
 __PACKAGE__->meta->make_immutable;

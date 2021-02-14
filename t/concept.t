@@ -13,11 +13,13 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Vote::Count::Method::Concept;
+use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
 use Storable 3.15 'dclone';
 use Data::Dumper;
+# use Carp::Always;
 
 my $set1 = read_ballots('t/data/Scotland2012/Cumbernauld_South.txt');
 my $data2 = read_ballots('t/data/data2.txt') ;
@@ -27,7 +29,7 @@ sub newA {
     Seats     => 4,
     BallotSet => dclone $set1,
     VoteValue => 100,
-    LogTo     => '/tmp/votecount_wigm2',
+    LogTo     => '/tmp/votecount_concept',
   );
 }
 
@@ -36,7 +38,7 @@ sub newB {
       Seats     => 2,
       BallotSet => dclone $data2,
       VoteValue => 100,
-      LogTo     => '/tmp/votecount_wigm2',
+      LogTo     => '/tmp/votecount_concept',
     );
 }
 
@@ -109,84 +111,100 @@ subtest '_chargeInsight' => sub {
   $B->Elect( 'MINTCHIP');
   my $estimate = { 'MINTCHIP' => 83, 'VANILLA' => 44 };
   my $cap = { 'MINTCHIP' => 100, 'VANILLA' => 100 };
+  my $bottom = { 'MINTCHIP' => 0, 'VANILLA' => 0 };
   my $freeze = {};
-  my $C1 = $B->_chargeInsight( 375, $estimate, $cap, $freeze, 'MINTCHIP', 'VANILLA' );
+  my $C1 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
   is_deeply( $C1->{result}{VANILLA},
     { 'count' => 7, 'surplus' => -67, 'charge' => 44, 'value' => 308 },
     'look at the result for a choice' );
-  is_deeply( $C1->{est},
+  is_deeply( $C1->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 54 },
     'check the estimate no caps or freezes in play' );
   $cap = { 'MINTCHIP' => 100, 'VANILLA' => 50 };
-  my $C2 = $B->_chargeInsight( 375, $estimate, $cap, $freeze, 'MINTCHIP', 'VANILLA' );
-  is_deeply( $C2->{est},
+  my $C2 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
+  is_deeply( $C2->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 50 },
     'check the estimate with a cap in play' );
   $cap = { 'MINTCHIP' => 100, 'VANILLA' => 100 };
   $freeze = { 'VANILLA' => 66 };
-  my $C3 = $B->_chargeInsight( 375, $estimate, $cap, $freeze, 'MINTCHIP', 'VANILLA' );
+  my $C3 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
   # note( Dumper $C3);
-  is_deeply( $C3->{est},
+  is_deeply( $C3->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 66 },
     'check the estimate with a freeze in play' );
-
-  ok 1;
-
+  is( $C3->{'result'}{'VANILLA'}{'charge'}, 66,
+    'confirm freeze applied immediately without updating the estimate');
+  $bottom->{ 'VANILLA' } = 71 ;
+  my $C4 =  $B->_chargeInsight( 375, $estimate, $cap, $bottom, {}, 'MINTCHIP', 'VANILLA' );
+  is_deeply ( $C4->{'estimate'}, { 'MINTCHIP' => 75, 'VANILLA' => 71 },
+    'check application of bottom bound' );
 };
 
-
-subtest 'calc charge' => sub {
-  my $A = newA;
+subtest 'calc charge simple data' => sub {
   my $B = newB;
   $B->TopCount;
   $B->Elect( 'VANILLA');
   $B->Elect( 'MINTCHIP');
-  # note( Dumper $B->CalcCharge( 375 ));
+  is_deeply( $B->CalcCharge( 375 ),
+    { 'MINTCHIP' => 75, 'VANILLA' => 54 },
+    'calculate the charge with the simple set two quota choices');
+  $B->Elect( 'CHOCOLATE');
+  is_deeply( $B->CalcCharge( 375 ),
+    { 'MINTCHIP' => 75, 'VANILLA' => 54, 'CHOCOLATE' => 100 },
+    'calculate the charge with the simple set two quota choices with 1 under');
+};
 
-  ok 1;
+subtest 'calc charge bigger data' => sub {
+  my $A = newA;
+  $A->IterationLog( '/tmp/cascade_iteration');
+  note( $A->TopCount()->RankTable() );
+  $A->NewRound();
+  $A->Elect( 'William_GOLDIE_SNP');
+  $A->Elect( 'Allan_GRAHAM_Lab');
+  my $BCharge1 = $A->CalcCharge(120301);
+  is_deeply( $BCharge1, #1203
+    { Allan_GRAHAM_Lab => 83, William_GOLDIE_SNP => 67 },
+    'Calculate the charge for the first 2 elected with the larger test set'
+  );
+  FullCascadeCharge( $A->GetBallots, 120301, $BCharge1, $A->GetActive, 100 );
+  my $roundnum = $A->NewRound( 120301, $BCharge1 );
+  my $TC = $A->TopCount();
+note( $TC->RankTable() );
+$A->{'DEBUG'} = 1;
+  my @newly = $A->QuotaElectDo( 120301 );
+note( "now electing @newly");
+  my $lastcharge = $A->{'roundstatus'}{$roundnum -1 }{'charge'};
+note( Dumper $A->{'roundstatus'} );
+  my $BCharge2 = $A->CalcCharge(120301);
+  is_deeply( $BCharge2, #1203
+    { Allan_GRAHAM_Lab => 68, William_GOLDIE_SNP => 66, Stephanie_MUIR_Lab => 81 },
+    'Calculate the charge adding the next quota winner'
+  );
 
+};
+
+subtest 'exception' => sub {
+  my $A = newA;
+  $A->Elect( 'Allan_GRAHAM_Lab');
+  like(
+    dies { $A->CalcCharge(103957) },
+    qr/LastTopCountUnWeighted failed/,
+    "CalcCharge threw an exception when TopCount wasn't performed first"
+  );
 };
 
 done_testing();
 
 =pod
-$D->WIGRun();
-is_deeply(  [ $D->Elected()],
-            [ qw/William_GOLDIE_SNP Allan_GRAHAM_Lab Stephanie_MUIR_Lab Paddy_HOGG_SNP/],
-            'choices elected in correct order' );
 
-$D->WriteLog();
-$D->WriteSTVEvent();
-my @evt = $D->STVEvent()->@*;
-is_deeply( $evt[-1], {
-  'winners' => [
-    'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab',
-    'Stephanie_MUIR_Lab', 'Paddy_HOGG_SNP'
-  ] },
-  'last item in STVEvent is the winners record' );
-my $expectround2 = {
-            'lowest'   => 'Kevin_MCVEY_SSP',
-            'allvotes' => {
-              'Donald_MASTERTON_CICA' => 36312966,
-              'Kevin_MCVEY_SSP'       => 15234225,
-              'Willie_HOMER_SNP'      => 79245144,
-              'Paddy_HOGG_SNP'        => 81581751,
-              'David_MCARTHUR_Con'    => 23213254,
-              'Stephanie_MUIR_Lab'    => 121042787
-            },
-            'quota'    => 120400000,
-            'noncontinuing' => 4068615,
-            'winvotes' => {
-              'Stephanie_MUIR_Lab' => 121042787
-            },
-            'pending' => ['Stephanie_MUIR_Lab'],
-            'round'   => 2
-          };
-    is_deeply( $evt[2] , $expectround2, 'STVEvent check round 2' );
-
-done_testing();
-
-=pod
+  is( $A->SetQuota(), 120301, 'Set initial Quota' );
+  $A->Defeat( 'Stephanie_MUIR_Lab');
+  $A->Elect( 'William_GOLDIE_SNP');
+  $A->Charge ( 'William_GOLDIE_SNP', 120301, 70 );
+  $A->Defeat( 'Paddy_HOGG_SNP');
+  $A->Elect(  'Allan_GRAHAM_Lab');
+  $A->Charge ( 'Allan_GRAHAM_Lab', 120301, 90 );
+  $TC = $A->TopCount();
 
 "name"                      stage1  stage2  stage3  stage4  stage5  stage6  stage7
 "rounds"                    round1  ------  round2  round3  round4  round5  round6

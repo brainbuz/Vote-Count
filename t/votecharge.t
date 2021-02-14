@@ -13,10 +13,11 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Try::Tiny;
-use Vote::Count::VoteCharge;
+use Vote::Count::VoteCharge 'FullCascadeCharge';
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
+
 use Data::Dumper;
 
 subtest '_setTieBreaks' => sub {

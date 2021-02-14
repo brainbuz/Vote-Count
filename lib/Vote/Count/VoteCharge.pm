@@ -200,16 +200,6 @@ sub Reinstate( $I, @choices ) {
   }
 }
 
-# need to add a method to synchronize choicestatus -> activeset.
-
-# refund should be here but may have different rules in the methods.
-# sub Refund ( $I, $args ) {
-#   my $choice = $args->{'choice'};
-#   my $surplus = $args->{'surplus'} || 0 ;
-#   my $refund =
-
-# }
-
 sub Charge ( $I, $choice, $quota, $charge=$I->VoteValue() ) {
   my $charged = 0;
   my $surplus = 0;
