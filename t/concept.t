@@ -115,7 +115,7 @@ subtest '_chargeInsight' => sub {
   my $freeze = {};
   my $C1 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
   is_deeply( $C1->{result}{VANILLA},
-    { 'count' => 7, 'surplus' => -67, 'charge' => 44, 'value' => 308 },
+    { 'count' => 7, 'surplus' => -67, 'value' => 308 },
     'look at the result for a choice' );
   is_deeply( $C1->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 54 },
@@ -125,15 +125,16 @@ subtest '_chargeInsight' => sub {
   is_deeply( $C2->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 50 },
     'check the estimate with a cap in play' );
-  $cap = { 'MINTCHIP' => 100, 'VANILLA' => 100 };
-  $freeze = { 'VANILLA' => 66 };
-  my $C3 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
+# no more mr freeze?
+  # $cap = { 'MINTCHIP' => 100, 'VANILLA' => 100 };
+  # $freeze = { 'VANILLA' => 66 };
+  # my $C3 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
   # note( Dumper $C3);
-  is_deeply( $C3->{estimate},
-    { 'MINTCHIP' => 75, 'VANILLA' => 66 },
-    'check the estimate with a freeze in play' );
-  is( $C3->{'result'}{'VANILLA'}{'charge'}, 66,
-    'confirm freeze applied immediately without updating the estimate');
+  # is_deeply( $C3->{estimate},
+  #   { 'MINTCHIP' => 75, 'VANILLA' => 66 },
+  #   'check the estimate with a freeze in play' );
+  # is( $C3->{'result'}{'VANILLA'}{'charge'}, 66,
+  #   'confirm freeze applied immediately without updating the estimate');
   $bottom->{ 'VANILLA' } = 71 ;
   my $C4 =  $B->_chargeInsight( 375, $estimate, $cap, $bottom, {}, 'MINTCHIP', 'VANILLA' );
   is_deeply ( $C4->{'estimate'}, { 'MINTCHIP' => 75, 'VANILLA' => 71 },
@@ -154,6 +155,19 @@ subtest 'calc charge simple data' => sub {
     'calculate the charge with the simple set two quota choices with 1 under');
 };
 
+sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
+  my $valelect = 0;
+  for ( @elected ) {
+      $valelect += $charge->{$_}{'value'} };
+  my $valremain = 0 ;
+  for my $k ( keys $Ballots->%* ) {
+    $valremain +=
+      $Ballots->{$k}{'votevalue'} * $Ballots->{$k}{'count'};
+  }
+  is( $valremain + $valelect, $balance,
+    'sum of elected value plus remaining value matches total vote value');
+}
+
 subtest 'calc charge bigger data' => sub {
   my $A = newA;
   $A->IterationLog( '/tmp/cascade_iteration');
@@ -169,18 +183,18 @@ subtest 'calc charge bigger data' => sub {
   FullCascadeCharge( $A->GetBallots, 120301, $BCharge1, $A->GetActive, 100 );
   my $roundnum = $A->NewRound( 120301, $BCharge1 );
   my $TC = $A->TopCount();
-note( $TC->RankTable() );
 $A->{'DEBUG'} = 1;
   my @newly = $A->QuotaElectDo( 120301 );
-note( "now electing @newly");
   my $lastcharge = $A->{'roundstatus'}{$roundnum -1 }{'charge'};
-note( Dumper $A->{'roundstatus'} );
   my $BCharge2 = $A->CalcCharge(120301);
   is_deeply( $BCharge2, #1203
-    { Allan_GRAHAM_Lab => 68, William_GOLDIE_SNP => 66, Stephanie_MUIR_Lab => 81 },
+    { Allan_GRAHAM_Lab => 78, William_GOLDIE_SNP => 67, Stephanie_MUIR_Lab => 93 },
     'Calculate the charge adding the next quota winner'
   );
-
+  my $Charge2F = FullCascadeCharge( $A->GetBallots, 120301, $BCharge2, $A->GetActive, 100 );
+note Dumper  $Charge2F;
+  my $balance = $A->VotesCast * 100;
+  TestBalance ( $A->GetBallots, $Charge2F, $balance, $A->Elected() );
 };
 
 subtest 'exception' => sub {

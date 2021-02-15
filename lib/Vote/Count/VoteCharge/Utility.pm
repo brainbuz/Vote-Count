@@ -73,5 +73,4 @@ FullChargeBALLOTLOOP2:
   return \%chargedval;
 }
 
-
 1;

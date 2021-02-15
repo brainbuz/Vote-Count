@@ -120,12 +120,12 @@ sub _chargeInsight ( $I, $quota, $est, $cap, $bottom, $freeze, @elected ) {
     FullCascadeCharge( $B, $quota, $est, $active, $I->VoteValue() );
 LOOPINSIGHT: for my $E (@elected) {
 
-if ( $I->{'DEBUG'} ) {
-if( $E eq 'Allan_GRAHAM_Lab' ) {
-  warn "Allan_GRAHAM_Lab:***\n charge ***\n" . Dumper $charge;
-  warn "FREEZE\n" . Dumper $freeze;
-  warn "ESTIMATE \n" . Dumper $est;
-}}
+# if ( $I->{'DEBUG'} ) {
+# if( $E eq 'Allan_GRAHAM_Lab' ) {
+#   warn "Allan_GRAHAM_Lab:***\n charge ***\n" . Dumper $charge;
+#   warn "FREEZE\n" . Dumper $freeze;
+#   warn "ESTIMATE \n" . Dumper $est;
+# }}
     if ( $freeze->{$E} ) {    # if frozen stay frozen.
       $estnew{$E} = $freeze->{$E};
       next LOOPINSIGHT;
@@ -165,7 +165,7 @@ sub CalcCharge ( $I, $quota ) {
   $estimates->{$iteration} = $estimate;
   my $done = 0;
   my $charged = undef ; # the last value from loop is needed for log.
-  until ( $done or $iteration > 10 ) {
+  until ( $done or $iteration > 20 ) {
     ++$iteration;
     # for ( $estimate, $cap, $bottom, $freeze, @elected ) { warn Dumper $_}
     $charged =
@@ -177,18 +177,13 @@ sub CalcCharge ( $I, $quota ) {
     for my $V (@elected) {
       my $est1 = $estimates->{$iteration}{$V};
       my $est2 = $estimates->{ $iteration - 1 }{$V};
-      if ( $est1 == $est2 ) {
-        $freeze->{$V} = $estimate->{$V} unless $freeze->{$V};
-      }
-      else {
-        $done = 0;
-      }
+      if ( $est1 != $est2 ) { $done = 0 }
     }
   }
   _write_iteration_log( $I, $round, {
     estimates => $estimates,
     quota => $quota,
-    charge => $freeze,
+    charge => $estimate,
     detail => $charged->{'result'} } );
   return $estimate;
 }
