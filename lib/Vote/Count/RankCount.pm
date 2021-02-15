@@ -120,9 +120,9 @@ Returns a HashRef with the keys tie, tied, winner where winner is the winner, ti
 
 Generates a MarkDown formatted table.
 
-=head3 RankTableWeighted
+=head3 RankTableWeighted ($votevalue)
 
-Ranktable for use with weighted votes. Displays both the Vote Value and the Vote Total (rounded to two places).
+Ranktable for use with weighted votes. Displays both the Vote Value and the Vote Total (rounded to two places). Requires Vote Value as an argument.
 
 =cut
 
@@ -169,7 +169,11 @@ sub RankTableWeighted( $self, $votevalue ) {
       push @rows, ( \@row );
     }
   }
-  return generate_table( rows => \@rows, style => 'markdown' ) . "\n";
+  return generate_table(
+    rows => \@rows,
+    style => 'markdown',
+    align => [qw/ l l r r /]
+    ) . "\n";
 }
 1;
 

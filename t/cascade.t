@@ -12,7 +12,7 @@ use Test::Exception;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
-use Vote::Count::Method::Concept;
+use Vote::Count::Method::Cascade;
 use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
@@ -24,21 +24,21 @@ use Data::Dumper;
 my $set1 = read_ballots('t/data/Scotland2012/Cumbernauld_South.txt');
 my $data2 = read_ballots('t/data/data2.txt') ;
 
-sub newA {
-  Vote::Count::Method::Concept->new(
+sub newA ( $lname='cascadeA') {
+  Vote::Count::Method::Cascade->new(
     Seats     => 4,
     BallotSet => dclone $set1,
     VoteValue => 100,
-    LogTo     => '/tmp/votecount_concept',
+    LogTo     => '/tmp/votecount_$lname',
   );
 }
 
-sub newB {
-  Vote::Count::Method::Concept->new(
+sub newB ( $lname='cascadeA') {
+  Vote::Count::Method::Cascade->new(
       Seats     => 2,
       BallotSet => dclone $data2,
       VoteValue => 100,
-      LogTo     => '/tmp/votecount_concept',
+      LogTo     => '/tmp/votecount_$lname',
     );
 }
 
@@ -76,7 +76,7 @@ subtest 'newround and _preEstimate' => sub {
   my $TC = $B->TopCount();
   my $quota = 375; # correct value is 376, this is for easier hand checking.
   # note( Dumper $B->CalcCharge( $quota, $TC, 'VANILLA', 'MINTCHIP' ) );
-  my ( $est, $cap ) = Vote::Count::Method::Concept::_preEstimate( $B, $quota, 'VANILLA', 'MINTCHIP' );
+  my ( $est, $cap ) = Vote::Count::Method::Cascade::_preEstimate( $B, $quota, 'VANILLA', 'MINTCHIP' );
   is_deeply(
     $est,
     { 'MINTCHIP' => 75, 'VANILLA' => 53 },
@@ -87,7 +87,7 @@ subtest 'newround and _preEstimate' => sub {
     'Check cap on first estimate');
   $B->{'roundstatus'}{97}{'charge'}{'VANILLA'} = 59;
   $B->{'currentround'} = 98;
-  ( $est, $cap ) = Vote::Count::Method::Concept::_preEstimate( $B, $quota, 'VANILLA', 'MINTCHIP' );
+  ( $est, $cap ) = Vote::Count::Method::Cascade::_preEstimate( $B, $quota, 'VANILLA', 'MINTCHIP' );
   is_deeply(
     $est,
     { 'MINTCHIP' => 75, 'VANILLA' => 59 },
@@ -171,7 +171,7 @@ sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
 subtest 'calc charge bigger data' => sub {
   my $A = newA;
   $A->IterationLog( '/tmp/cascade_iteration');
-  note( $A->TopCount()->RankTable() );
+  note( $A->TopCount()->RankTableWeighted( 100 ) );
   $A->NewRound();
   $A->Elect( 'William_GOLDIE_SNP');
   $A->Elect( 'Allan_GRAHAM_Lab');

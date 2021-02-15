@@ -167,15 +167,15 @@ LONGTABLE
 subtest 'RankTableWeighted' => sub {
 
 my $weightable = q%| Rank | Choice     | Votes | VoteValue |
-|------|------------|-------|-----------|
-| 1    | VANILLA    | 7.00  | 700       |
-| 2    | MINTCHIP   | 5.00  | 500       |
-| 3    | PISTACHIO  | 2.00  | 200       |
-| 4    | CHOCOLATE  | 1.00  | 100       |
-| 5    | CARAMEL    | 0.00  | 0         |
-| 5    | ROCKYROAD  | 0.00  | 0         |
-| 5    | RUMRAISIN  | 0.00  | 0         |
-| 5    | STRAWBERRY | 0.00  | 0         |
+|:-----|:-----------|------:|----------:|
+| 1    | VANILLA    |  7.00 |       700 |
+| 2    | MINTCHIP   |  5.00 |       500 |
+| 3    | PISTACHIO  |  2.00 |       200 |
+| 4    | CHOCOLATE  |  1.00 |       100 |
+| 5    | CARAMEL    |  0.00 |         0 |
+| 5    | ROCKYROAD  |  0.00 |         0 |
+| 5    | RUMRAISIN  |  0.00 |         0 |
+| 5    | STRAWBERRY |  0.00 |         0 |
 %;
 
   my $weighted = Vote::Count->new(

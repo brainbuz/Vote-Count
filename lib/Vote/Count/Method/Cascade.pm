@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.022;
 
-package Vote::Count::Method::Concept;
+package Vote::Count::Method::Cascade;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count::VoteCharge';
@@ -25,7 +25,7 @@ our $VERSION = '1.10';
 
 =head1 NAME
 
-Vote::Count::Method::Concept
+Vote::Count::Method::Cascade
 
 =head1 VERSION 1.10
 
