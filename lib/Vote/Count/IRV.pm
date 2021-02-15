@@ -27,7 +27,6 @@ Vote::Count::IRV
 
 no warnings 'experimental';
 use List::Util qw( min max );
-use Vote::Count::TextTableTiny 'generate_markdown_table';
 #use Data::Dumper;
 
 sub _ResolveTie ( $self, $active, $tiebreaker, @tiedchoices ) {

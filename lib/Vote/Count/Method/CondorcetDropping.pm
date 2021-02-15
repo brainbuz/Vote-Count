@@ -55,7 +55,7 @@ no warnings 'experimental';
 use Vote::Count::Matrix;
 use Carp;
 # use Try::Tiny;
-# use Text::Table::Tiny 'generate_markdown_table';
+# use Text::Table::Tiny 'generate_table';
 # use Data::Dumper;
 
 has 'Matrix' => (

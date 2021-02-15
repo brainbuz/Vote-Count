@@ -53,9 +53,9 @@ sub _init_choice_status ( $I ) {
 }
 
 # must deal with setting status after floor rule.
-sub VoteChargeFloor ( $I ) {
+# sub VoteChargeFloor ( $I ) {
 
-}
+# }
 
 # Default tie breaking to GrandJunction,
 # Force Precedence as fallback, and generate reproducable precedence

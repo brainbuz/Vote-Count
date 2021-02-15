@@ -7,7 +7,7 @@ package Vote::Count::RankCount;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 use List::Util qw( min max sum);
-use Vote::Count::TextTableTiny qw/generate_markdown_table/;
+use Vote::Count::TextTableTiny qw/generate_table/;
 use Sort::Hash;
 
 our $VERSION='1.10';
@@ -120,6 +120,10 @@ Returns a HashRef with the keys tie, tied, winner where winner is the winner, ti
 
 Generates a MarkDown formatted table.
 
+=head3 RankTableWeighted
+
+Ranktable for use with weighted votes. Displays both the Vote Value and the Vote Total (rounded to two places).
+
 =cut
 
 sub RawCount ( $I )      { return $I->{'rawcount'} }
@@ -150,9 +154,23 @@ sub RankTable( $self ) {
       push @rows, ( \@row );
     }
   }
-  return generate_markdown_table( rows => \@rows ) . "\n";
+  return generate_table( rows => \@rows, style => 'markdown' ) . "\n";
 }
 
+sub RankTableWeighted( $self, $votevalue ) {
+  my @rows   = ( [ 'Rank', 'Choice', 'Votes', 'VoteValue' ] );
+  my %rc     = $self->{'rawcount'}->%*;
+  my %byrank = $self->{'byrank'}->%*;
+  for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
+    my @choice = sort $byrank{$r}->@*;
+    for my $choice (@choice) {
+      my $votes = $rc{$choice};
+      my @row = ( $r, $choice, sprintf("%.2f", $votes/$votevalue), $votes );
+      push @rows, ( \@row );
+    }
+  }
+  return generate_table( rows => \@rows, style => 'markdown' ) . "\n";
+}
 1;
 
 #FOOTER

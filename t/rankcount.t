@@ -15,8 +15,6 @@ use Vote::Count::RankCount;
 
 use feature qw/signatures postderef/;
 
-# my $VC1 = Vote::Count->new( ballotset => read_ballots('t/data/data2.txt'), );
-
 # my $tc1       = $VC1->TopCount();
 my %set1 = (
   CARAMEL    => 0,
@@ -164,6 +162,33 @@ LONGTABLE
   # note $brexit->Approval->RankTable();
   is( $brexit->Approval->RankTable(),
     $longtable, 'Check a long table (sorting with more than 10 choices)' );
+};
+
+subtest 'RankTableWeighted' => sub {
+
+my $weightable = q%| Rank | Choice     | Votes | VoteValue |
+|------|------------|-------|-----------|
+| 1    | VANILLA    | 7.00  | 700       |
+| 2    | MINTCHIP   | 5.00  | 500       |
+| 3    | PISTACHIO  | 2.00  | 200       |
+| 4    | CHOCOLATE  | 1.00  | 100       |
+| 5    | CARAMEL    | 0.00  | 0         |
+| 5    | ROCKYROAD  | 0.00  | 0         |
+| 5    | RUMRAISIN  | 0.00  | 0         |
+| 5    | STRAWBERRY | 0.00  | 0         |
+%;
+
+  my $weighted = Vote::Count->new(
+    BallotSet => read_ballots('t/data/data2.txt'),
+    VoteValue => 100
+  );
+
+  my $ballots = $weighted->GetBallots();
+  for my $b ( keys $ballots->%* ) {
+    $ballots->{$b}->{'votevalue'} = 100;
+  }
+  is( $weighted->TopCount()->RankTableWeighted(100),
+    $weightable, 'generate weighted table' );
 };
 
 done_testing();

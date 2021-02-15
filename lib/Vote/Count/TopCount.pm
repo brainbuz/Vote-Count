@@ -10,7 +10,7 @@ use Moose::Role;
 no warnings 'experimental';
 use List::Util qw( min max );
 use Vote::Count::RankCount;
-use Vote::Count::TextTableTiny 'generate_markdown_table';
+use Vote::Count::TextTableTiny 'generate_table';
 
 use Math::BigRat try => 'GMP';
 use Storable 'dclone';
@@ -192,9 +192,9 @@ sub EvaluateTopCountMajority ( $self, $topcount = undef, $active = undef ) {
     ];
     $self->logt(
       '---',
-      generate_markdown_table(
+      generate_table(
         rows       => $rows,
-        header_row => 0
+        header_row => 0,
       )
     );
   }
