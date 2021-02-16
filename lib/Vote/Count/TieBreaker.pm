@@ -12,7 +12,7 @@ use List::Util qw( min max sum );
 use Path::Tiny;
 use Data::Dumper;
 
-our $VERSION='1.10';
+our $VERSION = '1.10';
 
 =head1 NAME
 
@@ -124,11 +124,11 @@ has 'TieBreakerFallBackPrecedence' => (
 );
 
 sub _triggercheckprecedence ( $I, $new, $old = undef ) {
-    unless ( $I->PrecedenceFile() ) {
-      $I->PrecedenceFile('/tmp/precedence.txt');
-      $I->logt( "Generated FallBack TieBreaker Precedence Order: "
-          . join( ', ', $I->CreatePrecedenceRandom() ) );
-    }
+  unless ( $I->PrecedenceFile() ) {
+    $I->PrecedenceFile('/tmp/precedence.txt');
+    $I->logt( "Generated FallBack TieBreaker Precedence Order: "
+        . join( ', ', $I->CreatePrecedenceRandom() ) );
+  }
 }
 
 sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
@@ -166,7 +166,7 @@ sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
     $round++;
   }
   if ( $self->TieBreakerFallBackPrecedence() ) {
-    $self->logv( 'Applying Precedence fallback');
+    $self->logv('Applying Precedence fallback');
     return $self->TieBreakerPrecedence(@tiedchoices);
   }
   else {
@@ -174,21 +174,19 @@ sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
   }
 }
 
-# =head1 Borda-like Later Harm Protected
-
-# This method is superficially similar to Borda. However, it only scores the best ranked member of the tie, ignoring the later votes. The tie member with the highest score wins. The original position on the ballot is used to score. It is subject to all of the Borda weighting problems. It is Later Harm Protected (within the tied set), but less resolvable than Modified Grand Junction.
-
-# =head2 TieBreakerBordalikeLaterHarm ()
-
-#   Currently unimplemented ...
-
-=head1 Method TieBreaker
+=head1 TieBreaker
 
 Implements some basic methods for resolving ties. The default value for IRV is 'all', and the default value for Matrix is 'none'. 'all' is inappropriate for Matrix, and 'none' is inappropriate for IRV.
 
-  my @keep = $self->TieBreaker( $tiebreaker, $active, @tiedchoices );
+  my @keep = $Election->TieBreaker( $tiebreaker, $active, @tiedchoices );
 
 TieBreaker returns a list containing the winner, if the method is 'all' the list is empty, if 'none' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
+
+=head1 UntieList
+
+Sort a list in an order determined by a TieBreaker method, sorted in Descending Order. To guarrantee reliable resolution Precedence must be used or have been set for fallback. The way this is currently implemented it does not produce the expected results with methods other than Precedence and Approval.
+
+  my @orderedlosers = $Election->UntieList( 'approval', @unorderedlosers );
 
 =head1 Precedence
 
@@ -222,7 +220,7 @@ sub TieBreakerPrecedence ( $I, @tiedchoices ) {
     $ordered{$_} = $start++;
   }
   my $ballots = $I->BallotSet()->{'ballots'};
-  my $winner  =  $tiedchoices[0];
+  my $winner  = $tiedchoices[0];
   for my $c (@tiedchoices) {
     unless ( defined $ordered{$c} ) {
       die "Choice $c missing from precedence file\n";
@@ -254,8 +252,8 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
 }
 
 sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
-  if ( $tiebreaker eq 'none' )  { return @tiedchoices }
-  if ( $tiebreaker eq 'all' ) { return () }
+  if ( $tiebreaker eq 'none' ) { return @tiedchoices }
+  if ( $tiebreaker eq 'all' )  { return () }
   my $choices_hashref = { map { $_ => 1 } @tiedchoices };
   my $ranked          = undef;
   if ( $tiebreaker eq 'borda' ) {
@@ -272,7 +270,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
   }
   elsif ( $tiebreaker eq 'grandjunction' ) {
     my $GJ = $I->TieBreakerGrandJunction(@tiedchoices);
-    if    ( $GJ->{'winner'} ) { return $GJ->{'winner'}   }
+    if    ( $GJ->{'winner'} ) { return $GJ->{'winner'} }
     elsif ( $GJ->{'tie'} )    { return $GJ->{'tied'}->@* }
     else { die "unexpected (or no) result from $tiebreaker!\n" }
   }
@@ -304,10 +302,21 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
   };
   if ( @highchoice > 1 ) {
     if ( $I->TieBreakerFallBackPrecedence() ) {
-      return( $I->TieBreakerPrecedence(@tiedchoices)->{'winner'} );
+      return ( $I->TieBreakerPrecedence(@tiedchoices)->{'winner'} );
     }
   }
-  return( @highchoice );
+  return (@highchoice);
+}
+
+sub UnTieList ( $I, $method, @tied ) {
+  my @ordered = ();
+  my %active  = ( map { $_ => 1 } @tied );
+  while ( scalar( keys %active ) ) {
+    my ($lead) = $I->TieBreaker( $method, \%active, ( keys %active ) );
+    delete $active{$lead};
+    push @ordered, $lead;
+  }
+  return @ordered;
 }
 
 1;

@@ -5,6 +5,7 @@ use 5.022;
 package Vote::Count::VoteCharge::Utility;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
+use Sort::Hash;
 
 our $VERSION = '1.10';
 
@@ -17,7 +18,6 @@ Vote::Count::Method::VoteCharge::Utility
 =head1 VERSION 1.10
 
 =cut
-
 
 =pod
 
@@ -39,28 +39,32 @@ The method is non-OO (thus the need to import it). This permits isolation of val
 
 The Ballots are passed as a HashRef and the votevalue will be modified, if you do not want the Ballots modified, provide a copy of them (Storable 'dclone' is recommended)
 
+=head1 NthApproval
+
+Finds the choice that would fill the last seat if the remaining seats were to be filled by highest Top Count, and sets the Vote Value for that Choice as the requirement. All Choices that do not have a weighted Approval greater than that requirement are returned, they will never be elected and are safe to defeat immediately.
+
 =cut
 
-use Exporter::Easy ( OK =>
-    ['FullCascadeCharge'],
-);
+use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval' ], );
 
 sub FullCascadeCharge ( $ballots, $quota, $cost, $active, $votevalue ) {
   for my $b ( keys $ballots->%* ) {
-    $ballots->{$b}{'votevalue'} = $votevalue; }
-  my %chargedval = map { $_ => { value => 0, count => 0, surplus => 0 } } ( keys $cost->%* );
+    $ballots->{$b}{'votevalue'} = $votevalue;
+  }
+  my %chargedval =
+    map { $_ => { value => 0, count => 0, surplus => 0 } } ( keys $cost->%* );
 FullChargeBALLOTLOOP1:
   for my $V ( values $ballots->%* ) {
     unless ( $V->{'votevalue'} > 0 ) { next FullChargeBALLOTLOOP1 }
-FullChargeBALLOTLOOP2:
+  FullChargeBALLOTLOOP2:
     for my $C ( $V->{'votes'}->@* ) {
       if ( $active->{$C} ) { last FullChargeBALLOTLOOP2 }
       elsif ( $cost->{$C} ) {
         my $charge = do {
-            if ( $V->{'votevalue'} >= $cost->{$C} ) { $cost->{$C} }
-            else { $V->{'votevalue'} }
-          };
-        $V->{'votevalue'} -= $charge;
+          if   ( $V->{'votevalue'} >= $cost->{$C} ) { $cost->{$C} }
+          else                                      { $V->{'votevalue'} }
+        };
+        $V->{'votevalue'}        -= $charge;
         $chargedval{$C}{'value'} += $charge * $V->{'count'};
         $chargedval{$C}{'count'} += $V->{'count'};
         unless ( $V->{'votevalue'} > 0 ) { last FullChargeBALLOTLOOP2 }
@@ -68,9 +72,24 @@ FullChargeBALLOTLOOP2:
     }
   }
   for my $E ( keys %chargedval ) {
-    $chargedval{$E}{'surplus'} = $chargedval{$E}{'value'} - $quota ;
+    $chargedval{$E}{'surplus'} = $chargedval{$E}{'value'} - $quota;
   }
   return \%chargedval;
+}
+
+sub NthApproval ( $I ) {
+  my $tc            = $I->TopCount();
+  my $ac            = $I->Approval();
+  my $seats         = $I->Seats() - $I->Elected();
+  my @defeat        = ();
+  my $bottomrunning = $tc->HashByRank()->{$seats}[0];
+  my $bar           = $tc->RawCount()->{$bottomrunning};
+  for my $A ( $I->GetActiveList ) {
+    next if $A eq $bottomrunning;
+    my $avv = $ac->{'rawcount'}{$A};
+    push @defeat, ($A) if $avv <= $bar;
+  }
+  return @defeat;
 }
 
 1;

@@ -87,6 +87,8 @@ sub ResetVoteValue ($I) {
   }
 }
 
+sub SeatsOpen ($I) { $I->Seats() - $I->Elected() }
+
 sub BUILD {
   my $self = shift;
   unless( $self->BallotSetType() eq 'rcv') {
@@ -110,6 +112,9 @@ sub CountAbandoned ( $I ) {
   my $cnt_abandoned = 0;
   my $val_abandoned = 0;
   for my $k ( keys $set->%*) {
+    unless( defined $set->{$k}{'topchoice'} ) {
+      die 'Attempt to Count Abandoned prior to TopCount'
+      }
     if( $set->{$k}{'topchoice'} eq 'NONE') {
       $cnt_abandoned += $set->{$k}{'count'};
       $val_abandoned += $set->{$k}{'count'} * $set->{$k}{'votevalue'};
@@ -198,6 +203,24 @@ sub Reinstate( $I, @choices ) {
     $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
     $I->{'Active'}{$choice} = 1;
   }
+}
+
+sub DefeatLosers( $I, $conflictstyle='approval', @defeating ) {
+  my $seats = $I->SeatsOpen();
+  my @a = $I->GetActiveList();
+  my $active = scalar @a;
+  if (($active + scalar( @defeating) ) < $seats) {
+    return ();
+  } elsif ( ( $active - @defeating ) < $seats ) {
+    @defeating = $I->UnTieList( $conflictstyle, @defeating );
+    until ( ($active - scalar( @defeating) ) >= $seats ) {
+      my $not = shift @defeating;
+    }
+  }
+  for my $D (@defeating ) {
+    $I->Defeat( $D );
+  }
+  return @defeating;
 }
 
 sub Charge ( $I, $choice, $quota, $charge=$I->VoteValue() ) {

@@ -171,28 +171,26 @@ sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
 subtest 'calc charge bigger data' => sub {
   my $A = newA;
   $A->IterationLog( '/tmp/cascade_iteration');
-  note( $A->TopCount()->RankTableWeighted( 100 ) );
   $A->NewRound();
   $A->Elect( 'William_GOLDIE_SNP');
   $A->Elect( 'Allan_GRAHAM_Lab');
-  my $BCharge1 = $A->CalcCharge(120301);
-  is_deeply( $BCharge1, #1203
+  my $ACharge1 = $A->CalcCharge(120301);
+  is_deeply( $ACharge1, #1203
     { Allan_GRAHAM_Lab => 83, William_GOLDIE_SNP => 67 },
     'Calculate the charge for the first 2 elected with the larger test set'
   );
-  FullCascadeCharge( $A->GetBallots, 120301, $BCharge1, $A->GetActive, 100 );
-  my $roundnum = $A->NewRound( 120301, $BCharge1 );
+  FullCascadeCharge( $A->GetBallots, 120301, $ACharge1, $A->GetActive, 100 );
+  my $roundnum = $A->NewRound( 120301, $ACharge1 );
   my $TC = $A->TopCount();
-$A->{'DEBUG'} = 1;
   my @newly = $A->QuotaElectDo( 120301 );
   my $lastcharge = $A->{'roundstatus'}{$roundnum -1 }{'charge'};
-  my $BCharge2 = $A->CalcCharge(120301);
-  is_deeply( $BCharge2, #1203
+  my $ACharge2 = $A->CalcCharge(120301);
+  is_deeply( $ACharge2, #1203
     { Allan_GRAHAM_Lab => 78, William_GOLDIE_SNP => 67, Stephanie_MUIR_Lab => 93 },
     'Calculate the charge adding the next quota winner'
   );
-  my $Charge2F = FullCascadeCharge( $A->GetBallots, 120301, $BCharge2, $A->GetActive, 100 );
-note Dumper  $Charge2F;
+  my $Charge2F = FullCascadeCharge( $A->GetBallots, 120301, $ACharge2, $A->GetActive, 100 );
+# note Dumper  $Charge2F;
   my $balance = $A->VotesCast * 100;
   TestBalance ( $A->GetBallots, $Charge2F, $balance, $A->Elected() );
 };
@@ -210,15 +208,6 @@ subtest 'exception' => sub {
 done_testing();
 
 =pod
-
-  is( $A->SetQuota(), 120301, 'Set initial Quota' );
-  $A->Defeat( 'Stephanie_MUIR_Lab');
-  $A->Elect( 'William_GOLDIE_SNP');
-  $A->Charge ( 'William_GOLDIE_SNP', 120301, 70 );
-  $A->Defeat( 'Paddy_HOGG_SNP');
-  $A->Elect(  'Allan_GRAHAM_Lab');
-  $A->Charge ( 'Allan_GRAHAM_Lab', 120301, 90 );
-  $TC = $A->TopCount();
 
 "name"                      stage1  stage2  stage3  stage4  stage5  stage6  stage7
 "rounds"                    round1  ------  round2  round3  round4  round5  round6

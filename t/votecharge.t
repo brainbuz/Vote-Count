@@ -6,14 +6,15 @@ use 5.022;
 # since later versions may break things.
 use Test2::V0;
 use Test2::Bundle::More;
-use Test::Exception;
+# use Test::Exception;
 # use JSON::MaybeXS qw/encode_json/;
 # use YAML::XS;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Try::Tiny;
-use Vote::Count::VoteCharge 'FullCascadeCharge';
+use Vote::Count::VoteCharge;
+use Vote::Count::VoteCharge::Utility 'FullCascadeCharge', 'NthApproval';
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
@@ -297,6 +298,42 @@ subtest 'VCUpdateActive' => sub {
     $G->GetActive(),
     { MINTCHIP => 1, CARAMEL => 1 },
     'VCUPDATEACTIVE set active with a choice pending');
+};
+
+subtest 'DefeatLosers' => sub {
+  my $A = Vote::Count::VoteCharge->new(
+    Seats     => 3,
+    VoteValue => 1000,
+    BallotSet => read_ballots( 't/data/data2.txt', )
+  );
+  my @defeated = $A->DefeatLosers( 'approval', NthApproval( $A ) );
+  is_deeply( [sort @defeated],
+    [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
+    'Defeated the full list when enough choices would remain');
+  $A = Vote::Count::VoteCharge->new(
+    Seats     => 5,
+    VoteValue => 1000,
+    PrecedenceFile => 't/data/data2precedence.txt',
+    BallotSet => read_ballots( 't/data/data2.txt' )
+  );
+  @defeated = ( qw/ CARAMEL PISTACHIO ROCKYROAD RUMRAISIN STRAWBERRY/ );
+  @defeated = $A->DefeatLosers( 'precedence', @defeated );
+  is_deeply( [sort @defeated],
+    [ qw( CARAMEL RUMRAISIN STRAWBERRY) ],
+    'Defeated fewer when enough choices would not remain');
+};
+
+subtest 'exception' => sub {
+  my $A = Vote::Count::VoteCharge->new(
+    Seats     => 5,
+    VoteValue => 100,
+    BallotSet => read_ballots('t/data/data1.txt')
+  );
+  like(
+    dies { $A->CountAbandoned() },
+    qr/Attempt to Count Abandoned prior to TopCount/,
+    "CountAbandoned threw an exception when TopCount wasn't performed first"
+  );
 };
 
 done_testing();

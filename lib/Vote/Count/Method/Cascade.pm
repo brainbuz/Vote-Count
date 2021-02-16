@@ -6,7 +6,6 @@ package Vote::Count::Method::Cascade;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count::VoteCharge';
-
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 
@@ -19,7 +18,7 @@ use JSON::MaybeXS;
 use YAML::XS;
 use Path::Tiny;
 use Carp;
-use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
+use Vote::Count::VoteCharge::Utility('FullCascadeCharge', 'NthApproval');
 
 our $VERSION = '1.10';
 
@@ -54,6 +53,7 @@ our $coder = JSON->new->ascii->pretty;
 sub Round($I) { return $I->{'currentround'}; }
 
 sub NewRound ( $I, $quota = 0, $charge = {} ) {
+  $I->TopCount();
   my $round = ++$I->{'currentround'};
   $I->{'roundstatus'}{ $round - 1 } = {
     'charge' => $charge,
@@ -104,6 +104,7 @@ sub QuotaElectDo ( $I, $quota ) {
   return @Electable;
 }
 
+
 # Produce a better estimate than the previous by running
 # FullCascadeCharge of the last estimate. Clones a copy of
 # Ballots for the Cascade Charge.
@@ -119,13 +120,6 @@ sub _chargeInsight ( $I, $quota, $est, $cap, $bottom, $freeze, @elected ) {
   my $charge =
     FullCascadeCharge( $B, $quota, $est, $active, $I->VoteValue() );
 LOOPINSIGHT: for my $E (@elected) {
-
-# if ( $I->{'DEBUG'} ) {
-# if( $E eq 'Allan_GRAHAM_Lab' ) {
-#   warn "Allan_GRAHAM_Lab:***\n charge ***\n" . Dumper $charge;
-#   warn "FREEZE\n" . Dumper $freeze;
-#   warn "ESTIMATE \n" . Dumper $est;
-# }}
     if ( $freeze->{$E} ) {    # if frozen stay frozen.
       $estnew{$E} = $freeze->{$E};
       next LOOPINSIGHT;

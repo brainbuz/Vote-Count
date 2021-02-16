@@ -181,29 +181,26 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
   is( $allintie->{'winner'}, 'PISTACHIO',
     'GrandJunction Method goes to fallback.' );
   note('Verify fallback with the tied TWEEDLES set');
-  my $tweedles = Vote::Count->new(
-      BallotSet => read_ballots('t/data/tweedles.txt'),
-    );
+  my $tweedles =
+    Vote::Count->new( BallotSet => read_ballots('t/data/tweedles.txt'), );
   $tweedles->TieBreakerFallBackPrecedence(1);
   for my $method (qw /borda topcount approval grandjunction borda_all/) {
     is(
       $tweedles->TieBreaker(
-        $method, $tweedles->Active(),
-        $tweedles->GetActiveList
+        $method, $tweedles->Active(), $tweedles->GetActiveList
       ),
       ('TWEEDLE_THREE'),
       "fallback from $method picks precedence winner"
     );
   }
 
-  $tweedles->PrecedenceFile( 't/data/tweedlesprecedence2.txt');
+  $tweedles->PrecedenceFile('t/data/tweedlesprecedence2.txt');
   # Coverage: Making sure the trigger is tested when changing precedence file.
   $tweedles->TieBreakerFallBackPrecedence(1);
   for my $method (qw /borda topcount approval grandjunction borda_all/) {
     is(
       $tweedles->TieBreaker(
-        $method, $tweedles->Active(),
-        $tweedles->GetActiveList
+        $method, $tweedles->Active(), $tweedles->GetActiveList
       ),
       ('TWEEDLE_DUM'),
       "fallback from $method picks winner with different precedence file"
@@ -211,24 +208,67 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
   }
   my $method = 'all';
   is_deeply(
-      [ $tweedles->TieBreaker(
-        $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
+    [
+      $tweedles->TieBreaker(
+        $method,
+        {
+          TWEEDLE_DEE   => 1,
+          TWEEDLE_DUM   => 1,
+          TWEEDLE_TWO   => 1,
+          TWEEDLE_THREE => 1
+        },
         $tweedles->GetActiveList()
-      ) ],
-      [],
-      "fallback from all returns list of choices in tie"
+      )
+    ],
+    [],
+    "fallback from all returns list of choices in tie"
   );
   $method = 'none';
   is_deeply(
-      [ $tweedles->TieBreaker(
-        $method, { TWEEDLE_DEE => 1, TWEEDLE_DUM => 1, TWEEDLE_TWO => 1, TWEEDLE_THREE => 1 },
+    [
+      $tweedles->TieBreaker(
+        $method,
+        {
+          TWEEDLE_DEE   => 1,
+          TWEEDLE_DUM   => 1,
+          TWEEDLE_TWO   => 1,
+          TWEEDLE_THREE => 1
+        },
         $tweedles->GetActiveList()
-      ) ],
-      [ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
-      "fallback from all returns list of choices in tie"
+      )
+    ],
+    [qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/],
+    "fallback from all returns list of choices in tie"
   );
 };
 
-      #$[ qw/TWEEDLE_DEE TWEEDLE_DO TWEEDLE_DUM TWEEDLE_THREE TWEEDLE_TWO/ ],
+subtest 'UntieList' => sub {
+  my $E = Vote::Count->new(
+    BallotSet                    => read_ballots('t/data/ties1.txt'),
+    TieBreakMethod               => 'approval',
+    PrecedenceFile               => 't/data/tiebreakerprecedence1.txt',
+    TieBreakerFallBackPrecedence => 1,
+  );
+  my @tied = qw( CARAMEL STRAWBERRY CHOCCHUNK PISTACHIO ROCKYROAD RUMRAISIN );
+  my @untied = $E->UnTieList( 'approval', @tied );
+  my @expect =
+    qw( ROCKYROAD PISTACHIO CARAMEL RUMRAISIN STRAWBERRY CHOCCHUNK );
+  is_deeply( \@untied, \@expect,
+    'correct sort order of choices per approval then precedence' );
+
+  @untied = $E->UnTieList( 'precedence', @tied );
+  @expect = qw( PISTACHIO ROCKYROAD CARAMEL RUMRAISIN CHOCCHUNK STRAWBERRY);
+  is_deeply( \@untied, \@expect,
+    'correct sort order of choices per precedence only' );
+  $E->{'BallotSet'}{'ballots'}{'STRAWBERRY'} = {
+    count     => 2,
+    votevalue => .2,
+    votes     => ["STRAWBERRY"]
+  };
+  @untied = $E->UnTieList( 'approval', @tied );
+  @expect = qw( ROCKYROAD STRAWBERRY PISTACHIO CARAMEL RUMRAISIN CHOCCHUNK );
+  is_deeply( \@untied, \@expect,
+    'modified order when fractional vote is added to a choice' );
+};
 
 done_testing();
