@@ -13,10 +13,11 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Vote::Count::Method::Cascade;
-use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
+use Vote::Count::VoteCharge::Utility 'FullCascadeCharge', 'NthApproval';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
+use Vote::Count::VoteCharge::TestBalance 'balance_ok';
 use Storable 3.15 'dclone';
 use Data::Dumper;
 # use Carp::Always;
@@ -32,30 +33,29 @@ sub newD ( $lname='dumbarton') {
   );
 }
 
-sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
-  my $valelect = 0;
-  for ( @elected ) {
-      $valelect += $charge->{$_}{'value'} };
-  my $valremain = 0 ;
-  for my $k ( keys $Ballots->%* ) {
-    $valremain +=
-      $Ballots->{$k}{'votevalue'} * $Ballots->{$k}{'count'};
-  }
-  is( $valremain + $valelect, $balance,
-    'sum of elected value plus remaining value matches total vote value');
-}
-
 subtest 'setup' => sub {
   my $D = newD();
-  $D->NewRound();
   note( $D->TopCount()->RankTableWeighted(100) );
+  my @defeated = $D->DefeatLosers( 'precedence', NthApproval( $D ) );
+  note( "DEFEAT SURE LOSERS: @defeated ");
+
+  # note( $D->SureLoser );
+  $D->NewRound();
   my $quota = $D->SetQuota();
   my $abandoned = $D->CountAbandoned;
   note( "quota $quota abandoned $abandoned->{value_abandoned} ");
-  # note( $D->SureLoser );
 
   $D->QuotaElectDo( $quota );
-  note( "Elected " . $D->Elected() );
+  note( "Elected " . Dumper $D->Elected() );
+
+  $D->NewRound();
+  $quota = $D->SetQuota();
+  $abandoned = $D->CountAbandoned;
+  note( "quota $quota abandoned $abandoned->{value_abandoned} ");
+
+  $D->QuotaElectDo( $quota );
+  note( Dumper $D->TopCount()->RankTableWeighted( 1000) );
+  note( Dumper $D->Approval()->RankTableWeighted( 1000) );
 
   # $A->Elect( 'William_GOLDIE_SNP');
   # $A->Elect( 'Allan_GRAHAM_Lab');

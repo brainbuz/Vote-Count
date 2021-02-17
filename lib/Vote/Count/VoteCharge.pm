@@ -205,7 +205,7 @@ sub Reinstate( $I, @choices ) {
   }
 }
 
-sub DefeatLosers( $I, $conflictstyle='approval', @defeating ) {
+sub DefeatLosers( $I, $conflictstyle, @defeating ) {
   my $seats = $I->SeatsOpen();
   my @a = $I->GetActiveList();
   my $active = scalar @a;

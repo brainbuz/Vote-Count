@@ -17,6 +17,7 @@ use Vote::Count::VoteCharge::Utility 'FullCascadeCharge';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
+use Vote::Count::VoteCharge::TestBalance 'balance_ok';
 use Storable 3.15 'dclone';
 use Data::Dumper;
 # use Carp::Always;
@@ -155,18 +156,18 @@ subtest 'calc charge simple data' => sub {
     'calculate the charge with the simple set two quota choices with 1 under');
 };
 
-sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
-  my $valelect = 0;
-  for ( @elected ) {
-      $valelect += $charge->{$_}{'value'} };
-  my $valremain = 0 ;
-  for my $k ( keys $Ballots->%* ) {
-    $valremain +=
-      $Ballots->{$k}{'votevalue'} * $Ballots->{$k}{'count'};
-  }
-  is( $valremain + $valelect, $balance,
-    'sum of elected value plus remaining value matches total vote value');
-}
+# sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
+#   my $valelect = 0;
+#   for ( @elected ) {
+#       $valelect += $charge->{$_}{'value'} };
+#   my $valremain = 0 ;
+#   for my $k ( keys $Ballots->%* ) {
+#     $valremain +=
+#       $Ballots->{$k}{'votevalue'} * $Ballots->{$k}{'count'};
+#   }
+#   is( $valremain + $valelect, $balance,
+#     'sum of elected value plus remaining value matches total vote value');
+# }
 
 subtest 'calc charge bigger data' => sub {
   my $A = newA;
@@ -190,9 +191,8 @@ subtest 'calc charge bigger data' => sub {
     'Calculate the charge adding the next quota winner'
   );
   my $Charge2F = FullCascadeCharge( $A->GetBallots, 120301, $ACharge2, $A->GetActive, 100 );
-# note Dumper  $Charge2F;
   my $balance = $A->VotesCast * 100;
-  TestBalance ( $A->GetBallots, $Charge2F, $balance, $A->Elected() );
+  balance_ok( $A->GetBallots, $Charge2F, $balance, [$A->Elected()] );
 };
 
 subtest 'exception' => sub {
