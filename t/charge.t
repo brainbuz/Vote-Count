@@ -13,8 +13,8 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Try::Tiny;
-use Vote::Count::VoteCharge;
-use Vote::Count::VoteCharge::Utility 'FullCascadeCharge', 'NthApproval';
+use Vote::Count::Charge;
+use Vote::Count::Charge::Utility 'FullCascadeCharge', 'NthApproval';
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
@@ -22,7 +22,7 @@ use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
 use Data::Dumper;
 
 subtest '_setTieBreaks' => sub {
-  my $A = Vote::Count::VoteCharge->new(
+  my $A = Vote::Count::Charge->new(
     Seats     => 5,
     VoteValue => 100,
     BallotSet => read_ballots('t/data/data1.txt')
@@ -34,7 +34,7 @@ subtest '_setTieBreaks' => sub {
   );
   note(
     'this subtest is just for coverage, but did find error by writing it.');
-  my $B = Vote::Count::VoteCharge->new(
+  my $B = Vote::Count::Charge->new(
     BallotSet      => read_ballots('t/data/data1.txt'),
     Seats          => 2,
     VoteValue      => 1000000,
@@ -47,7 +47,7 @@ subtest '_setTieBreaks' => sub {
     't/data/tiebreakerprecedence1.txt',
     'correct precedencefile reported'
   );
-  my $C = Vote::Count::VoteCharge->new(
+  my $C = Vote::Count::Charge->new(
     BallotSet      => read_ballots('t/data/data1.txt'),
     TieBreakMethod => 'precedence',
     Seats          => 4,
@@ -58,7 +58,7 @@ subtest '_setTieBreaks' => sub {
 };
 
 subtest '_inits' => sub {
-  my $D = Vote::Count::VoteCharge->new(
+  my $D = Vote::Count::Charge->new(
     Seats     => 4,
     VoteValue => 1000,
     BallotSet => read_ballots('t/data/data1.txt')
@@ -104,7 +104,7 @@ subtest '_inits' => sub {
   undef $D;
   like(
     dies {
-      Vote::Count::VoteCharge->new(
+      Vote::Count::Charge->new(
         Seats     => 4,
         BallotSet => read_range_ballots('t/data/tennessee.range.json')
       );
@@ -116,7 +116,7 @@ subtest '_inits' => sub {
 };
 
 subtest 'Charge' => sub {
-  my $E = Vote::Count::VoteCharge->new(
+  my $E = Vote::Count::Charge->new(
     Seats     => 3,
     VoteValue => 1000,
     BallotSet => read_ballots( 't/data/data1.txt', )
@@ -145,7 +145,7 @@ subtest 'Charge' => sub {
 };
 
 subtest 'Look at the Charges on some Ballots' => sub {
-  my $B = Vote::Count::VoteCharge->new(
+  my $B = Vote::Count::Charge->new(
     Seats     => 5,
     VoteValue => 1000,
     BallotSet => read_ballots( 't/data/biggerset1.txt', )
@@ -195,7 +195,7 @@ subtest 'Look at the Charges on some Ballots' => sub {
 };
 
 subtest 'Elect, Defeat, et al' => sub {
-  my $F = Vote::Count::VoteCharge->new(
+  my $F = Vote::Count::Charge->new(
     Seats     => 3,
     VoteValue => 1000,
     BallotSet => read_ballots( 't/data/data1.txt', )
@@ -266,7 +266,7 @@ subtest 'Elect, Defeat, et al' => sub {
 };
 
 subtest 'VCUpdateActive' => sub {
-  my $G = Vote::Count::VoteCharge->new(
+  my $G = Vote::Count::Charge->new(
     Seats     => 3,
     VoteValue => 1000,
     BallotSet => read_ballots( 't/data/data1.txt', )
@@ -301,7 +301,7 @@ subtest 'VCUpdateActive' => sub {
 };
 
 subtest 'DefeatLosers' => sub {
-  my $A = Vote::Count::VoteCharge->new(
+  my $A = Vote::Count::Charge->new(
     Seats     => 3,
     VoteValue => 1000,
     BallotSet => read_ballots( 't/data/data2.txt', )
@@ -310,7 +310,7 @@ subtest 'DefeatLosers' => sub {
   is_deeply( [sort @defeated],
     [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
     'Defeated the full list when enough choices would remain');
-  $A = Vote::Count::VoteCharge->new(
+  $A = Vote::Count::Charge->new(
     Seats     => 5,
     VoteValue => 1000,
     PrecedenceFile => 't/data/data2precedence.txt',
@@ -324,7 +324,7 @@ subtest 'DefeatLosers' => sub {
 };
 
 subtest 'exception' => sub {
-  my $A = Vote::Count::VoteCharge->new(
+  my $A = Vote::Count::Charge->new(
     Seats     => 5,
     VoteValue => 100,
     BallotSet => read_ballots('t/data/data1.txt')

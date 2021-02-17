@@ -12,12 +12,12 @@ use Test::Exception;
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
-use Vote::Count::Method::Cascade;
-use Vote::Count::VoteCharge::Utility 'FullCascadeCharge', 'NthApproval';
+use Vote::Count::Charge::Cascade;
+use Vote::Count::Charge::Utility 'FullCascadeCharge', 'NthApproval';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
-use Vote::Count::VoteCharge::TestBalance 'balance_ok';
+use Vote::Count::Charge::TestBalance 'balance_ok';
 use Storable 3.15 'dclone';
 use Data::Dumper;
 # use Carp::Always;
@@ -25,7 +25,7 @@ use Data::Dumper;
 my $dumbarton = read_ballots('t/data/Scotland2017/Dumbarton.txt');
 
 sub newD ( $lname='dumbarton') {
-  Vote::Count::Method::Cascade->new(
+  Vote::Count::Charge::Cascade->new(
     Seats     => 4,
     BallotSet => dclone $dumbarton,
     VoteValue => 100,

@@ -3,7 +3,7 @@ use warnings;
 use 5.022;
 use feature qw /postderef signatures/;
 
-package Vote::Count::VoteCharge;
+package Vote::Count::Charge;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
@@ -53,7 +53,7 @@ sub _init_choice_status ( $I ) {
 }
 
 # must deal with setting status after floor rule.
-# sub VoteChargeFloor ( $I ) {
+# sub ChargeFloor ( $I ) {
 
 # }
 
@@ -92,7 +92,7 @@ sub SeatsOpen ($I) { $I->Seats() - $I->Elected() }
 sub BUILD {
   my $self = shift;
   unless( $self->BallotSetType() eq 'rcv') {
-    croak "VoteCharge only supports rcv Ballot Type";
+    croak "Charge only supports rcv Ballot Type";
   }
   $self->_setTieBreaks();
   $self->ResetVoteValue();
@@ -311,7 +311,7 @@ sub NextSTVRound( $I) { return ++$I->{'stvround'} }
 
 =head1 NAME
 
-Vote::Count::Method::VoteCharge
+Vote::Count::Method::Charge
 
 =head1 VERSION 1.10
 
@@ -323,13 +323,13 @@ Vote::Count::Method::VoteCharge
 
 =head1 SYNOPSIS
 
-  my $E = Vote::Count::VoteCharge->new(
+  my $E = Vote::Count::Charge->new(
     Seats => 3,
     VoteValue => 1000,
     BallotSet => read_ballots('t/data/data1.txt', ) );
 
   $E->Elect('SOMECHOICE');
-  $E->Charge('SOMECHOICE', $quota, $pervotecharge );
+  $E->Charge('SOMECHOICE', $quota, $perCharge );
   say E->GetChoiceStatus( 'CARAMEL'),
    >  { state => 'withdrawn', votes => 0 }
 
@@ -347,7 +347,7 @@ Vote Charge uses integer math and truncates all remainders. Setting the Vote Val
 
 =head1 Description
 
-This module provides methods that can be shared between VoteCharge implementations and does not present a complete tool for conducting STV elections. Look at the Methods that have been implemented as part of Vote::Count.
+This module provides methods that can be shared between Charge implementations and does not present a complete tool for conducting STV elections. Look at the Methods that have been implemented as part of Vote::Count.
 
 =head1 Candidate / Choices States
 

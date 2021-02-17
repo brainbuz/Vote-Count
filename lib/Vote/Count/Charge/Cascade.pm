@@ -2,10 +2,10 @@ use strict;
 use warnings;
 use 5.022;
 
-package Vote::Count::Method::Cascade;
+package Vote::Count::Charge::Cascade;
 use namespace::autoclean;
 use Moose;
-extends 'Vote::Count::VoteCharge';
+extends 'Vote::Count::Charge';
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 
@@ -18,7 +18,7 @@ use JSON::MaybeXS;
 use YAML::XS;
 use Path::Tiny;
 use Carp;
-use Vote::Count::VoteCharge::Utility('FullCascadeCharge', 'NthApproval');
+use Vote::Count::Charge::Utility('FullCascadeCharge', 'NthApproval');
 
 our $VERSION = '1.10';
 

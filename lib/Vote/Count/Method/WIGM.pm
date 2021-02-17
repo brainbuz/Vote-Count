@@ -5,7 +5,7 @@ use 5.022;
 package Vote::Count::Method::WIGM;
 use namespace::autoclean;
 use Moose;
-extends 'Vote::Count::VoteCharge';
+extends 'Vote::Count::Charge';
 
 no warnings 'experimental';
 use feature qw /postderef signatures/;

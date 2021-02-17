@@ -3,7 +3,7 @@ use warnings;
 use 5.022;
 # use feature qw /postderef signatures/;
 
-package Vote::Count::VoteCharge::TestBalance;
+package Vote::Count::Charge::TestBalance;
 use Test2::API qw/context/;
 
 our @EXPORT = qw/balance_ok/;

@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.022;
 
-package Vote::Count::VoteCharge::Utility;
+package Vote::Count::Charge::Utility;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 use Sort::Hash;

@@ -13,8 +13,8 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 # use Vote::Count::Method::Concept;
-use Vote::Count::VoteCharge;
-use Vote::Count::VoteCharge::Utility ('FullCascadeCharge', 'NthApproval');
+use Vote::Count::Charge;
+use Vote::Count::Charge::Utility ('FullCascadeCharge', 'NthApproval');
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
@@ -80,7 +80,7 @@ subtest 'FullCascadeCharge' => sub {
 
 subtest 'NthApproval' => sub {
   my $B =
-    Vote::Count::VoteCharge->new(
+    Vote::Count::Charge->new(
       Seats     => 2,
       BallotSet => read_ballots('t/data/data2.txt'),
       VoteValue => 100,
@@ -91,7 +91,7 @@ subtest 'NthApproval' => sub {
     'returned list to eliminate'
   );
   my $C =
-    Vote::Count::VoteCharge->new(
+    Vote::Count::Charge->new(
       Seats     => 3,
       BallotSet => read_ballots('t/data/data2.txt'),
       VoteValue => 100,
