@@ -58,7 +58,7 @@ sub _init_choice_status ( $I ) {
 # }
 
 # Default tie breaking to GrandJunction,
-# Force Precedence as fallback, and generate reproducable precedence
+# Force Precedence as fallback, and generate reproducible precedence
 # file if one isn't provided.
 sub _setTieBreaks ( $I ) {
   no warnings 'uninitialized';
@@ -282,6 +282,16 @@ sub WriteSTVEvent( $I) {
 sub STVRound($I) { return $I->{'stvround'} }
 
 sub NextSTVRound( $I) { return ++$I->{'stvround'} }
+
+sub TCStats( $I ) {
+  my $tc = $I->TopCount;
+  $tc->{'total_votes'} = $I->VotesCast;
+  $tc->{'total_vote_value'} = $tc->{'total_votes'} * $I->VoteValue ;
+  $tc->{'abandoned'} = $I->CountAbandoned;
+  $tc->{'active_vote_value'} =
+    $tc->{'total_vote_value'} - $tc->{'abandoned'}{'value_abandoned'};
+  return $tc;
+}
 
 # keep this scrap for a future reporting method.
 # used when debugging the rounding diff between mollison's scotland results

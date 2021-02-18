@@ -336,4 +336,27 @@ subtest 'exception' => sub {
   );
 };
 
+subtest 'CountAbandoned, TCStats' => sub {
+  my $A = Vote::Count::Charge->new(
+    Seats     => 5,
+    VoteValue => 100,
+    BallotSet => read_ballots('t/data/data1.txt'),
+  );
+  my $tcs = $A->TCStats;
+  ok( $tcs->{abandoned}{message},
+    'there is a message in the abandoned key');
+  is( $tcs->{'active_vote_value'}, 1000,
+    'active vote value is reported by TCStats');
+  my $abandoned = $A->CountAbandoned;
+  is($abandoned->{count_abandoned}, 0, 'no abandoned ballots at beginning' );
+  is($abandoned->{value_abandoned}, 0, 'so their vote value is 0' );
+  $A->Defeat('VANILLA');
+  $tcs = $A->TCStats;
+  is( $tcs->{abandoned}{count_abandoned}, 2,
+    'after elimination 2 votes abandoned');
+  is( $tcs->{abandoned}{value_abandoned}, 200,
+    'after elimination 200 vote value abandoned');
+  is( $tcs->{'active_vote_value'}, 800, 'active vote value adjusted');
+};
+
 done_testing();

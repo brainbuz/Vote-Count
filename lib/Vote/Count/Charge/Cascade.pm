@@ -46,6 +46,8 @@ sub BUILD {
   my $I = shift;
   $I->{'roundstatus'}  = { 0 => {} };
   $I->{'currentround'} = 0;
+# to hold the last charged values for elected choices.
+  $I->{'lastcharge'} = {};
 }
 
 our $coder = JSON->new->ascii->pretty;
@@ -59,6 +61,7 @@ sub NewRound ( $I, $quota = 0, $charge = {} ) {
     'charge' => $charge,
     'quota'  => $quota,
   };
+  if ( keys $charge->%* ) { $I->{'lastcharge'} = $charge }
   return $round;
 }
 
@@ -80,9 +83,9 @@ sub _preEstimate ( $I, $quota, @elected ) {
   my %estimate = ();
   my %caps     = ();
   for my $e (@elected) {
-    if ( $lastcharge->{$e} ) {
-      $estimate{$e} = $lastcharge->{$e};
-      $caps{$e}     = $lastcharge->{$e};
+    if ( $I->{'lastcharge'}{$e} ) {
+      $estimate{$e} = $I->{'lastcharge'}{$e};
+      $caps{$e}     = $I->{'lastcharge'}{$e};
     }
     else {
       $estimate{$e} = int( $quota / $unw->{$e} );
@@ -92,6 +95,8 @@ sub _preEstimate ( $I, $quota, @elected ) {
   return ( \%estimate, \%caps );
 }
 
+# Must move directly to charge after this
+# if another topcount happens estimate will crash!
 sub QuotaElectDo ( $I, $quota ) {
   my %TC        = $I->TopCount()->RawCount()->%*;
   my @Electable = ();
@@ -103,7 +108,6 @@ sub QuotaElectDo ( $I, $quota ) {
   }
   return @Electable;
 }
-
 
 # Produce a better estimate than the previous by running
 # FullCascadeCharge of the last estimate. Clones a copy of

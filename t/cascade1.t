@@ -86,7 +86,7 @@ subtest 'newround and _preEstimate' => sub {
     $cap,
     { 'MINTCHIP' => 100, 'VANILLA' => 100 },
     'Check cap on first estimate');
-  $B->{'roundstatus'}{97}{'charge'}{'VANILLA'} = 59;
+  $B->{'lastcharge'}{'VANILLA'} = 59;
   $B->{'currentround'} = 98;
   ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $B, $quota, 'VANILLA', 'MINTCHIP' );
   is_deeply(
@@ -102,6 +102,22 @@ subtest 'newround and _preEstimate' => sub {
   is( $B->NewRound(), 1, 'NewRound returns new round number');
   is( $B->NewRound(), 2, 'NewRound returns next round number');
   is( $B->Round(), 2, 'double check the currentround with round method');
+  # A fatal error was found in later testing with this set.
+  my $died =  Vote::Count::Charge::Cascade->new(
+    Seats     => 4,
+    BallotSet => read_ballots('t/data/Scotland2017/Dumbarton.txt'),,
+    VoteValue => 100,
+    LogTo     => '/tmp/votecount_preest3',
+  );
+  for ( qw/ David_MCBRIDE_Lab Karen_CONAGHAN_SNP George_BLACK_WDCP/ ) {
+    $died->Elect($_);
+  }
+  my $diedcharge = { David_MCBRIDE_Lab => 57, Karen_CONAGHAN_SNP => 51 , George_BLACK_WDCP =>  89 };
+  FullCascadeCharge( $died->GetBallots, 120055, $diedcharge, $died->GetActive, 100 );
+  $died->Suspend( 'Iain_MCLAREN_SNP' );
+  $died->Suspend('Andrew_MUIR_Ind');
+  $died->TopCount();
+  $died->LastTopCountUnWeighted;
 };
 
 subtest '_chargeInsight' => sub {
@@ -126,16 +142,6 @@ subtest '_chargeInsight' => sub {
   is_deeply( $C2->{estimate},
     { 'MINTCHIP' => 75, 'VANILLA' => 50 },
     'check the estimate with a cap in play' );
-# no more mr freeze?
-  # $cap = { 'MINTCHIP' => 100, 'VANILLA' => 100 };
-  # $freeze = { 'VANILLA' => 66 };
-  # my $C3 = $B->_chargeInsight( 375, $estimate, $cap, $bottom, $freeze, 'MINTCHIP', 'VANILLA' );
-  # note( Dumper $C3);
-  # is_deeply( $C3->{estimate},
-  #   { 'MINTCHIP' => 75, 'VANILLA' => 66 },
-  #   'check the estimate with a freeze in play' );
-  # is( $C3->{'result'}{'VANILLA'}{'charge'}, 66,
-  #   'confirm freeze applied immediately without updating the estimate');
   $bottom->{ 'VANILLA' } = 71 ;
   my $C4 =  $B->_chargeInsight( 375, $estimate, $cap, $bottom, {}, 'MINTCHIP', 'VANILLA' );
   is_deeply ( $C4->{'estimate'}, { 'MINTCHIP' => 75, 'VANILLA' => 71 },
@@ -156,18 +162,6 @@ subtest 'calc charge simple data' => sub {
     'calculate the charge with the simple set two quota choices with 1 under');
 };
 
-# sub TestBalance ( $Ballots, $charge, $balance, @elected ) {
-#   my $valelect = 0;
-#   for ( @elected ) {
-#       $valelect += $charge->{$_}{'value'} };
-#   my $valremain = 0 ;
-#   for my $k ( keys $Ballots->%* ) {
-#     $valremain +=
-#       $Ballots->{$k}{'votevalue'} * $Ballots->{$k}{'count'};
-#   }
-#   is( $valremain + $valelect, $balance,
-#     'sum of elected value plus remaining value matches total vote value');
-# }
 
 subtest 'calc charge bigger data' => sub {
   my $A = newA;

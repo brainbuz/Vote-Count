@@ -126,7 +126,7 @@ has 'TieBreakerFallBackPrecedence' => (
 sub _triggercheckprecedence ( $I, $new, $old = undef ) {
   unless ( $I->PrecedenceFile() ) {
     $I->PrecedenceFile('/tmp/precedence.txt');
-    $I->logt( "Generated FallBack TieBreaker Precedence Order: "
+    $I->logt( "Generated FallBack TieBreaker Precedence Order: \n"
         . join( ', ', $I->CreatePrecedenceRandom() ) );
   }
 }
