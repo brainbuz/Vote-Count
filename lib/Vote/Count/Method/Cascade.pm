@@ -79,17 +79,14 @@ sub StartElection ( $I ) {
 
 sub _electquotaround ( $I, $quota, @elected ) {
   my $round = $I->Round();
-my @allelected = $I->Elected;
-warn "all elected = @allelected";
-warn "new elected = @elected";
-warn Dumper $I->{'roundstatus'};
-# warn $I->TopCount()->RankTable();
   my $charge = $I->CalcCharge( $quota );
-  FullCascadeCharge( $I->GetBallots, $quota, $charge, $I->GetActive, $I->VoteValue );
+  my $value = FullCascadeCharge( $I->GetBallots, $quota, $charge, $I->GetActive, $I->VoteValue );
   $I->{'roundstatus'}{ $round } = {
     'charge' => $charge,
     'quota'  => $quota,
     'elect'  => \@elected,
+    'votes'  => $value,
+    'action' => 'elect',
   };
   $I->{lastcharge} = $charge;
   return $quota;
@@ -100,10 +97,9 @@ sub _noelectquotaround ( $I, $quota, $restype, @defeated ) {
   $I->{'roundstatus'}{ $round } = {
     'charge' => {},
     'quota'  => $quota,
+    'action' => $restype,
     $restype  => \@defeated,
   };
-warn   "_noelectquotaround round $round will return quota $quota +++++++++++++";
-  return $quota;
 }
 
 sub _quotaroundstart ( $I ) {
@@ -120,19 +116,24 @@ sub _quotaroundstart ( $I ) {
     $I->logv( "$cnt_active hopeful choices is not greater than $cnt_open remaining seats.");
     return 0;
   }
-  $I->logt( "# Round: $round");
-  $I->logt( "Quota Set At: $quota  Active Vote Value: $tc->{active_vote_value}");
-  $I->logv( "Non Continuing Vote Value: $tc->{abandoned}{value_abandoned}")
+  $I->logt( "# Round: $round\n");
+  $I->logt( "Quota Set At: $quota  Active Vote Value: $tc->{active_vote_value}\n");
+  $I->logv( "Non Continuing Vote Value: $tc->{abandoned}{value_abandoned}\n")
     if  $tc->{abandoned}{value_abandoned};
-  $I->logv( "## Round $round Votes\n" . $tc->RankTableWeighted( $I->VoteValue) );
+  $I->logv( "## Round $round Votes\n" . $tc->RankTableWeighted( $I->VoteValue) ."\n" );
   return $quota;
 }
 
 sub _dodrop ( $I, $droptype) {
-  my $rt = $I->Approval;
-  my $round = $I->Round;
-  $I->logv( "## Weighted Approval Round $round.\n");
-  $I->logv( $rt->RankTableWeighted( $I->VoteValue) );
+  my $rt = undef;
+  if ($droptype eq 'approval' ) {
+    $rt = $I->Approval;
+    my $round = $I->Round;
+    $I->logv( "## Weighted Approval Round $round.\n");
+    $I->logv( $rt->RankTableWeighted( $I->VoteValue) );
+  } else {
+    $rt = $I->TopCount();
+  }
   my @losing = $rt->ArrayBottom->@*;
   my ($suspend) = @losing == 1 ? $losing[0] :
       $I->TieBreaker(
@@ -143,7 +144,7 @@ sub _dodrop ( $I, $droptype) {
 }
 
 # Return Value true = continue, false = end quota.
-sub ConductQuotaRound ( $I,$droptype='approval' ) {
+sub ConductQuotaRound ( $I, $droptype='approval' ) {
   my $quota = _quotaroundstart ( $I );
   # false return val from _quotaroundstart inidcates no open seats.
   return 0 unless $quota;
@@ -160,9 +161,7 @@ sub ConductQuotaRound ( $I,$droptype='approval' ) {
     $I->logt( "Sure Loser Rule Defeated: " . join( ', ', @defeated ));
     return _noelectquotaround ( $I, $quota, 'defeat', @defeated );
   }
-
   my $suspend = _dodrop( $I, $droptype);
-
   $I->logt( "Suspend Lowest by Weighted Approval: $suspend");
   $I->Suspend( $suspend );
   _noelectquotaround ( $I, $quota, 'suspend', $suspend );

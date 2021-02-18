@@ -36,7 +36,7 @@ $DMB->StartElection;
 my $phase = 1;
 my $looper = 1;
 while ( $looper ) {
-  $looper = $DMB->ConductQuotaRound;
+  $looper = $DMB->ConductQuotaRound( 'topcount');
   note( "Round: " . $DMB->Round() );
   }
 
