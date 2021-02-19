@@ -126,6 +126,7 @@ sub _quotaroundstart ( $I ) {
 
 sub _dodrop ( $I, $droptype) {
   my $rt = undef;
+  my $desctype = 'Weighted Approval';
   if ($droptype eq 'approval' ) {
     $rt = $I->Approval;
     my $round = $I->Round;
@@ -133,6 +134,7 @@ sub _dodrop ( $I, $droptype) {
     $I->logv( $rt->RankTableWeighted( $I->VoteValue) );
   } else {
     $rt = $I->TopCount();
+    $desctype = 'Top Count';
   }
   my @losing = $rt->ArrayBottom->@*;
   my ($suspend) = @losing == 1 ? $losing[0] :
@@ -140,6 +142,7 @@ sub _dodrop ( $I, $droptype) {
                     $I->TieBreakMethod,
                     $I->Active,
                      );
+  $I->logt( "Suspend Lowest by $desctype: $suspend");
   return $suspend;
 }
 
@@ -162,7 +165,6 @@ sub ConductQuotaRound ( $I, $droptype='approval' ) {
     return _noelectquotaround ( $I, $quota, 'defeat', @defeated );
   }
   my $suspend = _dodrop( $I, $droptype);
-  $I->logt( "Suspend Lowest by Weighted Approval: $suspend");
   $I->Suspend( $suspend );
   _noelectquotaround ( $I, $quota, 'suspend', $suspend );
   # No active choices ends the Quota phase.

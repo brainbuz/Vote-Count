@@ -27,7 +27,8 @@ my $DMB =
   Vote::Count::Method::Cascade->new(
     Seats     => 4,
     BallotSet => read_ballots('t/data/Scotland2017/Dumbarton.txt'),
-    VoteValue => 100,
+    VoteValue => 100000,
+    IterationLog => '/tmp/votecount_cascademethod_iteration',
     LogTo     => '/tmp/votecount_cascademethod',
   );
 
@@ -36,7 +37,7 @@ $DMB->StartElection;
 my $phase = 1;
 my $looper = 1;
 while ( $looper ) {
-  $looper = $DMB->ConductQuotaRound( 'topcount');
+  $looper = $DMB->ConductQuotaRound( 'approval');
   note( "Round: " . $DMB->Round() );
   }
 

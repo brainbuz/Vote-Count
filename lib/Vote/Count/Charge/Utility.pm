@@ -89,6 +89,15 @@ sub NthApproval ( $I ) {
     my $avv = $ac->{'rawcount'}{$A};
     push @defeat, ($A) if $avv <= $bar;
   }
+  if (@defeat) {
+    my $deflst = join( ', ', @defeat );
+    $I->logv( qq/
+      Seats: $seats Choice $seats: $bottomrunning ( $bar )
+
+      Choices Not Over $bar by Weighted Approval: $deflst
+    /);
+
+  }
   return @defeat;
 }
 
