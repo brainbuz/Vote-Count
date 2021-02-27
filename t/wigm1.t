@@ -97,31 +97,25 @@ subtest 'C Scotland2017 Dumbarton' => sub {
 
   $ROUND = $C->_WIGRound($quota);
   is( $ROUND->{allvotes}{'Andrew_MUIR_Ind'},
-    17090994, "Round 2: Check the votes for choice that will be defeated" );
+    17090994, "Check the votes for choice that will be defeated" );
 
   my $abandoned = undef;
   $abandoned = $C->CountAbandoned();
   is( int round( $abandoned->{'value_abandoned'}, 5, 2 ),
     int 52.64,
-    'Round 2: value_abandoned should match at this point to stage 3.' );
+    'value_abandoned should match at this point to stage 3.' );
 
   $C->Defeat('Andrew_MUIR_Ind');
-  # deals with rounding difference to reference by lowering precision.
-  $abandoned = $C->CountAbandoned();
-  is( int round( $abandoned->{'value_abandoned'}, 5, 2 ),
-    int 52.64,
-    'Round 2: value_abandoned should match at this point to stage 3.' );
-  # note( "NON-CONTINUING: $abandoned->{'value_abandoned'} ======" );
 
   $ROUND = $C->_WIGRound($quota);
   is( $ROUND->{allvotes}{ $ROUND->{lowest} },
-    88829800, "Round 3: Check the votes for choice that will be defeated" );
+    88829800, "Check the votes for choice that will be defeated" );
 
   $abandoned = $C->CountAbandoned();
   is( int round( $abandoned->{'value_abandoned'}, 5, 2 ),
     int 102.58,
     'Round 4: value_abandoned should match at this point to stage 3.' );
-  note( Dumper $ROUND);
+  # note( Dumper $ROUND);
 
   $C->Defeat( $ROUND->{lowest} );
   $ROUND = $C->_WIGRound($quota);

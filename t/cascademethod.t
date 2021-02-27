@@ -34,12 +34,14 @@ my $DMB =
 
 ok 1;
 $DMB->StartElection;
-my $phase = 1;
-my $looper = 1;
-while ( $looper ) {
-  $looper = $DMB->ConductQuotaRound( 'approval');
-  note( "Round: " . $DMB->Round() );
-  }
+# my $phase = 1;
+# my $looper = 1;
+
+# incomplete code in infinite loop.
+# while ( $looper ) {
+#   $looper = $DMB->ConductQuotaRound( 'approval');
+#   note( "Round: " . $DMB->Round() );
+#   }
 
 # $DMB->ConductQuotaRound;
 # say "===== " . $DMB->ConductQuotaRound;

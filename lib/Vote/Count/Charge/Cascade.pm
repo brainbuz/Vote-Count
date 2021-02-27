@@ -24,7 +24,7 @@ our $VERSION = '1.10';
 
 =head1 NAME
 
-Vote::Count::Method::Cascade
+Vote::Count::Charge::Cascade
 
 =head1 VERSION 1.10
 
@@ -66,7 +66,6 @@ sub NewRound ( $I, $quota = 0, $charge = {} ) {
 }
 
 sub SetQuota ($I) {
-  # insure up to date TopCount before finding abandoned.
   my $abandoned   = $I->CountAbandoned();
   my $abndnvotes  = $abandoned->{'value_abandoned'};
   my $cast        = $I->BallotSet->{'votescast'};
@@ -96,7 +95,7 @@ sub _preEstimate ( $I, $quota, @elected ) {
 }
 
 # Must move directly to charge after this
-# if another topcount happens estimate will crash!
+# --- if another topcount happens estimate will crash!
 sub QuotaElectDo ( $I, $quota ) {
   my %TC        = $I->TopCount()->RawCount()->%*;
   my @Electable = ();

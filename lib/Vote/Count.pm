@@ -437,7 +437,7 @@ Get a Matrix Object for the Active Set. Generated and cached on the first reques
 
 =head3 UpdatePairMatrix
 
-Regenerate and cache Matrix with current Active Set.
+Regenerate and cache Matrix with current Active Set. 
 
 
 =head3 VotesCast
@@ -452,7 +452,7 @@ Returns the number of non-exhausted ballots based on the current Active Set.
 
 =head1 Minimum Perl Version
 
-It is the policy of Vote::Count to only develop with recent versions of Perl. Support for older versions will be dropped as they either start failing tests or impair adoption of new features.
+It is the policy of Vote::Count to only develop with recent versions of Perl. Support for older versions will be dropped as they either start failing tests or impair adoption of new features. 
 
 
 =head2 Components

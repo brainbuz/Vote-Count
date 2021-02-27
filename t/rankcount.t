@@ -13,6 +13,8 @@ use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Vote::Count::RankCount;
 
+use Data::Dumper;
+
 use feature qw/signatures postderef/;
 
 # my $tc1       = $VC1->TopCount();
@@ -126,13 +128,28 @@ my $bigtie = {
   'BRONZE' => 5,
 };
 
-my $bt  = Vote::Count::RankCount->Rank($bigtie);
-my $bto = $bt->HashByRank();
-is_deeply(
-  $bto->{2},
-  [qw/ BRASS BRONZE COPPER PEARL RUBY/],
-  'Check that the arrayref from HashByRank is sorted.'
-);
+subtest 'HashByRank HashWithOrder' => sub {
+  my $bt  = Vote::Count::RankCount->Rank($bigtie);
+  my $bto = $bt->HashByRank();
+  my $btr = $bt->HashWithOrder();
+  is_deeply(
+    $bto->{2},
+    [qw/ BRASS BRONZE COPPER PEARL RUBY/],
+    'Check that the arrayref from HashByRank is sorted.'
+  );
+  is_deeply(
+    $btr,
+    { 'BRASS'  => 2,
+      'BRONZE' => 2,
+      'SILVER' => 1,
+      'COPPER' => 2,
+      'PEARL'  => 2,
+      'RUBY'   => 2,
+      'GOLD'   => 1
+    },
+    'HashWithOrder reflects tied positions'
+  );
+};
 
 subtest 'Bigger Than 10' => sub {
 
@@ -166,7 +183,7 @@ LONGTABLE
 
 subtest 'RankTableWeighted' => sub {
 
-my $weightable = q%| Rank | Choice     | Votes | VoteValue |
+  my $weightable = q%| Rank | Choice     | Votes | VoteValue |
 |:-----|:-----------|------:|----------:|
 | 1    | VANILLA    |  7.00 |       700 |
 | 2    | MINTCHIP   |  5.00 |       500 |

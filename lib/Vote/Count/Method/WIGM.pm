@@ -15,7 +15,7 @@ use Mojo::Template;
 use Sort::Hash;
 use Data::Dumper;
 
-our $VERSION = '1.10';
+our $VERSION='1.10';
 
 =head1 NAME
 
@@ -240,3 +240,26 @@ WIGDOROUNDLOOP:
 
 __PACKAGE__->meta->make_immutable;
 1;
+
+#FOOTER
+
+=pod
+
+BUG TRACKER
+
+L<https://github.com/brainbuz/Vote-Count/issues>
+
+AUTHOR
+
+John Karr (BRAINBUZ) brainbuz@cpan.org
+
+CONTRIBUTORS
+
+Copyright 2019-2020 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+
+LICENSE
+
+This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+=cut
+

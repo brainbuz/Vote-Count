@@ -6,6 +6,7 @@ package Vote::Count::Charge::Utility;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 use Sort::Hash;
+use Vote::Count::TextTableTiny qw/generate_table/;
 
 our $VERSION = '1.10';
 
@@ -45,7 +46,7 @@ Finds the choice that would fill the last seat if the remaining seats were to be
 
 =cut
 
-use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval' ], );
+use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable' ], );
 
 sub FullCascadeCharge ( $ballots, $quota, $cost, $active, $votevalue ) {
   for my $b ( keys $ballots->%* ) {
@@ -100,5 +101,63 @@ sub NthApproval ( $I ) {
   }
   return @defeat;
 }
+
+sub WeightedTable ( $I ) {
+  my $approval = $I->Approval()->RawCount();
+  my $tc = $I->TopCount();
+  my $tcr = $tc->RawCount();
+  my $vv = $I->VoteValue();
+  my %data =();
+  my @active = $I->GetActiveList();
+  for my $choice ( @active ) {
+    $data{ $choice } = {
+      'votevalue' => $tcr->{ $choice },
+      'votes' => sprintf( "%.2f",$tcr->{ $choice } / $vv),
+      'approvalvalue' => $approval->{ $choice },
+      'approval' => sprintf( "%.2f", $approval->{ $choice } / $vv),
+    };
+  }
+  my @rows = ( [ 'Rank', 'Choice', 'Votes', 'VoteValue', 'Approval', 'Approval Value' ] );
+  my %byrank = $tc->HashByRank()->%*;
+  for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
+    my @choice = sort $byrank{$r}->@*;
+    for my $choice (@choice) {
+      # my $votes = $tcr->{$choice};
+      my $D = $data{$choice};
+      my @row = (
+          $r, $choice, $D->{'votes'}, $D->{'votevalue'},
+          $D->{'approval'}, $D->{'approvalvalue'} );
+      push @rows, ( \@row );
+    }
+  }
+  return generate_table(
+    rows => \@rows,
+    style => 'markdown',
+    align => [qw/ l l r r r r/]
+    ) . "\n";
+}
+
+# sub RankTableWeighted( $self, $votevalue ) {
+#   my @rows   = ( [ 'Rank', 'Choice', 'Votes', 'VoteValue' ] );
+#   my %rc     = $self->{'rawcount'}->%*;
+#   my %byrank = $self->{'byrank'}->%*;
+#   for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
+#     my @choice = sort $byrank{$r}->@*;
+#     for my $choice (@choice) {
+#       my $votes = $rc{$choice};
+#       my @row = ( $r, $choice, sprintf("%.2f", $votes/$votevalue), $votes );
+#       push @rows, ( \@row );
+#     }
+#   }
+#   return generate_table(
+#     rows => \@rows,
+#     style => 'markdown',
+#     align => [qw/ l l r r /]
+#     ) . "\n";
+# }
+
+# sub BottomRunoff ( $rankcount, $method,  ) {
+
+# }
 
 1;

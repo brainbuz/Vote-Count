@@ -19,7 +19,7 @@ use Data::Dumper;
 use Try::Tiny;
 use Carp;
 
-our $VERSION = '1.10';
+our $VERSION='1.10';
 
 =head1 NAME
 
@@ -62,13 +62,14 @@ has 'TieBreakMethod' => (
 );
 
 sub StartElection ( $I ) {
-  my @defeated = $I->DefeatLosers( $I->TieBreakMethod, NthApproval( $I ));
+  my @defeated = NthApproval( $I );
   if (@defeated) {
-    $I->logv( "Sure Loser Rule Defeated: " . join( ', ', @defeated ));
+    $I->logt( "Automatic Rule Defeated: " . join( ', ', @defeated ));
+    for (@defeated) { $I->Defeat($_)}
     $I->logv( $I->TopCount()->RankTableWeighted( $I->VoteValue) );
     $I->TopCount; # need to make sure stats are fresh after defeats.
     my $abandon = $I->CountAbandoned()->{'count_abandoned'};
-    $I->logt( "$abandon Ballots are Non-Continuing") if $abandon;
+    $I->logv( "$abandon Ballots are Non-Continuing") if $abandon;
   } else {
     $I->logt( 'No Choices Defeated by Sure Loser at start');
   }
@@ -77,7 +78,7 @@ sub StartElection ( $I ) {
   $I->logv( "Total Votes Cast: $cast. Active Votes: $remain" )
 }
 
-sub _electquotaround ( $I, $quota, @elected ) {
+sub _electround ( $I, $quota, @elected ) {
   my $round = $I->Round();
   my $charge = $I->CalcCharge( $quota );
   my $value = FullCascadeCharge( $I->GetBallots, $quota, $charge, $I->GetActive, $I->VoteValue );
@@ -92,7 +93,7 @@ sub _electquotaround ( $I, $quota, @elected ) {
   return $quota;
 }
 
-sub _noelectquotaround ( $I, $quota, $restype, @defeated ) {
+sub _noelectround ( $I, $quota, $restype, @defeated ) {
   my $round = $I->Round();
   $I->{'roundstatus'}{ $round } = {
     'charge' => {},
@@ -102,7 +103,7 @@ sub _noelectquotaround ( $I, $quota, $restype, @defeated ) {
   };
 }
 
-sub _quotaroundstart ( $I ) {
+sub _roundstart ( $I ) {
   my $round = ++$I->{'currentround'};
   my $tc = $I->TCStats();
   my $quota = $I->SetQuota();
@@ -147,39 +148,116 @@ sub _dodrop ( $I, $droptype) {
 }
 
 # Return Value true = continue, false = end quota.
-sub ConductQuotaRound ( $I, $droptype='approval' ) {
-  my $quota = _quotaroundstart ( $I );
-  # false return val from _quotaroundstart inidcates no open seats.
+sub ConductRound ( $I, $droptype='approval' ) {
+  my $quota = _roundstart ( $I );
+  # false return val from _roundstart inidcates no open seats.
   return 0 unless $quota;
   my $round = $I->Round();
   my @elected = $I->QuotaElectDo( $quota );
   if ( @elected ) {
     $I->logt( "Electing: " . join( ', ', @elected));
-    return _electquotaround ( $I, $quota, @elected );
+    return _electround ( $I, $quota, @elected );
   } else {
     $I->logt( "No choices elected in round $round.");
   }
-  my @defeated = $I->DefeatLosers( $I->TieBreakMethod, NthApproval( $I ));
+  my @defeated = $I->TieBreakMethod, NthApproval( $I );
   if (@defeated) {
+    for (@defeated) { $I->Defeat($_)}
     $I->logt( "Sure Loser Rule Defeated: " . join( ', ', @defeated ));
-    return _noelectquotaround ( $I, $quota, 'defeat', @defeated );
+    return _noelectround ( $I, $quota, 'defeat', @defeated );
   }
   my $suspend = _dodrop( $I, $droptype);
   $I->Suspend( $suspend );
-  _noelectquotaround ( $I, $quota, 'suspend', $suspend );
+  _noelectround ( $I, $quota, 'suspend', $suspend );
   # No active choices ends the Quota phase.
   my $cntactive = () =   $I->GetActiveList;
   unless( $cntactive ) { return 0 }
   else { return $quota }
 }
-#
-    # if( $I->Suspended ) {
-    #   $I-logt(
-    #       'Reinstating Suspended Choices: ' .
-    #       join (',', $I->Reinstate() ));
-    # }
+
+# sub CascadeRound
+
+# sub WIGRun ( $I ) {
+#   my $pre_rslt = $I->_WIGStart();
+#   my $quota    = $pre_rslt->{'quota'};
+#   my $seats    = $I->Seats();
+
+# WIGDOROUNDLOOP:
+#   while ( $I->Elected() < $seats ) {
+#     my $rnd = $I->_WIGRound($quota);
+#     last WIGDOROUNDLOOP if _wigcomplete ( $I, $rnd );
+#     my @pending = $rnd->{'pending'}->@*;
+#     if ( scalar(@pending)){
+#       for my $pending (@pending) {
+#         my $chrg = $I->Charge( $pending, $quota );
+#         $I->_WIGElect($chrg);
+#         }
+#     } else {
+#       $I->logv( "Eliminating low choice: $rnd->{'lowest'}\n");
+#       $I->Defeat($rnd->{'lowest'});
+#       last WIGDOROUNDLOOP if _wigcomplete ( $I, $rnd );
+#     }
+#   }
+#   my @elected = $I->Elected();
+#   $I->STVEvent( { winners => \@elected });
+#   $I->logt( "Winners: " . join( ', ', @elected ));
+# }
+
+# sub _WIGRound ( $I, $quota ) {
+#   my $round_num = $I->NextSTVRound();
+#   my $round     = $I->TopCount();
+#   my $roundcnt  = $round->RawCount();
+#   my @choices   = $I->GetActiveList();
+#   my %rndvotes  = ();
+#   my $leader = $round->Leader()->{'winner'};
+#   my $votes4leader = $round->RawCount->{$leader};
+#   my $pending = $votes4leader >= $quota ? $leader : '';
+
+#   for my $C (@choices ) {
+#     if( $roundcnt->{ $C} >= $quota ) {
+#       $rndvotes{ $C } = $roundcnt->{ $C } ;
+#     }
+#   }
+#   my @pending = sort_hash( \%rndvotes, 'numeric', 'desc' );
+
+#   my $rslt = {
+#     pending  => \@pending,
+#     winvotes => \%rndvotes,
+#     quota    => $quota,
+#     round    => $round_num,
+#     allvotes => $round->RawCount(),
+#     lowest   => $round->ArrayBottom()->[0],
+#     noncontinuing => $I->CountAbandoned()->{'value_abandoned'},
+#   };
+#   $I->STVEvent($rslt);
+#   $I->logv( _format_round_result( $rslt, $round, $I->VoteValue() ) );
+#   return ($rslt);
+# }
 
 __PACKAGE__->meta->make_immutable;
 1;
 
 =pod
+
+#FOOTER
+
+=pod
+
+BUG TRACKER
+
+L<https://github.com/brainbuz/Vote-Count/issues>
+
+AUTHOR
+
+John Karr (BRAINBUZ) brainbuz@cpan.org
+
+CONTRIBUTORS
+
+Copyright 2019-2020 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+
+LICENSE
+
+This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+=cut
+

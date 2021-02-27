@@ -57,8 +57,10 @@ subtest 'quota' => sub {
   $A->Elect(  'Allan_GRAHAM_Lab');
   $A->Charge ( 'Allan_GRAHAM_Lab', 120301, 90 );
   $TC = $A->TopCount();
-  # note( $TC->RankTable );
-  # note( Dumper $A->CountAbandoned);
+  note( $TC->RankTable );
+  note( Dumper $A->CountAbandoned);
+  # note( Dumper $A->CountAbandonedTC);
+  note( Dumper $A->GetChoiceStatus);
   # This quota was never hand checked.
   is( $A->SetQuota(), 103957, 'Set a new Quota after some elections and defeats' );
   $TC = $B->TopCount( );

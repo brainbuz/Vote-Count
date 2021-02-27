@@ -122,8 +122,8 @@ subtest 'Charge' => sub {
     BallotSet => read_ballots( 't/data/data1.txt', )
   );
 
-  # These 2 need to be done before every new Charge.
-  $E->ResetVoteValue();    # undo partial charging from previous.
+  # resetvotevalue and topcount need to be done before every new Charge.
+  # $E->ResetVoteValue();    # undo partial charging from previous.
   $E->TopCount();          # init topcounts.
   is( $E->Charge( 'VANILLA', 3000, 1 )->{'surplus'}, -2997,
     'undercharge shows negative surplus');
@@ -300,41 +300,18 @@ subtest 'VCUpdateActive' => sub {
     'VCUPDATEACTIVE set active with a choice pending');
 };
 
-subtest 'DefeatLosers' => sub {
-  my $A = Vote::Count::Charge->new(
-    Seats     => 3,
-    VoteValue => 1000,
-    BallotSet => read_ballots( 't/data/data2.txt', )
-  );
-  my @defeated = $A->DefeatLosers( 'approval', NthApproval( $A ) );
-  is_deeply( [sort @defeated],
-    [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
-    'Defeated the full list when enough choices would remain');
-  $A = Vote::Count::Charge->new(
-    Seats     => 5,
-    VoteValue => 1000,
-    PrecedenceFile => 't/data/data2precedence.txt',
-    BallotSet => read_ballots( 't/data/data2.txt' )
-  );
-  @defeated = ( qw/ CARAMEL PISTACHIO ROCKYROAD RUMRAISIN STRAWBERRY/ );
-  @defeated = $A->DefeatLosers( 'precedence', @defeated );
-  is_deeply( [sort @defeated],
-    [ qw( CARAMEL RUMRAISIN STRAWBERRY) ],
-    'Defeated fewer when enough choices would not remain');
-};
-
-subtest 'exception' => sub {
-  my $A = Vote::Count::Charge->new(
-    Seats     => 5,
-    VoteValue => 100,
-    BallotSet => read_ballots('t/data/data1.txt')
-  );
-  like(
-    dies { $A->CountAbandoned() },
-    qr/Attempt to Count Abandoned prior to TopCount/,
-    "CountAbandoned threw an exception when TopCount wasn't performed first"
-  );
-};
+# subtest 'exception' => sub {
+#   my $A = Vote::Count::Charge->new(
+#     Seats     => 5,
+#     VoteValue => 100,
+#     BallotSet => read_ballots('t/data/data1.txt')
+#   );
+#   like(
+#     dies { $A->CountAbandoned() },
+#     qr/Attempt to Count Abandoned prior to TopCount/,
+#     "CountAbandoned threw an exception when TopCount wasn't performed first"
+#   );
+# };
 
 subtest 'CountAbandoned, TCStats' => sub {
   my $A = Vote::Count::Charge->new(

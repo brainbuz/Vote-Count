@@ -11,8 +11,10 @@ no warnings 'experimental';
 use List::Util qw( min max sum );
 use Path::Tiny;
 use Data::Dumper;
+use Vote::Count::RankCount;
+use Carp;
 
-our $VERSION = '1.10';
+our $VERSION='1.10';
 
 =head1 NAME
 
@@ -216,7 +218,7 @@ sub TieBreakerPrecedence ( $I, @tiedchoices ) {
   my %ordered = ();
   my $start   = 0;
   for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
-    $_ =~ s/\s//g;    #strip out any accidental whitespace
+    $_ =~ s/\s//g;    #strip out any accidental white space
     $ordered{$_} = $start++;
   }
   my $ballots = $I->BallotSet()->{'ballots'};
@@ -317,6 +319,28 @@ sub UnTieList ( $I, $method, @tied ) {
     push @ordered, $lead;
   }
   return @ordered;
+}
+
+sub UnTieAll ( $I, $method1, $method2 ) {
+  unless( 1 == $I->TieBreakerFallBackPrecedence() ) {
+    croak "TieBreakerFallBackPrecedence must be enabled to use UnTieAll";
+  }
+  my @choices = $I->GetActiveList();
+  my @ordered = ();
+  my $active  = $I->GetActive ;
+  my $first = $I->$method1()->HashByRank();
+
+  for my $level ( sort {$a <=> $b} ( keys %{$first})) {
+    my @l = @{$first->{$level}};
+    my @suborder
+      = ( 1 ==  @{$first->{$level}} )
+      ? @{$first->{$level}}
+      : $I->UnTieList( $method2, @l );
+    push @ordered, @suborder;
+  }
+  my $position = 0;
+  return Vote::Count::RankCount->Rank(
+   { map { $_ => --$position } @ordered } );
 }
 
 1;

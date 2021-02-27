@@ -96,7 +96,7 @@ Returns the original HashRef used for Object Creation.
 
 =item * HashWithOrder
 
-Returns a HashRef with the Choices as Keys and the position of the choice, the value for the Leader would be 1 and the Third Place Choice would be 3.
+Returns a HashRef with the Choices as Keys and the position of the choice, the value for the Leader would be 1 and the Third Place Choice would be 3. If choices are tied they will share the same value for their position.
 
 =item * HashByRank
 
