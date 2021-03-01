@@ -14,7 +14,7 @@ use Data::Dumper;
 use Vote::Count::RankCount;
 use Carp;
 
-our $VERSION='1.10';
+our $VERSION = '1.10';
 
 =head1 NAME
 
@@ -44,7 +44,6 @@ TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker
   'approval'
   'all' [ eliminate all tied choices ]
   'borda' [ applies Borda Count to current Active set ]
-  'barda_all' [ applies Borda Count to all of the choices ]
   'grandjunction' [ more resolveable than simple TopCount would be ]
   'none' [ eliminate no choices ]
   'precedence' [ requires also setting PrecedenceFile ]
@@ -115,6 +114,7 @@ has 'PrecedenceFile' => (
   is       => 'rw',
   isa      => 'Str',
   required => 0,
+  trigger  => \&_triggercheckprecedence,
 );
 
 has 'TieBreakerFallBackPrecedence' => (
@@ -131,6 +131,7 @@ sub _triggercheckprecedence ( $I, $new, $old = undef ) {
     $I->logt( "Generated FallBack TieBreaker Precedence Order: \n"
         . join( ', ', $I->CreatePrecedenceRandom() ) );
   }
+  $I->{'PRECEDENCEORDER'} = undef;    # clear cached if the file changes.
 }
 
 sub TieBreakerGrandJunction ( $self, @tiedchoices ) {
@@ -214,22 +215,31 @@ This optional argument enables or disables using precedence as a fallback, gener
 
 =cut
 
-sub TieBreakerPrecedence ( $I, @tiedchoices ) {
+sub _precedence_sort ( $I, @list ) {
   my %ordered = ();
   my $start   = 0;
-  for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
-    $_ =~ s/\s//g;    #strip out any accidental white space
-    $ordered{$_} = $start++;
+  if ( defined $I->{'PRECEDENCEORDER'} ) {
+    %ordered = $I->{'PRECEDENCEORDER'}->%*;
   }
-  my $ballots = $I->BallotSet()->{'ballots'};
-  my $winner  = $tiedchoices[0];
-  for my $c (@tiedchoices) {
-    unless ( defined $ordered{$c} ) {
-      die "Choice $c missing from precedence file\n";
+  else {
+    for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
+      $_ =~ s/\s//g;    #strip out any accidental white space
+      $ordered{$_} = ++$start;
     }
-    if ( $ordered{$c} < $ordered{$winner} ) { $winner = $c }
+    for my $c ($I->GetChoices) {
+      unless ( defined $ordered{$c} ) {
+        croak "Choice $c missing from precedence file\n";
+      }
+    }
+    $I->{'PRECEDENCEORDER'} = \%ordered;
   }
-  return { 'winner' => $winner, 'tie' => 0, 'tied' => [] };
+  my %L = map { $ordered{$_} => $_ } @list;
+  return ( map { $L{$_} } ( sort { $a <=> $b } keys %L ) );
+}
+
+sub TieBreakerPrecedence ( $I, @tiedchoices ) {
+  my @list = $I->_precedence_sort(@tiedchoices);
+  return { 'winner' => $list[0], 'tie' => 0, 'tied' => [] };
 }
 
 sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
@@ -253,6 +263,50 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
   return @precedence;
 }
 
+# # this is incomplete work left for later.
+# # sort list by grandjunction using the LNH safe variant, which
+# # isnt grandjunction anymore, but don't have better name right now.
+# sub _GrandJunctionRank ( $I, $safe, @active )  {
+#   my %active = @active
+#     ? map { $_ => 1 } @active
+#     : $I->GetActive()->%*;
+#   my $B = $I->GetBallots;
+#   my $Ranks = {};
+#   my @result = ();
+#   my $maxrank = 0;
+#   my $Scores =
+#   GRANDJUNCTIONBALLOOP: for my $BAL ( values $B->%* ) {
+#     my $lastvote = scalar( $BAL->{'votes'}->@*);
+#     $maxrank = $lastvote if $lastvote > $maxrank;
+#     $lastvote--; # index of array starts at 0, not 1.
+#     for my $index ( 0..$lastvote) {
+#       my $v = $BAL->{'votes'}[$index];
+#       if ( $active{$v} ) {
+#         $Ranks->{$index+1}{$v} += $BAL->{count};
+#         next GRANDJUNCTIONBALLOOP if $safe;
+#       }
+#     }
+#     my $scores
+#     # for my $R ( 1..$lastrank ) {
+#     #   # if ( )
+#     # }
+#   }
+#   $Ranks;
+
+# }
+
+# sub GrandJunctionRank ( $I, @active ) {
+#   $I->_GrandJunctionSort( 0,  @active );
+# }
+
+# sub GrandJunctionRankSafe ( $I, @active ) {
+#   $I->_GrandJunctionSort( 1,  @active );
+# }
+
+# sub PrecedenceSort( $I, @choices ) {
+
+# }
+
 sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
   if ( $tiebreaker eq 'none' ) { return @tiedchoices }
   if ( $tiebreaker eq 'all' )  { return () }
@@ -274,13 +328,13 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
     my $GJ = $I->TieBreakerGrandJunction(@tiedchoices);
     if    ( $GJ->{'winner'} ) { return $GJ->{'winner'} }
     elsif ( $GJ->{'tie'} )    { return $GJ->{'tied'}->@* }
-    else { die "unexpected (or no) result from $tiebreaker!\n" }
+    else { croak "unexpected (or no) result from $tiebreaker!\n" }
   }
   elsif ( $tiebreaker eq 'precedence' ) {
     # The one nice thing about precedence is that there is always a winner.
     return $I->TieBreakerPrecedence(@tiedchoices)->{'winner'};
   }
-  else { die "undefined tiebreak method $tiebreaker!\n" }
+  else { croak "undefined tiebreak method $tiebreaker!\n" }
   my @highchoice = ();
   my $highest    = 0;
   my $counted    = $ranked->RawCount();
@@ -311,36 +365,60 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
 }
 
 sub UnTieList ( $I, $method, @tied ) {
+  my $hasprecedence = 0;
+  $hasprecedence = 1 if 1 == $I->TieBreakerFallBackPrecedence();
+  $hasprecedence = 1 if lc($method) eq 'precedence';
+  unless ($hasprecedence) {
+    croak
+"TieBreakerFallBackPrecedence must be enabled or the specified method must be precedence to use UnTieList";
+  }
   my @ordered = ();
   my %active  = ( map { $_ => 1 } @tied );
-  while ( scalar( keys %active ) ) {
-    my ($lead) = $I->TieBreaker( $method, \%active, ( keys %active ) );
-    delete $active{$lead};
-    push @ordered, $lead;
-  }
+  my $nonrc   = 0;
+  $nonrc = 1 if lc($method) eq 'precedence';
+  # $nonrc = 1 if lc($method) eq 'grandjunction' ;
+  #   unless ( $nonrc ) {
+  #     my $RC = $I->$method( \%active)->HashByRank;
+  #     for my $tier ( sort { $a <=> $b } keys $RC->%* ) {
+  #       warn "TIER $tier -- " . Dumper $tier;
+
+  #       }
+  #     else {
+  #     while ( scalar( keys %active ) ) {
+  #       my ($lead) = $I->TieBreaker( $method, \%active, ( keys %active ) );
+  #       delete $active{$lead};
+  #       push @ordered, $lead;
+  #       }
+  #     }
+  # # warn Dumper $RC;
+  #     # for my $l
+  #   }
   return @ordered;
 }
 
 sub UnTieAll ( $I, $method1, $method2 ) {
-  unless( 1 == $I->TieBreakerFallBackPrecedence() ) {
-    croak "TieBreakerFallBackPrecedence must be enabled to use UnTieAll";
+  my $hasprecedence = 0;
+  $hasprecedence = 1 if 1 == $I->TieBreakerFallBackPrecedence();
+  $hasprecedence = 1 if lc($method1) eq 'precedence';
+  $hasprecedence = 1 if lc($method2) eq 'precedence';
+  unless ($hasprecedence) {
+    croak
+"TieBreakerFallBackPrecedence must be enabled or one of the specified methods must be precedence to use UnTieAll";
   }
-  my @choices = $I->GetActiveList();
   my @ordered = ();
-  my $active  = $I->GetActive ;
-  my $first = $I->$method1()->HashByRank();
+  my $first   = $I->$method1()->HashByRank();
 
-  for my $level ( sort {$a <=> $b} ( keys %{$first})) {
-    my @l = @{$first->{$level}};
-    my @suborder
-      = ( 1 ==  @{$first->{$level}} )
-      ? @{$first->{$level}}
+  for my $level ( sort { $a <=> $b } ( keys %{$first} ) ) {
+    my @l = @{ $first->{$level} };
+    my @suborder =
+      ( 1 == @{ $first->{$level} } )
+      ? @{ $first->{$level} }
       : $I->UnTieList( $method2, @l );
     push @ordered, @suborder;
   }
   my $position = 0;
   return Vote::Count::RankCount->Rank(
-   { map { $_ => --$position } @ordered } );
+    { map { $_ => --$position } @ordered } );
 }
 
 1;
