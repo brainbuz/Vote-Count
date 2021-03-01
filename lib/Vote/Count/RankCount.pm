@@ -74,6 +74,14 @@ sub _RankResult ( $rawcount ) {
 
 Takes a single argument of a hashref containing Choices as Keys and Votes as Values. Returns an Object. This method is also aliased as new.
 
+=head1 FromList
+
+Takes an ordered list and returns a RankCount Object where the RawCount values are the position time -1: Item 3 in the list will have -3 votes while Item 1 have -1.
+
+  my $ordered_rank_count = Vote::Count::RankCount->newFromList( @ordered_list );
+
+
+
 =cut
 
 sub Rank ( $class, $rawcount ) {
@@ -84,6 +92,13 @@ sub Rank ( $class, $rawcount ) {
 sub new ( $class, $rawcount ) {
   my $I = _RankResult($rawcount);
   return bless $I, $class;
+}
+
+sub newFromList ( @list ) {
+  shift @list;
+  my $pos = 0;
+  return Vote::Count::RankCount->Rank({
+    map { $_ => --$pos } @list} );
 }
 
 =head2 Methods

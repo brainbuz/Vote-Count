@@ -78,6 +78,10 @@ FullChargeBALLOTLOOP1:
   return \%chargedval;
 }
 
+# untilist method
+# moved to tiebreaker
+# add tests where ties in the middle move bottom running.
+
 sub NthApproval ( $I ) {
   my $tc            = $I->TopCount();
   my $ac            = $I->Approval();
@@ -97,7 +101,6 @@ sub NthApproval ( $I ) {
 
       Choices Not Over $bar by Weighted Approval: $deflst
     /);
-
   }
   return @defeat;
 }
@@ -136,28 +139,4 @@ sub WeightedTable ( $I ) {
     align => [qw/ l l r r r r/]
     ) . "\n";
 }
-
-# sub RankTableWeighted( $self, $votevalue ) {
-#   my @rows   = ( [ 'Rank', 'Choice', 'Votes', 'VoteValue' ] );
-#   my %rc     = $self->{'rawcount'}->%*;
-#   my %byrank = $self->{'byrank'}->%*;
-#   for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
-#     my @choice = sort $byrank{$r}->@*;
-#     for my $choice (@choice) {
-#       my $votes = $rc{$choice};
-#       my @row = ( $r, $choice, sprintf("%.2f", $votes/$votevalue), $votes );
-#       push @rows, ( \@row );
-#     }
-#   }
-#   return generate_table(
-#     rows => \@rows,
-#     style => 'markdown',
-#     align => [qw/ l l r r /]
-#     ) . "\n";
-# }
-
-# sub BottomRunoff ( $rankcount, $method,  ) {
-
-# }
-
 1;

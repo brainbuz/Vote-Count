@@ -78,7 +78,7 @@ subtest 'FullCascadeCharge' => sub {
     'remaining value on an exhausted ballot is 0');
 };
 
-todo 'NthApproval' => sub {
+subtest 'NthApproval' => sub {
   my $B =
     Vote::Count::Charge->new(
       Seats     => 2,
@@ -101,20 +101,6 @@ todo 'NthApproval' => sub {
     [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
     'another choice had approval == Nth place topcount'
   );
-  my $D =
-    Vote::Count::Charge->new(
-      Seats     => 3,
-      BallotSet => read_ballots('t/data/ties1.txt'),
-      VoteValue => 100,
-      PrecedenceFile => 't/data/tiebreakerprecedence1.txt',
-    );
-
-  note WeightedTable($D);
-  note $D->Approval->RankTable();
-  my @group1 = $D->UnTieList( qw( precedence MINTCHIP PISTACHIO ROCKYROAD RUMRAISIN));
-  note Dumper @group1;
-
-
 };
 
 subtest 'WeightedTable' => sub {

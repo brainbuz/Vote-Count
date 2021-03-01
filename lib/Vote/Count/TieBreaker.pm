@@ -185,12 +185,6 @@ Implements some basic methods for resolving ties. The default value for IRV is '
 
 TieBreaker returns a list containing the winner, if the method is 'all' the list is empty, if 'none' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
 
-=head1 UntieList
-
-Sort a list in an order determined by a TieBreaker method, sorted in Descending Order. To guarrantee reliable resolution Precedence must be used or have been set for fallback. The way this is currently implemented it does not produce the expected results with methods other than Precedence and Approval.
-
-  my @orderedlosers = $Election->UntieList( 'approval', @unorderedlosers );
-
 =head1 Precedence
 
 Since many existing Elections Rules call for Random, and Vote::Count does not accept Random as the result will be different bewtween runs, Precedence allows the Administrators of an election to randomly or arbitrarily determine who will win ties before running Vote::Count.
@@ -213,6 +207,16 @@ Creates a Predictable Psuedo Random Precedence file, and returns the list. Rando
 
 This optional argument enables or disables using precedence as a fallback, generates /tmp/precedence.txt if no PrecedenceFile is specified. Default is off.
 
+=head1 UntieList
+
+Sort a list in an order determined by a TieBreaker method, sorted in Descending Order. The TieBreaker must be a method that returns a RankCount object, Borda, TopCount, and Approval, Precedence. To guarrantee reliable resolution Precedence must be used or have been set for fallback.
+
+  my @orderedlosers = $Election->UntieList( 'Approval', @unorderedlosers );
+
+=head1 UntieAll
+
+Takes a primary and secondary method to provide an ordered list of all the Choices in the election.
+
 =cut
 
 sub _precedence_sort ( $I, @list ) {
@@ -226,7 +230,7 @@ sub _precedence_sort ( $I, @list ) {
       $_ =~ s/\s//g;    #strip out any accidental white space
       $ordered{$_} = ++$start;
     }
-    for my $c ($I->GetChoices) {
+    for my $c ( $I->GetChoices ) {
       unless ( defined $ordered{$c} ) {
         croak "Choice $c missing from precedence file\n";
       }
@@ -263,51 +267,8 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
   return @precedence;
 }
 
-# # this is incomplete work left for later.
-# # sort list by grandjunction using the LNH safe variant, which
-# # isnt grandjunction anymore, but don't have better name right now.
-# sub _GrandJunctionRank ( $I, $safe, @active )  {
-#   my %active = @active
-#     ? map { $_ => 1 } @active
-#     : $I->GetActive()->%*;
-#   my $B = $I->GetBallots;
-#   my $Ranks = {};
-#   my @result = ();
-#   my $maxrank = 0;
-#   my $Scores =
-#   GRANDJUNCTIONBALLOOP: for my $BAL ( values $B->%* ) {
-#     my $lastvote = scalar( $BAL->{'votes'}->@*);
-#     $maxrank = $lastvote if $lastvote > $maxrank;
-#     $lastvote--; # index of array starts at 0, not 1.
-#     for my $index ( 0..$lastvote) {
-#       my $v = $BAL->{'votes'}[$index];
-#       if ( $active{$v} ) {
-#         $Ranks->{$index+1}{$v} += $BAL->{count};
-#         next GRANDJUNCTIONBALLOOP if $safe;
-#       }
-#     }
-#     my $scores
-#     # for my $R ( 1..$lastrank ) {
-#     #   # if ( )
-#     # }
-#   }
-#   $Ranks;
-
-# }
-
-# sub GrandJunctionRank ( $I, @active ) {
-#   $I->_GrandJunctionSort( 0,  @active );
-# }
-
-# sub GrandJunctionRankSafe ( $I, @active ) {
-#   $I->_GrandJunctionSort( 1,  @active );
-# }
-
-# sub PrecedenceSort( $I, @choices ) {
-
-# }
-
 sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
+  no warnings 'uninitialized';
   if ( $tiebreaker eq 'none' ) { return @tiedchoices }
   if ( $tiebreaker eq 'all' )  { return () }
   my $choices_hashref = { map { $_ => 1 } @tiedchoices };
@@ -365,41 +326,35 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
 }
 
 sub UnTieList ( $I, $method, @tied ) {
-  my $hasprecedence = 0;
-  $hasprecedence = 1 if 1 == $I->TieBreakerFallBackPrecedence();
-  $hasprecedence = 1 if lc($method) eq 'precedence';
-  unless ($hasprecedence) {
+  return $I->_precedence_sort( @tied ) if ( lc($method) eq 'precedence' );
+  unless ( $I->TieBreakerFallBackPrecedence() ) {
     croak
 "TieBreakerFallBackPrecedence must be enabled or the specified method must be precedence to use UnTieList";
   }
   my @ordered = ();
   my %active  = ( map { $_ => 1 } @tied );
-  my $nonrc   = 0;
-  $nonrc = 1 if lc($method) eq 'precedence';
-  # $nonrc = 1 if lc($method) eq 'grandjunction' ;
-  #   unless ( $nonrc ) {
-  #     my $RC = $I->$method( \%active)->HashByRank;
-  #     for my $tier ( sort { $a <=> $b } keys $RC->%* ) {
-  #       warn "TIER $tier -- " . Dumper $tier;
+  # method should be topcount borda or approval which all take argument of active.
+  my $RC = $I->$method(\%active)->HashByRank();
 
-  #       }
-  #     else {
-  #     while ( scalar( keys %active ) ) {
-  #       my ($lead) = $I->TieBreaker( $method, \%active, ( keys %active ) );
-  #       delete $active{$lead};
-  #       push @ordered, $lead;
-  #       }
-  #     }
-  # # warn Dumper $RC;
-  #     # for my $l
-  #   }
+  # my $nonrc   = 0;
+  for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
+    my @l = @{ $RC->{$level} };
+    my @suborder =
+      ( 1 == @{ $RC->{$level} } )
+      ? @{ $RC->{$level} }
+      : $I->_precedence_sort( @l );
+    push @ordered, @suborder;
+  }
   return @ordered;
 }
 
-sub UnTieAll ( $I, $method1, $method2 ) {
+sub UnTieAll ( $I, $method1, $method2='precedence' ) {
+   if ( lc($method1) eq 'precedence' ) {
+    return Vote::Count::RankCount->newFromList(
+      $I->_precedence_sort( $I->GetActiveList() ));
+    }
   my $hasprecedence = 0;
   $hasprecedence = 1 if 1 == $I->TieBreakerFallBackPrecedence();
-  $hasprecedence = 1 if lc($method1) eq 'precedence';
   $hasprecedence = 1 if lc($method2) eq 'precedence';
   unless ($hasprecedence) {
     croak
@@ -417,8 +372,7 @@ sub UnTieAll ( $I, $method1, $method2 ) {
     push @ordered, @suborder;
   }
   my $position = 0;
-  return Vote::Count::RankCount->Rank(
-    { map { $_ => --$position } @ordered } );
+  return Vote::Count::RankCount->newFromList( @ordered );
 }
 
 1;

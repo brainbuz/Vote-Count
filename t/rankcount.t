@@ -208,4 +208,16 @@ subtest 'RankTableWeighted' => sub {
     $weightable, 'generate weighted table' );
 };
 
+subtest 'newFromList' => sub {
+  my @quartet = ('VIOLIN', 'VIOLA', 'GAMBA', 'CELLO');
+  my $fromlist = Vote::Count::RankCount->newFromList( @quartet);
+  is( $fromlist->Leader()->{'winner'}, 'VIOLIN', 'from list has correct leader');
+  my $orderd = $fromlist->HashWithOrder();
+  my $rawc = $fromlist->RawCount();
+  for my $instrument ( @quartet ) {
+    is( abs( $rawc->{$instrument} ), $orderd->{$instrument},
+    "$instrument Position in Order is absolute value of raw count: abs $rawc->{$instrument} == $orderd->{$instrument}" );
+  }
+};
+
 done_testing();

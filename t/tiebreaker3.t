@@ -8,6 +8,7 @@ use Test2::Bundle::More;
 use Test::Exception;
 use Test2::Tools::Exception qw/dies lives/;
 use File::Temp qw/tempfile tempdir/;
+use Vote::Count::Charge::Utility qw/ WeightedTable /;
 # use Test::Exception;
 use Carp;
 use Data::Dumper;
@@ -21,16 +22,13 @@ use Vote::Count::ReadBallots 'read_ballots';
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
-todo 'UnTieList' => sub {
+subtest 'UnTieList' => sub {
   my $E = Vote::Count->new(
     BallotSet                    => read_ballots('t/data/ties1.txt'),
     TieBreakMethod               => 'approval',
     PrecedenceFile               => 't/data/tiebreakerprecedence1.txt',
     TieBreakerFallBackPrecedence => 1,
   );
-
-note Dumper $E->_precedence_sort( qw( CARAMEL STRAWBERRY CHOCCHUNK PISTACHIO ROCKYROAD RUMRAISIN ) )  ;
-note Dumper $E->{'PRECEDENCEORDER'};
 
   my @tied = qw( CARAMEL STRAWBERRY CHOCCHUNK PISTACHIO ROCKYROAD RUMRAISIN );
   my @untied = $E->UnTieList( 'Approval', @tied );
@@ -54,22 +52,7 @@ note Dumper $E->{'PRECEDENCEORDER'};
     'modified order when fractional vote is added to a choice' );
 };
 
-done_testing;
-
-=pod
-
-todo 'UnTieAll' => sub {
-
-  like(
-    dies {
-      my $z =
-        Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'), );
-      $z->UnTieAll( 1, 2 );
-    },
-    qr/TieBreakerFallBackPrecedence/,
-    "TieBreakerFallBackPrecedence must be true to use UnTieAll"
-  );
-
+subtest 'UnTieAll' => sub {
   my $D = Vote::Count->new(
     BallotSet                    => read_ballots('t/data/ties1.txt'),
     TieBreakerFallBackPrecedence => 1,
@@ -85,14 +68,13 @@ todo 'UnTieAll' => sub {
     RUMRAISIN  => 6,
     BUBBLEGUM  => 7,
     CHOCCHUNK  => 8,
-    CARAMEL    => 9,
-    CHERRY     => 10,
-    CHOCOLATE  => 11,
-    STRAWBERRY => 12
+    CHERRY     => 9,
+    CHOCOLATE  => 10,
+    CARAMEL    => 11,
+    STRAWBERRY => 12,
   };
-
   subtest 'TopCount approval precedence' => sub {
-    my $untied = $D->UnTieAll( 'TopCount', 'approval' );
+    my $untied = eval { $D->UnTieAll( 'TopCount', 'Approval' ) };
     for my $x ( keys %{$var2} ) {
       is( abs( $untied->RawCount()->{$x} ), $var2->{$x}, $x );
     }
@@ -113,12 +95,18 @@ todo 'UnTieAll' => sub {
     CHOCCHUNK  => 12,
   };
   subtest 'Borda topcount precedence' => sub {
-    my $untied = $D->UnTieAll( 'Borda', 'topcount' );
+    my $untied = $D->UnTieAll( 'Borda', 'TopCount' );
     for my $x ( keys %{$var3} ) {
       is( abs( $untied->RawCount()->{$x} ), $var3->{$x}, $x );
     }
   };
-
+  my %var4 = do {
+      my $ctr = 0;
+      map { $_ => ++$ctr } ( split /\n/, path('t/data/tiebreakerprecedence1.txt')->slurp );
+    };
+    my $prec = $D->UnTieAll( 'Precedence' );
+    is_deeply( $prec->HashWithOrder(), \%var4,
+      'Untieall hashwithorder matches the raw precedence file');
 };
 
-done_testing();
+done_testing;

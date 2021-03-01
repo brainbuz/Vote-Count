@@ -5,11 +5,8 @@ use 5.022;
 # since later versions may break things.
 use Test2::V0;
 use Test2::Bundle::More;
-use Test::Exception;
-use Test2::Tools::Exception qw/dies lives/;
 use File::Temp qw/tempfile tempdir/;
-# use Test::Exception;
-use Data::Dumper;
+# use Data::Dumper;
 
 use Path::Tiny;
 # use Storable 'dclone';
@@ -97,7 +94,7 @@ subtest 'object tiebreakers' => sub {
   my @resolve7 =
     $I5->TieBreaker( 'all', $active, ( 'VANILLA', 'ROCKYROAD' ) );
 
-  note( Dumper @resolve7 );
+  # note( Dumper @resolve7 );
 
   is( @resolve7, 0, 'all returns an empty array.' );
 };

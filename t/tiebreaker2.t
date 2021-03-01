@@ -5,11 +5,10 @@ use 5.022;
 # since later versions may break things.
 use Test2::V0;
 use Test2::Bundle::More;
-use Test::Exception;
-use Test2::Tools::Exception qw/dies lives/;
-use File::Temp qw/tempfile tempdir/;
 # use Test::Exception;
-use Data::Dumper;
+# use Test2::Tools::Exception qw/dies lives/;
+use File::Temp qw/tempfile tempdir/;
+# use Data::Dumper;
 
 use Path::Tiny;
 # use Storable 'dclone';
@@ -47,15 +46,6 @@ subtest 'Precedence' => sub {
     $ties->Active(), qw( BUBBLEGUM CARAMEL) );
   is_deeply( \@tryagain, ['CARAMEL'],
     'shorter choices without precedence leaders returned right choice' );
-  $ties->PrecedenceFile('t/data/tiebreakerprecedence2.txt');
-  dies_ok(
-    sub {
-      $ties->TieBreaker( $ties->TieBreakMethod(),
-        $ties->Active(), qw( FUDGESWIRL CARAMEL) );
-    },
-    "choice missing in precedence file is fatal"
-  );
-
 };
 
 subtest 'utility method to generate a Predictable Random Precedence File.' =>
