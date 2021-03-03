@@ -54,20 +54,12 @@ Small discrepencies with the stages data available for testing have been seen, w
 
 =cut
 
-has 'TieBreakMethod' => (
-  is      => 'ro',
-  isa     => 'Str',
-  init_arg => undef,
-  default => 'grandjunction',
-);
-
 sub StartElection ( $I ) {
   my @defeated = NthApproval( $I );
   if (@defeated) {
     $I->logt( "Automatic Rule Defeated: " . join( ', ', @defeated ));
     for (@defeated) { $I->Defeat($_)}
     $I->logv( $I->TopCount()->RankTableWeighted( $I->VoteValue) );
-    $I->TopCount; # need to make sure stats are fresh after defeats.
     my $abandon = $I->CountAbandoned()->{'count_abandoned'};
     $I->logv( "$abandon Ballots are Non-Continuing") if $abandon;
   } else {
@@ -133,6 +125,7 @@ sub _dodrop ( $I, $droptype) {
     my $round = $I->Round;
     $I->logv( "## Weighted Approval Round $round.\n");
     $I->logv( $rt->RankTableWeighted( $I->VoteValue) );
+# elsif for bottom runoff.
   } else {
     $rt = $I->TopCount();
     $desctype = 'Top Count';

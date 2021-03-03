@@ -42,6 +42,18 @@ has 'IterationLog' => (
   required => 0,
 );
 
+has 'EstimationRule' => (
+  is    => 'ro',
+  isa   => 'Str',
+  default => 'estimate',
+);
+
+has 'EstimationFresh' => (
+  is    => 'ro',
+  isa   => 'Bool',
+  default => 0,
+);
+
 sub BUILD {
   my $I = shift;
   $I->{'roundstatus'}  = { 0 => {} };
@@ -54,6 +66,7 @@ our $coder = JSON->new->ascii->pretty;
 
 sub Round($I) { return $I->{'currentround'}; }
 
+# quota and charge of from previous round!
 sub NewRound ( $I, $quota = 0, $charge = {} ) {
   $I->TopCount();
   my $round = ++$I->{'currentround'};
@@ -75,19 +88,26 @@ sub SetQuota ($I) {
 }
 
 sub _preEstimate ( $I, $quota, @elected ) {
+  my $estrule = $I->EstimationRule();
   my $lastround  = $I->{'currentround'} ? $I->{'currentround'} - 1 : 0;
   my $lastcharge = $I->{'roundstatus'}{$lastround}{'charge'};
   my $unw        = $I->LastTopCountUnWeighted();
   die 'LastTopCountUnWeighted failed' unless ( keys $unw->%* );
   my %estimate = ();
   my %caps     = ();
+  if ( $I->EstimationFresh && $I->EstimationRule eq 'estimate') {
+    die "Fresh Estimation is not compatible with EstimationRule estimate, because prior winners are not in current top count!";
+  }
   for my $e (@elected) {
-    if ( $I->{'lastcharge'}{$e} ) {
+    if ( $I->{'lastcharge'}{$e} && ! $I->EstimationFresh ) {
       $estimate{$e} = $I->{'lastcharge'}{$e};
       $caps{$e}     = $I->{'lastcharge'}{$e};
     }
     else {
-      $estimate{$e} = int( $quota / $unw->{$e} );
+      if ($estrule eq 'estimate') { $estimate{$e} = int( $quota / $unw->{$e} ) }
+      elsif ( $estrule eq 'votevalue' ) { $estimate{$e} = $I->VoteValue }
+      elsif ( $estrule eq 'zero') { $estimate{$e} = 0 }
+      elsif ( $estrule eq 'halfvalue' ){ $estimate{$e} = int( $I->VoteValue / 2 ) }
       $caps{$e}     = $I->VoteValue;
     }
   }

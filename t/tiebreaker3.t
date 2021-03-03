@@ -52,7 +52,7 @@ subtest 'UnTieList' => sub {
     'modified order when fractional vote is added to a choice' );
 };
 
-subtest 'UnTieAll' => sub {
+subtest 'UntieActive' => sub {
   my $D = Vote::Count->new(
     BallotSet                    => read_ballots('t/data/ties1.txt'),
     TieBreakerFallBackPrecedence => 1,
@@ -74,8 +74,8 @@ subtest 'UnTieAll' => sub {
     STRAWBERRY => 12,
   };
   subtest 'TopCount approval precedence' => sub {
-    my $untied = eval { $D->UnTieAll( 'TopCount', 'Approval' ) };
-    for my $x ( keys %{$var2} ) {
+    my $untied = eval { $D->UntieActive( 'TopCount', 'Approval' ) };
+    for my $x ( sort keys %{$var2} ) {
       is( abs( $untied->RawCount()->{$x} ), $var2->{$x}, $x );
     }
   };
@@ -94,19 +94,28 @@ subtest 'UnTieAll' => sub {
     STRAWBERRY => 11,
     CHOCCHUNK  => 12,
   };
+
   subtest 'Borda topcount precedence' => sub {
-    my $untied = $D->UnTieAll( 'Borda', 'TopCount' );
-    for my $x ( keys %{$var3} ) {
+    my $untied = $D->UntieActive( 'Borda', 'TopCount' );
+    for my $x ( sort keys %{$var3} ) {
       is( abs( $untied->RawCount()->{$x} ), $var3->{$x}, $x );
     }
   };
+
   my %var4 = do {
       my $ctr = 0;
       map { $_ => ++$ctr } ( split /\n/, path('t/data/tiebreakerprecedence1.txt')->slurp );
     };
-    my $prec = $D->UnTieAll( 'Precedence' );
+    my $prec = $D->UntieActive( 'Precedence' );
     is_deeply( $prec->HashWithOrder(), \%var4,
-      'Untieall hashwithorder matches the raw precedence file');
+      'UntieActive hashwithorder matches the raw precedence file');
+  delete $D->{'Active'}{'FUDGESWIRL'};
+  delete $D->{'Active'}{'VANILLA'};
+  my $afterelim = $D->UntieActive( 'TopCount', 'Approval' )->HashByRank();
+  is( scalar( keys $afterelim->%* ), 10,
+    'With 2 choices eliminated UntieActive had 2 fewer choices');
+  is( $afterelim->{1}[0], 'CHERRY', 'new leader after the eliminations');
+  is( $afterelim->{2}[0], 'MINTCHIP', 'check a choice that moved down rank after elimination' );
 };
 
 done_testing;

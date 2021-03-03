@@ -103,26 +103,6 @@ CountAbandoned
 
 =cut
 
-# old method that just counted abandoned. keep for reference for a bit.
-# sub OldCountAbandoned ( $I ) {
-#   my $set = $I->GetBallots();
-#   my $cnt_abandoned = 0;
-#   my $val_abandoned = 0;
-#   for my $k ( keys $set->%*) {
-#     unless( defined $set->{$k}{'topchoice'} ) {
-#       die 'Attempt to Count Abandoned prior to TopCount'
-#       }
-#     if( $set->{$k}{'topchoice'} eq 'NONE') {
-#       $cnt_abandoned += $set->{$k}{'count'};
-#       $val_abandoned += $set->{$k}{'count'} * $set->{$k}{'votevalue'};
-#     }
-#   }
-#   return {  count_abandoned => $cnt_abandoned,
-#             value_abandoned => $val_abandoned,
-#             message =>
-#             "Votes with no Choice: $cnt_abandoned, Value: $val_abandoned" };
-# }
-
 sub CountAbandoned ($I) {
   my @continuing = ( $I->Suspended(), $I->GetActiveList );
   my $set        = $I->GetBallots();
@@ -300,30 +280,12 @@ sub TCStats( $I ) {
   return $tc;
 }
 
-# keep this scrap for a future reporting method.
-# used when debugging the rounding diff between mollison's scotland results
-# and votecount's.
-# my $status_table = '';
-# my %top = $C->TopCount()->RawCount()->%*;
-# my $vv = $C->VoteValue();
-# my %status = ();
-# while ( my ( $k, $v ) = each ($C->GetChoiceStatus()->%* ) ) {
-#   if ( $v->{votes} > 0 ) { $status{$k} = $v->{votes} / $vv }
-#   else {
-#     $status{$k} = $top{$k} / $vv;
-#   }
-# }
-# note( Dumper \%status );
-# my $activotes = 0;
-# map { $activotes += $_ } ( values %status );
-# # must use tempvar hash would change during map.
-# $status{'ActiveVotes'} = $activotes ;
-# note("status -- $status{'ActiveVotes'}" );
-# $status{'TotalVotes'} = $C->{BallotSet}{votescast};
-# $status{'NONE'} = $C->Discontinued()->{transfervalue} / $vv;
-# $status{'RoundingDiff'} = $status{'TotalVotes'} - ( $activotes  );
-# note( Dumper \%status );
-# #note( Dumper %top );
+sub BottomRunOff ( $I, $method1='TopCount', $method2='precedence' ) {
+  my %ranked = $I->UntieActive($method1, $method2)->HashByRank()->%*;
+  my $bottom = scalar keys %ranked;
+  my $next = $bottom - 1;
+  return $I->TopCount( {$ranked{$bottom} => 1 , $ranked{$next} => 1 });
+}
 
 =head1 NAME
 

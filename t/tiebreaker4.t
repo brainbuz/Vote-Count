@@ -20,17 +20,16 @@ use Vote::Count::ReadBallots 'read_ballots';
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
-
 subtest 'Exceptions' => sub {
 
   like(
     dies {
       my $z =
         Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'), );
-      $z->UnTieAll( 1, 2 );
+      $z->UntieActive( 1, 2 );
     },
     qr/TieBreakerFallBackPrecedence/,
-    "Precedence must be method or fallback to use UnTieAll"
+    "Precedence must be method or fallback to use UntieActive"
   );
 
   like(

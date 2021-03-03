@@ -213,9 +213,9 @@ Sort a list in an order determined by a TieBreaker method, sorted in Descending 
 
   my @orderedlosers = $Election->UntieList( 'Approval', @unorderedlosers );
 
-=head1 UntieAll
+=head1 UntieActive
 
-Takes a primary and secondary method to provide an ordered list of all the Choices in the election.
+Takes a primary and secondary method to provide a  of all Active Choices in the election.
 
 =cut
 
@@ -348,7 +348,7 @@ sub UnTieList ( $I, $method, @tied ) {
   return @ordered;
 }
 
-sub UnTieAll ( $I, $method1, $method2='precedence' ) {
+sub UntieActive ( $I, $method1, $method2='precedence' ) {
    if ( lc($method1) eq 'precedence' ) {
     return Vote::Count::RankCount->newFromList(
       $I->_precedence_sort( $I->GetActiveList() ));
@@ -358,7 +358,7 @@ sub UnTieAll ( $I, $method1, $method2='precedence' ) {
   $hasprecedence = 1 if lc($method2) eq 'precedence';
   unless ($hasprecedence) {
     croak
-"TieBreakerFallBackPrecedence must be enabled or one of the specified methods must be precedence to use UnTieAll";
+"TieBreakerFallBackPrecedence must be enabled or one of the specified methods must be precedence to use UntieActive";
   }
   my @ordered = ();
   my $first   = $I->$method1()->HashByRank();

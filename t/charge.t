@@ -300,19 +300,6 @@ subtest 'VCUpdateActive' => sub {
     'VCUPDATEACTIVE set active with a choice pending');
 };
 
-# subtest 'exception' => sub {
-#   my $A = Vote::Count::Charge->new(
-#     Seats     => 5,
-#     VoteValue => 100,
-#     BallotSet => read_ballots('t/data/data1.txt')
-#   );
-#   like(
-#     dies { $A->CountAbandoned() },
-#     qr/Attempt to Count Abandoned prior to TopCount/,
-#     "CountAbandoned threw an exception when TopCount wasn't performed first"
-#   );
-# };
-
 subtest 'CountAbandoned, TCStats' => sub {
   my $A = Vote::Count::Charge->new(
     Seats     => 5,

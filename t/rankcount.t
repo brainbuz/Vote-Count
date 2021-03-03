@@ -5,7 +5,7 @@ use 5.022;
 # since later versions may break things.
 use Test2::V0;
 use Test2::Bundle::More;
-use Test::Exception;
+use Test2::Tools::Exception qw/dies lives/;
 
 use Path::Tiny;
 
@@ -139,7 +139,8 @@ subtest 'HashByRank HashWithOrder' => sub {
   );
   is_deeply(
     $btr,
-    { 'BRASS'  => 2,
+    {
+      'BRASS'  => 2,
       'BRONZE' => 2,
       'SILVER' => 1,
       'COPPER' => 2,
@@ -209,15 +210,30 @@ subtest 'RankTableWeighted' => sub {
 };
 
 subtest 'newFromList' => sub {
-  my @quartet = ('VIOLIN', 'VIOLA', 'GAMBA', 'CELLO');
-  my $fromlist = Vote::Count::RankCount->newFromList( @quartet);
-  is( $fromlist->Leader()->{'winner'}, 'VIOLIN', 'from list has correct leader');
+  my @quartet  = ( 'VIOLIN', 'VIOLA', 'GAMBA', 'CELLO' );
+  my $fromlist = Vote::Count::RankCount->newFromList(@quartet);
+  is( $fromlist->Leader()->{'winner'},
+    'VIOLIN', 'from list has correct leader' );
   my $orderd = $fromlist->HashWithOrder();
-  my $rawc = $fromlist->RawCount();
-  for my $instrument ( @quartet ) {
-    is( abs( $rawc->{$instrument} ), $orderd->{$instrument},
-    "$instrument Position in Order is absolute value of raw count: abs $rawc->{$instrument} == $orderd->{$instrument}" );
+  my $rawc   = $fromlist->RawCount();
+  for my $instrument (@quartet) {
+    is(
+      abs( $rawc->{$instrument} ),
+      $orderd->{$instrument},
+      "$instrument Position in Order is absolute value of raw count: " .
+      "abs $rawc->{$instrument} == $orderd->{$instrument}"
+    );
   }
+  like(
+    dies { $brexit->TopCount->OrderedList; },
+    qr/OrderedList may only be used/,
+    "DIES The OrderedList method is only valid when created from one."
+  );
+  is_deeply(
+    [ $fromlist->OrderedList() ],
+    [ @quartet ],
+    'OrderedList returned the original list.'
+  );
 };
 
 done_testing();

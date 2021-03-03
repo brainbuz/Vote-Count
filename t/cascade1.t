@@ -57,10 +57,10 @@ subtest 'quota' => sub {
   $A->Elect(  'Allan_GRAHAM_Lab');
   $A->Charge ( 'Allan_GRAHAM_Lab', 120301, 90 );
   $TC = $A->TopCount();
-  note( $TC->RankTable );
-  note( Dumper $A->CountAbandoned);
+  # note( $TC->RankTable );
+  # note( Dumper $A->CountAbandoned);
   # note( Dumper $A->CountAbandonedTC);
-  note( Dumper $A->GetChoiceStatus);
+  # note( Dumper $A->GetChoiceStatus);
   # This quota was never hand checked.
   is( $A->SetQuota(), 103957, 'Set a new Quota after some elections and defeats' );
   $TC = $B->TopCount( );
@@ -122,6 +122,82 @@ subtest 'newround and _preEstimate' => sub {
   $died->LastTopCountUnWeighted;
 };
 
+subtest '_preEstimate options' => sub {
+  my $recalc =
+  Vote::Count::Charge::Cascade->new(
+    Seats     => 4,
+    BallotSet => dclone $set1,
+    VoteValue => 100,
+    LogTo     => '/tmp/votecount_recalc',
+    EstimationRule => 'votevalue',
+    EstimationFresh => 1,
+  );
+  my @newrndargs =  ( 12031, { 'William_GOLDIE_SNP' => 70, 'Allan_GRAHAM_Lab' => 90 });
+  note( "estimate with fresh estimate each round: Round : ${\ $recalc->NewRound( @newrndargs) }");
+  $recalc->Elect( 'William_GOLDIE_SNP');
+  $recalc->Charge ( 'William_GOLDIE_SNP', 120301, 70 );
+  note( "estimate with fresh estimate each round: Round : ${\ $recalc->NewRound( @newrndargs) }");
+  $recalc->Elect( 'Allan_GRAHAM_Lab');
+  $recalc->Charge( 'Allan_GRAHAM_Lab', 120301, 90 );
+
+  $recalc->TopCount();
+  my ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $recalc, 120301, 'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab' );
+  is_deeply(
+    $est,
+    { 'William_GOLDIE_SNP' => 100, 'Allan_GRAHAM_Lab' => 100 },
+    'Check estimate');
+  is_deeply(
+    $cap,
+    { 'William_GOLDIE_SNP' => 100, 'Allan_GRAHAM_Lab' => 100 },
+    'Check cap ');
+  $recalc->{'EstimationRule'} = 'halfvalue';
+  ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $recalc, 120301, 'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab' );
+  is_deeply(
+    $est,
+    { 'William_GOLDIE_SNP' => 50, 'Allan_GRAHAM_Lab' => 50 },
+    'Check estimate halfvalue');
+  is_deeply(
+    $cap,
+    { 'William_GOLDIE_SNP' => 100, 'Allan_GRAHAM_Lab' => 100 },
+    'Check cap halfvalue');
+  $recalc->{'EstimationRule'} = 'zero';
+  ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $recalc, 120301, 'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab' );
+  is_deeply(
+    $est,
+    { 'William_GOLDIE_SNP' => 0, 'Allan_GRAHAM_Lab' => 0 },
+    'Check estimate zero');
+  is_deeply(
+    $cap,
+    { 'William_GOLDIE_SNP' => 100, 'Allan_GRAHAM_Lab' => 100 },
+    'Check cap zero');
+  $recalc =
+  Vote::Count::Charge::Cascade->new(
+    Seats     => 4,
+    BallotSet => dclone $set1,
+    VoteValue => 100,
+    LogTo     => '/tmp/votecount_recalc',
+    EstimationRule => 'votevalue',
+    EstimationFresh => 0,
+  );
+  note( "estimate with no fresh estimate each round: Round : ${\ $recalc->NewRound(  @newrndargs) }");
+  $recalc->Elect( 'William_GOLDIE_SNP');
+  $recalc->Elect( 'Allan_GRAHAM_Lab');
+  $recalc->Charge ( 'William_GOLDIE_SNP', 120301, 70 );
+  $recalc->Charge( 'Allan_GRAHAM_Lab', 120301, 90 );
+  note( "estimate with no fresh estimate each round: Round : ${\ $recalc->NewRound( @newrndargs) }");
+  $recalc->TopCount();
+  $recalc->Elect( 'Stephanie_MUIR_Lab');
+  ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $recalc, 120301, 'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab', 'Stephanie_MUIR_Lab' );
+  is_deeply(
+    $est,
+    { 'William_GOLDIE_SNP' => 70, 'Allan_GRAHAM_Lab' => 90, 'Stephanie_MUIR_Lab' => 100 },
+    'Check estimate with fresh off');
+  is_deeply(
+    $cap,
+    { 'William_GOLDIE_SNP' => 70, 'Allan_GRAHAM_Lab' => 90, 'Stephanie_MUIR_Lab' => 100  },
+    'Check cap with fresh off');
+};
+
 subtest '_chargeInsight' => sub {
   my $A = newA;
   my $B = newB;
@@ -164,7 +240,6 @@ subtest 'calc charge simple data' => sub {
     'calculate the charge with the simple set two quota choices with 1 under');
 };
 
-
 subtest 'calc charge bigger data' => sub {
   my $A = newA;
   $A->IterationLog( '/tmp/cascade_iteration');
@@ -199,6 +274,23 @@ subtest 'exception' => sub {
     qr/LastTopCountUnWeighted failed/,
     "CalcCharge threw an exception when TopCount wasn't performed first"
   );
+  my $recalc =
+  Vote::Count::Charge::Cascade->new(
+    Seats     => 4,
+    BallotSet => dclone $set1,
+    VoteValue => 100,
+    LogTo     => '/tmp/votecount_recalc',
+    EstimationRule => 'estimate',
+    EstimationFresh => 1,
+  );
+  like(
+    dies {
+      $recalc->TopCount;
+      my ( $est, $cap ) = Vote::Count::Charge::Cascade::_preEstimate( $recalc, 120301, 'William_GOLDIE_SNP', 'Allan_GRAHAM_Lab' ); },
+    qr/Fresh Estimation/,
+    "Fresh Estimation used with the estimate option throws exception"
+  );
+
 };
 
 done_testing();
