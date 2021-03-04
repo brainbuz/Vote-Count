@@ -9,6 +9,7 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 
 use Storable 3.15 'dclone';
+use Path::Tiny;
 
 # ABSTRACT: Role shared by Count and Matrix for common functionality. See Vote::Count Documentation.
 
@@ -39,11 +40,25 @@ has 'VoteValue' => (
   default => 1,
 );
 
+has 'WithdrawalList' => (
+  is      => 'rw',
+  isa     => 'Str',
+  required => 0,
+  );
+
 sub GetChoices ( $self ) {
   return sort keys( $self->BallotSet()->{'choices'}->%* );
 }
 
-sub _defaultactive ( $self ) { return dclone $self->BallotSet()->{'choices'} }
+sub _defaultactive ( $self ) {
+  my $active = dclone $self->BallotSet()->{'choices'} ;
+  if ( $self->WithdrawalList ) {
+    for my $w (path( $self->WithdrawalList )->lines({ chomp => 1})) {
+      delete $active->{$w};
+    }
+  }
+  return $active;
+}
 
 sub SetActive ( $self, $active ) {
   # Force deref
@@ -121,11 +136,19 @@ This role is consumed by Vote::Count and Vote::Count::Matrix.
 
 =head3 new
 
+Has the following Attributes:
+
+=head4 WithdrawalList
+
+A text file containing choices 1 per line that are withdrawn. Use when a choice may be included in the ballots but should be treated as not-present. Removing a choice from the choices list in a Ballot File will generate an exception from ReadBallots if it appears on any Ballots. Withdrawing a choice will exclude it from the Active Set if it is present in the Ballots.
+
+=head4 VoteValue
+
+Use to set a Vote Value for methods that weight votes. The default value is 1.
 
 =head3 Active
 
 Get Active Set as HashRef to the active set. Changing the new HashRef will change the internal Active Set, GetActive is recommended as it will return a HashRef that is a copy instead.
-
 
 =head3 GetActive
 

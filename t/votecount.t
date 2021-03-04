@@ -92,4 +92,13 @@ is_deeply( $VC2->Active(), { 'CHOCOLATE' => 1, 'MINTCHIP' => 1},
 is( $VC2->GetBallots()->{'VANILLA'}{'count'}, 2,
   'Confirm a value from GetBallots');
 
+my $withdraws = Vote::Count->new(
+    BallotSet => read_ballots('t/data/biggerset1.txt'),
+    WithdrawalList => 't/data/biggerset1withdrawn.txt',
+  );
+my $wda = $withdraws->GetActive;
+is( $wda->{'RUMRAISIN'},
+    undef,
+    'a choice removed by withdrawalist isnt in active set') ;
+
 done_testing();

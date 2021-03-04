@@ -27,6 +27,18 @@ has 'Seats' => (
   required => 1,
 );
 
+has 'FloorRule' => (
+  is       => 'rw',
+  isa      => 'Str',
+  default  => '',
+);
+
+has 'FloorThresshold' => (
+  is      => 'ro',
+  isa     => 'Num',
+  default => 0,
+  );
+
 # $choice_status->{'choice'} = {
 #   key : 'NAME',
 #   state => elected, pending, defeated, withdrawn, active, suspended
@@ -51,9 +63,14 @@ sub _init_choice_status ( $I ) {
       votes => 0,
     };
   }
+  if ( $I->WithdrawalList ) {
+    for my $w (path( $I->WithdrawalList )->lines({ chomp => 1})) {
+      $I->Withdraw($w) if defined $I->{'choice_status'}{$w};
+    }
+  }
 }
 
-# Default tie breaking to GrandJunction,
+# Default tie breaking to Precedence,
 # Force Precedence as fallback, and generate reproducible precedence
 # file if one isn't provided.
 sub _setTieBreaks ( $I ) {
@@ -167,9 +184,20 @@ sub Defeat ( $I, $choice ) {
   $I->{'choice_status'}->{$choice}{'state'} = 'defeated';
 }
 
+sub Withdrawn ($I) {
+  my @withdrawn = ();
+  for my $c ( keys  $I->{'choice_status'}->%* ) {
+    if ( $I->{'choice_status'}{$c}{'state'} eq 'withdrawn') {
+      push @withdrawn, $c;
+    }
+  }
+  return sort(@withdrawn);
+}
+
 sub Withdraw ( $I, $choice ) {
   delete $I->{'Active'}{$choice};
   $I->{'choice_status'}->{$choice}{'state'} = 'withdrawn';
+  return $I->Withdrawn();
 }
 
 sub Suspend ( $I, $choice ) {
@@ -280,11 +308,38 @@ sub TCStats( $I ) {
   return $tc;
 }
 
+sub STVFloor ( $I, $action='Withdraw' ) {
+  if ( $I->FloorRule() && $I->FloorThresshold() ) {
+    $I->FloorRule('ApprovalFloor') if $I->FloorRule() eq 'Approval';
+    $I->FloorRule('TopCountFloor') if $I->FloorRule() eq 'TopCount';
+    my @withdrawn =();
+    my $newactive =
+      $I->ApplyFloor(
+        $I->FloorRule(),
+        $I->FloorThresshold()
+      );
+    for my $choice ($I->GetChoices()) {
+      unless( $newactive->{$choice}) {
+        $I->$action( $choice );
+        push @withdrawn, $choice;
+      }
+    }
+    @withdrawn = sort (@withdrawn);
+    my $done = $action;
+    $done = 'Withdrawn' if $action eq 'Withdraw';
+    $done = 'Defeated' if $action eq 'Defeat';
+    # $I->logv( "$done by Floor Rule: ${\ join(', ', @withdrawn) }." );
+    return @withdrawn;
+  }
+}
+
 sub BottomRunOff ( $I, $method1='TopCount', $method2='precedence' ) {
   my %ranked = $I->UntieActive($method1, $method2)->HashByRank()->%*;
   my $bottom = scalar keys %ranked;
   my $next = $bottom - 1;
-  return $I->TopCount( {$ranked{$bottom} => 1 , $ranked{$next} => 1 });
+  return $I->TopCount(
+    {$ranked{$bottom}[0] => 1 , $ranked{$next}[0] => 1 }
+    )->Leader()->{'winner'};
 }
 
 =head1 NAME

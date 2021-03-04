@@ -54,6 +54,12 @@ has 'EstimationFresh' => (
   default => 0,
 );
 
+has 'TieBreakMethod' => (
+  is       => 'rw',
+  isa      => 'Str',
+  default => 'topcount',
+);
+
 sub BUILD {
   my $I = shift;
   $I->{'roundstatus'}  = { 0 => {} };

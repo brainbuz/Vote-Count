@@ -56,8 +56,7 @@ subtest 'utility method to generate a Predictable Random Precedence File.' =>
     [qw/ YODEL RINGDING DEVILDOG KRIMPET HOHO TWINKIE SUZIEQ/];
   is_deeply( \@prec1, $expectprec1,
     'Predictable Randomized order for ballotfile majority1.txt' );
-  my @readback = path('/tmp/precedence.txt')->lines();
-  chomp(@readback);
+  my @readback = path('/tmp/precedence.txt')->lines({chomp=>1});
   is_deeply( \@readback, $expectprec1,
     'readback of precedence written to default /tmp/precedence.txt' );
 
@@ -71,8 +70,7 @@ subtest 'utility method to generate a Predictable Random Precedence File.' =>
   ];
   is_deeply( \@prec2, $expectprec2,
     'Predictable Randomized order for ballotfile ties1.txt' );
-  @readback = path($tmp2)->lines();
-  chomp(@readback);
+  @readback = path($tmp2)->lines({chomp=>1});
   is_deeply( \@readback, $expectprec2,
     "readback of precedence written to generated $tmp2" );
   };

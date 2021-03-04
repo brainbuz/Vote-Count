@@ -30,6 +30,7 @@ my $DMB =
     VoteValue => 100000,
     IterationLog => '/tmp/votecount_cascademethod_iteration',
     LogTo     => '/tmp/votecount_cascademethod',
+    FloorThresshold => 50,
   );
 
 ok 1;
@@ -51,7 +52,7 @@ $DMB->StartElection;
 # say "===== " . $DMB->ConductQuotaRound;
 # while ($phase ) { $phase = $DMB->ConductQuotaRound() ;}
 note( $DMB->logv );
-note( Dumper $DMB->{'roundstatus'});
+# note( Dumper $DMB->{'roundstatus'});
 # p $DMB->meta()->{'methods'};
 
 # subtest 'setup' => sub {

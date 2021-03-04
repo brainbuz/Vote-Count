@@ -140,12 +140,11 @@ sub read_ballots( $filename ) {
     'comment'   => ''
   );
 BALLOTREADLINES:
-  for my $line_raw ( path($filename)->lines ) {
+  for my $line_raw ( path($filename)->lines({chomp => 1}) ) {
     if ( $line_raw =~ m/^\#/ ) {
       $data{'comment'} .= $line_raw;
       next BALLOTREADLINES;
     }
-    chomp $line_raw;
     if ( $line_raw =~ m/^\:CHOICES\:/ ) {
       if ( $data{'choices'} ) {
         croak("File $filename redefines CHOICES \n$line_raw\n");

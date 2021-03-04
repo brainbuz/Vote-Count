@@ -10,7 +10,7 @@ use Moose::Role;
 
 no warnings 'experimental';
 
-our $VERSION='1.10';
+our $VERSION = '1.10';
 
 =head1 NAME
 
@@ -36,7 +36,7 @@ sub _FloorRnd ( $I, $num ) {
     return int($num);
   }
   elsif ( $I->FloorRounding eq 'up' ) {
-    return int( $num ) if ( $num == int( $num ) );
+    return int($num) if ( $num == int($num) );
     return int( $num + 1 );
   }
   elsif ( $I->FloorRounding eq 'round' ) {
@@ -45,7 +45,7 @@ sub _FloorRnd ( $I, $num ) {
   elsif ( $I->FloorRounding eq 'nextint' ) {
     return int( $num + 1 );
   }
-  else { die 'unknown FloorRounding method requested: ' . $I->FloorRounding };
+  else { die 'unknown FloorRounding method requested: ' . $I->FloorRounding }
 }
 
 sub _FloorMin ( $I, $floorpct ) {
@@ -63,11 +63,16 @@ sub _DoFloor ( $I, $ranked, $cutoff ) {
       $I->logv("Removing: $s: $ranked->{$s}, minimum is $cutoff.");
     }
   }
-  $I->logt(
-    "Floor Rule Eliminated: ",
-    join( ', ', @remove ),
-    "Remaining: ", join( ', ', @active ),
-  );
+  if (@remove) {
+    $I->logt(
+      "Floor Rule Eliminated: ",
+      join( ', ', @remove ),
+      "Remaining: ", join( ', ', @active ),
+    );
+  }
+  else {
+    $I->logt('None Eliminated');
+  }
   return { map { $_ => 1 } @active };
 }
 
@@ -77,14 +82,20 @@ sub ApprovalFloor ( $self, $floorpct = 5, $rangecutoff = 0 ) {
   my $votescast = $self->VotesCast();
   $self->logt( "Applying Floor Rule of $floorpct\% "
       . "Approval Count. vs Ballots Cast of $votescast." );
-  return $self->_DoFloor( $self->Approval( undef, $rangecutoff )->RawCount(),
-    $self->_FloorMin($floorpct) );
+  my $raw =
+    $self->BallotSetType() eq 'rcv'
+    ? do { $self->Approval(); $self->LastApprovalBallots() }
+    : $self->Approval( undef, $rangecutoff )->RawCount();
+  return $self->_DoFloor( $raw, $self->_FloorMin($floorpct) );
 }
 
 sub TopCountFloor ( $self, $floorpct = 2 ) {
   $self->logt("Applying Floor Rule of $floorpct\% First Choice Votes.");
-  return $self->_DoFloor( $self->TopCount()->RawCount(),
-    $self->_FloorMin($floorpct) );
+  my $raw =
+    $self->BallotSetType() eq 'rcv'
+    ? do { $self->TopCount(); $self->LastTopCountUnWeighted() }
+    : $self->TopCount();
+  return $self->_DoFloor( $raw, $self->_FloorMin($floorpct) );
 }
 
 sub TCA ( $self, $floor = .5 ) {
@@ -109,16 +120,19 @@ sub TCA ( $self, $floor = .5 ) {
 
 sub ApplyFloor ( $self, $rule, @args ) {
   my $newset = {};
-  if ( $rule eq 'ApprovalFloor') {
-    $newset = $self->ApprovalFloor( @args );
-  } elsif ( $rule eq 'TopCountFloor') {
-    $newset = $self->TopCountFloor( @args );
-  } elsif ( $rule eq 'TCA') {
-    $newset = $self->TCA( @args );
-  } else {
+  if ( $rule eq 'ApprovalFloor' ) {
+    $newset = $self->ApprovalFloor(@args);
+  }
+  elsif ( $rule eq 'TopCountFloor' ) {
+    $newset = $self->TopCountFloor(@args);
+  }
+  elsif ( $rule eq 'TCA' ) {
+    $newset = $self->TCA(@args);
+  }
+  else {
     die "Bad rule provided to ApplyFloor, $rule";
   }
-  $self->SetActive( $newset);
+  $self->SetActive($newset);
   return $newset;
 }
 
