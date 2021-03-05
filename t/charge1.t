@@ -28,9 +28,9 @@ subtest '_setTieBreaks' => sub {
     BallotSet => read_ballots('t/data/data1.txt')
   );
   like(
-    $A->logv(),
-    qr/TieBreakMethod is undefined, setting to grandjunction/,
-    "Logged: TieBreakMethod is undefined, setting to grandjunction"
+    $A->logd(),
+    qr/TieBreakMethod is undefined, setting to precedence/,
+    "Logged: TieBreakMethod is undefined, setting to precedence"
   );
   note(
     'this subtest is just for coverage, but did find error by writing it.');

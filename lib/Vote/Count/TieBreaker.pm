@@ -215,7 +215,9 @@ Sort a list in an order determined by a TieBreaker method, sorted in Descending 
 
 =head1 UntieActive
 
-Takes a primary and secondary method to provide a  of all Active Choices in the election.
+Produces a precedence list of all the active choices in the election. Takes a first and optional second method name, if one of the methods is not Precedence, TieBreakerPrecedence must be true. The methods may be TopCount, Approval, or any other method that returns a RankCount object. Returns a RankCount object (with the OrderedList method enabled).
+
+  my $precedenceRankCount = $Election->UntieActive( 'TopCount', 'Approval');
 
 =cut
 

@@ -10,7 +10,10 @@ extends 'Vote::Count::Charge::Cascade';
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 
-use Vote::Count::Charge::Utility 'FullCascadeCharge', 'NthApproval';
+use Vote::Count::Charge::Utility 'FullCascadeCharge', 'NthApproval',
+  'WeightedTable', 'ChargeTable';
+use Vote::Count::TextTableTiny qw/generate_table/;
+
 use Storable 3.15 'dclone';
 use Sort::Hash;
 use Data::Dumper;
@@ -66,223 +69,180 @@ has 'CalculatedPrecedenceFile' => (
 );
 
 has 'FloorRule' => (
-  is       => 'rw',
-  isa      => 'Str',
-  default  => 'Approval',
+  is      => 'rw',
+  isa     => 'Str',
+  default => 'Approval',
 );
 
 has 'FloorThresshold' => (
   is      => 'ro',
   isa     => 'Num',
   default => 1,
-  );
+);
+
+# values topcount, bottomrunoff, approval
+has 'DropRule' => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => 'topcount',
+);
+
+has 'FinalPhase' => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => '',
+);
+
+sub _automatic_defeat ($I) {
+  my @defeated = ();
+  my $rule     = $I->AutomaticDefeat();
+  if    ( $rule eq 'NthApproval' ) { @defeated = NthApproval($I); }
+  elsif ( lc($rule) eq 'none' )    { return 0 }
+  else { ... }    # other rules might be available in the future.
+  for (@defeated) { $I->Defeat($_) }
+  if (@defeated) {
+    $I->logt( "Defeated by $rule: " . join( ', ', @defeated ) . '.' );
+    $I->STVEvent( { round => $I->Round, defeat => \@defeated });
+    return 1;
+  }
+  else {
+    $I->logt("No Defeats by $rule.");
+    return 0;
+  }
+}
+
+sub _set_quota ($I) {
+  my $tc    = $I->TCStats();
+  my $av    = $tc->{active_vote_value};
+  my $quota = $I->SetQuota();
+  $I->logv("Active Vote Value: $av (${\ int ( $av / $I->VoteValue()) }) ");
+  $I->logt("Quota is $quota (${\ int $quota / $I->VoteValue() })");
+  return $quota;
+}
+
+sub _check_seatschoices ($I) {
+  my @active = $I->GetActiveList();
+  my $seats  = $I->SeatsOpen();
+  if ( $I->FinalPhase && $seats == 1 ) {
+      if ( $I->FinalPhase ) { $I->_do_finalphase; }
+    return 1 }
+  if ( $seats >= @active ) {
+    my @sorted = $I->UnTieList( 'TopCount', @active );
+    $I->Elect( $sorted[0] );
+    $I->logt(
+"Seats Open: ${seats}. Choices: ${\ scalar(@active) }. Electing: ${sorted[0]}"
+    );
+    return 1
+  }
+  return 0;
+}
+
+sub _do_charge ( $I, $quota, @elected ) {
+  my $chargecalc = $I->CalcCharge($quota);
+  my $result =
+    FullCascadeCharge( $I->GetBallots, $quota, $chargecalc, $I->GetActive,
+    $I->VoteValue );
+  $I->{'lastcharge'} = $chargecalc;
+  $I->logv( ChargeTable( $chargecalc, $result ) );
+  $I->STVEvent({ round => $I->Round, elected => [ @elected ]});
+  return $chargecalc;
+}
+
+sub _do_drop ( $I ) {
+  if ( $I->DropRule eq 'bottomrunoff' ) { return  $I->BottomRunOff }
+  elsif ( $I->DropRule eq 'approval' ) {
+    return [$I->UntieActive( 'Approval', 'precedence' )->OrderedList()]->[-1]
+    }
+  elsif ( $I->DropRule eq 'topcount' ) {
+    return [$I->UntieActive( 'TopCount', 'precedence' )->OrderedList()]->[-1];
+    }
+  else { die "Invalid DropRule: ${\ $I->DropRule }\n" }
+}
+
+sub _do_finalphase ($I) {
+    my @defeated = $I->Defeated();
+    for my $choice (@defeated) {
+      $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
+      $I->{'Active'}{$choice} = 1;
+      }
+    $I->logv("Final Phase, reinstatiting ${\ join ', ', @defeated }");
+    $I->logv( WeightedTable( $I ) );
+  my $winner = $I->UntieActive()->OrderedList()->[0];
+  $I->logt( "Last Seat By Approval. Elected: $winner");
+  $I->STVEvent( finalphase => 'approval', winner => $winner, approval => $I->Approval->RawCount );
+}
 
 sub StartElection ( $Election ) {
   $Election->STVFloor();
   my @precedence = ();
-  if ($Election->TieBreakMethod() eq 'Precedence') {
-    @precedence =  path( $Election->PrecedenceFile() )->lines({ chomp => 1 });
-  } else {
-    @precedence = $Election->UntieActive('TopCount', 'Approval')->OrderedList;
-    path( $Election->CalculatedPrecedenceFile
-      )->spew( map { "$_\n" } (@precedence));
+  if ( $Election->TieBreakMethod() eq 'precedence' ) {
+    @precedence =
+      path( $Election->PrecedenceFile() )->lines( { chomp => 1 } );
+    $Election->logv(qq/## Tie Breaker Precedence:/);
+  }
+  else {
+    @precedence =
+      $Election->UntieActive( 'TopCount', 'Approval' )->OrderedList;
+    path( $Election->CalculatedPrecedenceFile )
+      ->spew( map { "$_\n" } (@precedence) );
     $Election->PrecedenceFile( $Election->CalculatedPrecedenceFile );
     $Election->TieBreakMethod('Precedence');
+    $Election->logv(
+      qq/## Tie Breaker Precedence from Top Count, Approval, FallBack:/);
   }
   my $prec = 0;
-  $Election->logv( qq/## Tie Breaker Precedence from Top Count, Approval, FallBack:/,
-    map { "${\ ++$prec }. $_" } @precedence );
-  # my @defeated = NthApproval( $I );
-  # if (@defeated) {
-  #   $I->logt( "Automatic Rule Defeated: " . join( ', ', @defeated ));
-  #   for (@defeated) { $I->Defeat($_)}
-  #   $I->logv( $I->TopCount()->RankTableWeighted( $I->VoteValue) );
-  #   my $abandon = $I->CountAbandoned()->{'count_abandoned'};
-  #   $I->logv( "$abandon Ballots are Non-Continuing") if $abandon;
-  # } else {
-  #   $I->logt( 'No Choices Defeated by Sure Loser at start');
-  # }
-  # my $cast = $I->VotesCast();
-  # my $remain = $cast - $I->CountAbandoned()->{'count_abandoned'};
-  # $I->logv( "Total Votes Cast: $cast. Active Votes: $remain" )
+  $Election->logv( map { "${\ ++$prec }. $_" } @precedence );
 }
 
-sub _electround ( $I, $quota, @elected ) {
-  my $round  = $I->Round();
-  my $charge = $I->CalcCharge($quota);
-  my $value =
-    FullCascadeCharge( $I->GetBallots, $quota, $charge, $I->GetActive,
-    $I->VoteValue );
-  $I->{'roundstatus'}{$round} = {
-    'charge' => $charge,
-    'quota'  => $quota,
-    'elect'  => \@elected,
-    'votes'  => $value,
-    'action' => 'elect',
-  };
-  $I->{lastcharge} = $charge;
-  return $quota;
+sub Conduct ( $I ) {
+  my $forever = () = $I->GetChoices;
+  $forever += 2;
+  $I->NewRound();
+  # Check Complete is in loop condition
+CONDUCTCASCADELOOP: while ( $I->SeatsOpen() ) {
+    # uncoverable something
+    if ( $forever-- < 0 ) {
+      die "infinite loop break from CONDUCTCASCADELOOP\n";
+    }
+    $I->logt("## Round ${\ $I->Round() }");
+    $I->logv( WeightedTable($I) );
+    $I->STVEvent({
+      round => $I->Round,
+      approval => $I->Approval->RawCount,
+      topcount => $I->TopCount->RawCount });
+    # Check Seats vs remaining.
+    # Start Electing Remaining Choices, apply Final Phase if applicable.
+    next CONDUCTCASCADELOOP if $I->_check_seatschoices();
+    # Automatic Defeat
+    next CONDUCTCASCADELOOP if $I->_automatic_defeat();
+    # Quota
+    my $quota = $I->_set_quota();
+    # Elect
+    my @elected = $I->QuotaElectDo($quota);
+    # Charge
+    if (@elected) {
+      $I->logt( "Elected: " . join( ', ', @elected ) );
+      my $charge = $I->_do_charge( $quota, @elected );
+      $I->NewRound( $quota, $charge );
+      next CONDUCTCASCADELOOP;
+    } else {
+      $I->logv('No Choices Meet Quota');
+    }
+    # Drop Rule
+    my $defeat = $I->_do_drop();
+    $I->Defeat( $defeat );
+    $I->logv( "Defeating: $defeat");
+    $I->STVEvent( { round => $I->Round, defeat => [$defeat] });
+    $I->NewRound( $quota );
+    next CONDUCTCASCADELOOP;
+    # last CONDUCTCASCADELOOP;
+  }
+  $I->logt( "Elected: " . join ', ', ( sort $I->Elected ) );
+  $I->STVEvent( {elected => [sort $I->Elected  ]});
+  $I->WriteSTVEvent;
+  return sort $I->Elected;
 }
 
-sub _noelectround ( $I, $quota, $restype, @defeated ) {
-  my $round = $I->Round();
-  $I->{'roundstatus'}{$round} = {
-    'charge' => {},
-    'quota'  => $quota,
-    'action' => $restype,
-    $restype => \@defeated,
-  };
-}
-
-sub _roundstart ( $I ) {
-  my $round    = ++$I->{'currentround'};
-  my $tc       = $I->TCStats();
-  my $quota    = $I->SetQuota();
-  my $cnt_open = scalar $I->SeatsOpen();
-  return 0 unless $cnt_open;    # election is complete.
-      # GetActiveList does not want to be evaluated as a list for counting
-      # = () = forces evaluation as a list forced to scalar context.
-  my $cnt_active  = () = $I->GetActiveList();
-  my $cnt_elected = () = $I->Elected();
-
-  if ( $cnt_active <= $cnt_open ) {
-    $I->logv(
-"$cnt_active hopeful choices is not greater than $cnt_open remaining seats."
-    );
-    return 0;
-  }
-  $I->logt("# Round: $round\n");
-  $I->logt(
-    "Quota Set At: $quota  Active Vote Value: $tc->{active_vote_value}\n");
-  $I->logv("Non Continuing Vote Value: $tc->{abandoned}{value_abandoned}\n")
-    if $tc->{abandoned}{value_abandoned};
-  $I->logv( "## Round $round Votes\n"
-      . $tc->RankTableWeighted( $I->VoteValue )
-      . "\n" );
-  return $quota;
-}
-
-sub _dodrop ( $I, $droptype ) {
-  my $rt       = undef;
-  my $desctype = 'Weighted Approval';
-  if ( $droptype eq 'approval' ) {
-    $rt = $I->Approval;
-    my $round = $I->Round;
-    $I->logv("## Weighted Approval Round $round.\n");
-    $I->logv( $rt->RankTableWeighted( $I->VoteValue ) );
-    # elsif for bottom runoff.
-  }
-  else {
-    $rt       = $I->TopCount();
-    $desctype = 'Top Count';
-  }
-  my @losing = $rt->ArrayBottom->@*;
-  my ($suspend) =
-      @losing == 1
-    ? $losing[0]
-    : $I->TieBreaker( $I->TieBreakMethod, $I->Active, );
-  $I->logt("Suspend Lowest by $desctype: $suspend");
-  return $suspend;
-}
-
-# Return Value true = continue, false = end quota.
-sub ConductRound ( $I, $droptype = 'approval' ) {
-
-  # Check Complete
-  # Automatic Defeat
-  # Check Complete
-  # Quota
-  # Elect
-  # Check for Finale
-  # Drop Rule
-
-  my $quota = _roundstart($I);
-  # false return val from _roundstart inidcates no open seats.
-  return 0 unless $quota;
-  my $round   = $I->Round();
-  my @elected = $I->QuotaElectDo($quota);
-  if (@elected) {
-    $I->logt( "Electing: " . join( ', ', @elected ) );
-    return _electround( $I, $quota, @elected );
-  }
-  else {
-    $I->logt("No choices elected in round $round.");
-  }
-  my @defeated = $I->TieBreakMethod, NthApproval($I);
-  if (@defeated) {
-    for (@defeated) { $I->Defeat($_) }
-    $I->logt( "Sure Loser Rule Defeated: " . join( ', ', @defeated ) );
-    return _noelectround( $I, $quota, 'defeat', @defeated );
-  }
-  my $suspend = _dodrop( $I, $droptype );
-  $I->Suspend($suspend);
-  _noelectround( $I, $quota, 'suspend', $suspend );
-  # No active choices ends the Quota phase.
-  my $cntactive = () = $I->GetActiveList;
-  unless ($cntactive) { return 0 }
-  else                { return $quota }
-}
-
-# sub CascadeRound
-
-# sub WIGRun ( $I ) {
-#   my $pre_rslt = $I->_WIGStart();
-#   my $quota    = $pre_rslt->{'quota'};
-#   my $seats    = $I->Seats();
-
-# WIGDOROUNDLOOP:
-#   while ( $I->Elected() < $seats ) {
-#     my $rnd = $I->_WIGRound($quota);
-#     last WIGDOROUNDLOOP if _wigcomplete ( $I, $rnd );
-#     my @pending = $rnd->{'pending'}->@*;
-#     if ( scalar(@pending)){
-#       for my $pending (@pending) {
-#         my $chrg = $I->Charge( $pending, $quota );
-#         $I->_WIGElect($chrg);
-#         }
-#     } else {
-#       $I->logv( "Eliminating low choice: $rnd->{'lowest'}\n");
-#       $I->Defeat($rnd->{'lowest'});
-#       last WIGDOROUNDLOOP if _wigcomplete ( $I, $rnd );
-#     }
-#   }
-#   my @elected = $I->Elected();
-#   $I->STVEvent( { winners => \@elected });
-#   $I->logt( "Winners: " . join( ', ', @elected ));
-# }
-
-# sub _WIGRound ( $I, $quota ) {
-#   my $round_num = $I->NextSTVRound();
-#   my $round     = $I->TopCount();
-#   my $roundcnt  = $round->RawCount();
-#   my @choices   = $I->GetActiveList();
-#   my %rndvotes  = ();
-#   my $leader = $round->Leader()->{'winner'};
-#   my $votes4leader = $round->RawCount->{$leader};
-#   my $pending = $votes4leader >= $quota ? $leader : '';
-
-#   for my $C (@choices ) {
-#     if( $roundcnt->{ $C} >= $quota ) {
-#       $rndvotes{ $C } = $roundcnt->{ $C } ;
-#     }
-#   }
-#   my @pending = sort_hash( \%rndvotes, 'numeric', 'desc' );
-
-#   my $rslt = {
-#     pending  => \@pending,
-#     winvotes => \%rndvotes,
-#     quota    => $quota,
-#     round    => $round_num,
-#     allvotes => $round->RawCount(),
-#     lowest   => $round->ArrayBottom()->[0],
-#     noncontinuing => $I->CountAbandoned()->{'value_abandoned'},
-#   };
-#   $I->STVEvent($rslt);
-#   $I->logv( _format_round_result( $rslt, $round, $I->VoteValue() ) );
-#   return ($rslt);
-# }
-
-__PACKAGE__->meta->make_immutable;
 1;
 
 =pod

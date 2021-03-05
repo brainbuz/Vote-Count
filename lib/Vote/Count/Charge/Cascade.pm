@@ -57,11 +57,13 @@ has 'EstimationFresh' => (
 has 'TieBreakMethod' => (
   is       => 'rw',
   isa      => 'Str',
-  default => 'topcount',
+  default => ''
 );
 
 sub BUILD {
   my $I = shift;
+  $I->TieBreakMethod('precedence');
+  $I->TieBreakerFallBackPrecedence(1);
   $I->{'roundstatus'}  = { 0 => {} };
   $I->{'currentround'} = 0;
 # to hold the last charged values for elected choices.
@@ -96,7 +98,7 @@ sub SetQuota ($I) {
 sub _preEstimate ( $I, $quota, @elected ) {
   my $estrule = $I->EstimationRule();
   my $lastround  = $I->{'currentround'} ? $I->{'currentround'} - 1 : 0;
-  my $lastcharge = $I->{'roundstatus'}{$lastround}{'charge'};
+  my $lastcharge = $I->{'lastcharge'};
   my $unw        = $I->LastTopCountUnWeighted();
   die 'LastTopCountUnWeighted failed' unless ( keys $unw->%* );
   my %estimate = ();
@@ -188,8 +190,9 @@ sub CalcCharge ( $I, $quota ) {
   $estimates->{$iteration} = $estimate;
   my $done = 0;
   my $charged = undef ; # the last value from loop is needed for log.
-  until ( $done or $iteration > 20 ) {
+  until ( $done  ) {
     ++$iteration;
+    if ( $iteration > 100 ) { die "Exceeded Iteration Limit!\n"}
     # for ( $estimate, $cap, $bottom, $freeze, @elected ) { warn Dumper $_}
     $charged =
       _chargeInsight( $I, $quota, $estimate, $cap, $bottom, $freeze,
@@ -207,7 +210,16 @@ sub CalcCharge ( $I, $quota ) {
     estimates => $estimates,
     quota => $quota,
     charge => $estimate,
+    iterations => $iteration,
     detail => $charged->{'result'} } );
+
+  $I->STVEvent( {
+    round => $round,
+    quota => $quota,
+    charge => $estimate,
+    iterations => $iteration,
+    detail => $charged->{'result'}
+    } );
   return $estimate;
 }
 

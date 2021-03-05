@@ -23,35 +23,43 @@ use Data::Printer;
 use Data::Dumper;
 # use Carp::Always;
 
-my $DMB =
+my $DMB1 =
   Vote::Count::Method::Cascade->new(
     Seats     => 4,
     BallotSet => read_ballots('t/data/Scotland2017/Dumbarton.txt'),
     VoteValue => 100000,
-    IterationLog => '/tmp/votecount_cascademethod_iteration',
-    LogTo     => '/tmp/votecount_cascademethod',
-    FloorThresshold => 50,
+    IterationLog => '/tmp/votecount_cascademethod_dmb1',
+    LogTo     => '/tmp/votecount_cascademethod_dmb1',
+    FloorThresshold => 1,
   );
 
-ok 1;
-$DMB->StartElection;
-# my $phase = 1;
-# my $looper = 1;
+$DMB1->StartElection;
+my @elected = $DMB1->Conduct();
+# note( $DMB1->logv );
+# note Dumper @elected;
+my $expectwin = [ 'David_MCBRIDE_Lab',  'Elizabeth_RUINE_Lab', 'Iain_MCLAREN_SNP', 'Karen_CONAGHAN_SNP'];
+is_deeply( \@elected, $expectwin, 'first run winners ***' );
 
-# incomplete code in infinite loop.
-# while ( $looper ) {
-#   $looper = $DMB->ConductQuotaRound( 'approval');
-#   note( "Round: " . $DMB->Round() );
-#   }
+my $DMB2 =
+  Vote::Count::Method::Cascade->new(
+    Seats     => 4,
+    BallotSet => read_ballots('t/data/Scotland2017/Dumbarton.txt'),
+    VoteValue => 100000,
+    IterationLog => '/tmp/votecount_cascademethod_dmb2',
+    LogTo     => '/tmp/votecount_cascademethod_dmb2',
+    FloorThresshold => 1,
+    FloorRule => 'TopCount',
+    DropRule => 'bottomrunoff',
+    # FinalPhase => 'approval',
+  );
+$DMB2->StartElection;
+@elected = $DMB2->Conduct();
+note( $DMB2->logv );
+# note Dumper @elected;
+$expectwin = [ 'Brian_WALKER_Con', 'David_MCBRIDE_Lab', 'George_BLACK_WDCP', 'Karen_CONAGHAN_SNP'];
+is_deeply( \@elected, $expectwin, 'second run winners' );
 
-# $DMB->ConductQuotaRound;
-# say "===== " . $DMB->ConductQuotaRound;
-# say "===== " . $DMB->ConductQuotaRound;
-# $DMB->{DEBUG}=1;
 
-# say "===== " . $DMB->ConductQuotaRound;
-# while ($phase ) { $phase = $DMB->ConductQuotaRound() ;}
-note( $DMB->logv );
 # note( Dumper $DMB->{'roundstatus'});
 # p $DMB->meta()->{'methods'};
 

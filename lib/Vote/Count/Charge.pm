@@ -76,8 +76,8 @@ sub _init_choice_status ( $I ) {
 sub _setTieBreaks ( $I ) {
   no warnings 'uninitialized';
   unless ( $I->TieBreakMethod() ) {
-    $I->logv('TieBreakMethod is undefined, setting to grandjunction');
-    $I->TieBreakMethod('grandjunction');
+    $I->logd('TieBreakMethod is undefined, setting to precedence');
+    $I->TieBreakMethod('precedence');
   }
   if ( $I->TieBreakMethod ne 'precedence' ) {
     $I->logv( 'Ties will be broken by: '
@@ -88,7 +88,7 @@ sub _setTieBreaks ( $I ) {
   unless ( stat $I->PrecedenceFile ) {
     my @order = $I->CreatePrecedenceRandom('/tmp/precedence.txt');
     $I->PrecedenceFile('/tmp/precedence.txt');
-    $I->logv( "Order for Random Tie Breakers is: \n" . join( "\n", @order ) );
+    $I->logv( "Order for Random Tie Breakers is: " . join( ", ", @order ) );
   }
 }
 
@@ -110,7 +110,7 @@ sub BUILD {
   $self->_setTieBreaks();
   $self->ResetVoteValue();
   $self->_init_choice_status();
-
+  $self->FloorRounding('down');
 }
 
 =pod
@@ -182,6 +182,16 @@ sub Elected ($I) { return $I->{'elected'}->@* }
 sub Defeat ( $I, $choice ) {
   delete $I->{'Active'}{$choice};
   $I->{'choice_status'}->{$choice}{'state'} = 'defeated';
+}
+
+sub Defeated ($I) {
+  my @defeated = ();
+  for my $c ( keys  $I->{'choice_status'}->%* ) {
+    if ( $I->{'choice_status'}{$c}{'state'} eq 'defeated') {
+      push @defeated, $c;
+    }
+  }
+  return sort(@defeated);
 }
 
 sub Withdrawn ($I) {
@@ -334,12 +344,15 @@ sub STVFloor ( $I, $action='Withdraw' ) {
 }
 
 sub BottomRunOff ( $I, $method1='TopCount', $method2='precedence' ) {
-  my %ranked = $I->UntieActive($method1, $method2)->HashByRank()->%*;
-  my $bottom = scalar keys %ranked;
-  my $next = $bottom - 1;
-  return $I->TopCount(
-    {$ranked{$bottom}[0] => 1 , $ranked{$next}[0] => 1 }
-    )->Leader()->{'winner'};
+  my @ranked = $I->UntieActive($method1, $method2)->OrderedList();
+  my @runoff = $I->UnTieList( 'TopCount', $ranked[-1],  $ranked[-2]);
+  my $loser = pop @runoff;
+  return $loser;
+# warn $I->TopCount( { $ranked[-1] => 1 , $ranked[-2] => 1 } )->RankTableWeighted( $I->VoteValue );
+
+#   return $I->TopCount(
+#     { $ranked[-1] => 1 , $ranked[-2] => 1 }
+#     )->ArrayBottom()->[0];
 }
 
 =head1 NAME

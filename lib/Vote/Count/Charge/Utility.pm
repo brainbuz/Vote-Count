@@ -46,7 +46,7 @@ Finds the choice that would fill the last seat if the remaining seats were to be
 
 =cut
 
-use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable' ], );
+use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ], );
 
 sub FullCascadeCharge ( $ballots, $quota, $cost, $active, $votevalue ) {
   for my $b ( keys $ballots->%* ) {
@@ -103,6 +103,23 @@ sub NthApproval ( $I ) {
     /);
   }
   return @defeat;
+}
+
+sub ChargeTable ( $estimate, $result ) {
+  my @rows = (['Choice','Charge','Value Charged', 'Votes Charged','Surplus'] );
+  for my $c ( sort keys $estimate->%* ) {
+    push @rows, [
+      $c, $estimate->{$c},
+      $result->{$c}{'value'},
+      $result->{$c}{'count'},
+      $result->{$c}{'surplus'}
+    ]
+  }
+  return generate_table(
+      rows => \@rows,
+      style => 'markdown',
+      align => [qw/ l l r r r/]
+      ) . "\n";
 }
 
 sub WeightedTable ( $I ) {
