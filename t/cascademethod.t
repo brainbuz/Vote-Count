@@ -54,98 +54,48 @@ my $DMB2 =
   );
 $DMB2->StartElection;
 @elected = $DMB2->Conduct();
-note( $DMB2->logv );
+# note( $DMB2->logv );
 # note Dumper @elected;
 $expectwin = [ 'Brian_WALKER_Con', 'David_MCBRIDE_Lab', 'George_BLACK_WDCP', 'Karen_CONAGHAN_SNP'];
 is_deeply( \@elected, $expectwin, 'second run winners' );
 
 
-# note( Dumper $DMB->{'roundstatus'});
-# p $DMB->meta()->{'methods'};
+my $DMB3 =
+  Vote::Count::Method::Cascade->new(
+    Seats     => 4,
+    BallotSet => read_ballots('t/data/Scotland2017/Dumbarton.txt'),
+    VoteValue => 100,
+    IterationLog => '/tmp/votecount_cascademethod_dmb3',
+    LogTo     => '/tmp/votecount_cascademethod_dmb3',
+    FloorThresshold => 1,
+    FloorRule => 'TopCount',
+    DropRule => 'topcount',
+    AutomaticDefeat => 'none',
+    FinalPhase => 'approval',
+  );
+$DMB3->StartElection;
+@elected = $DMB3->Conduct();
+note( $DMB3->logv );
 
-# subtest 'setup' => sub {
-#   my $D = newD();
-#   note( $D->TopCount()->RankTableWeighted(100) );
-#   my @defeated = $D->DefeatLosers( 'precedence', NthApproval( $D ) );
-#   note( "DEFEAT SURE LOSERS: @defeated ");
+my $BIG1 =
+  Vote::Count::Method::Cascade->new(
+    Seats     => 4,
+    BallotSet => read_ballots('t/data/biggerset1.txt'),
+    VoteValue => 100,
+    IterationLog => '/tmp/votecount_cascademethod_big1',
+    LogTo     => '/tmp/votecount_cascademethod_big1',
+    FloorThresshold => 1,
+    FloorRule => 'TopCount',
+    DropRule => 'topcount',
+    AutomaticDefeat => 'none',
+    FinalPhase => 'approval',
+  );
+$BIG1->StartElection;
+@elected = $BIG1->Conduct();
+note( $BIG1->logv );
 
-#   # note( $D->SureLoser );
-#   $D->NewRound();
-#   my $quota = $D->SetQuota();
-#   my $abandoned = $D->CountAbandoned;
-#   note( "quota $quota abandoned $abandoned->{value_abandoned} ");
 
-#   $D->QuotaElectDo( $quota );
-#   note( "Elected " . Dumper $D->Elected() );
-
-#   $D->NewRound();
-#   $quota = $D->SetQuota();
-#   $abandoned = $D->CountAbandoned;
-#   note( "quota $quota abandoned $abandoned->{value_abandoned} ");
-
-#   $D->QuotaElectDo( $quota );
-#   note( Dumper $D->TopCount()->RankTableWeighted( 1000) );
-#   note( Dumper $D->Approval()->RankTableWeighted( 1000) );
-
-#   # $A->Elect( 'William_GOLDIE_SNP');
-#   # $A->Elect( 'Allan_GRAHAM_Lab');
-#   ok $D;
-# };
+# note Dumper @elected;
+# 100000 82 10000 57 1000 36 100 16
 
 done_testing();
-
-=pod
-
-subtest 'calc charge bigger data' => sub {
-  my $A = newA;
-  $A->IterationLog( '/tmp/cascade_iteration');
-  note( $A->TopCount()->RankTableWeighted( 100 ) );
-  $A->NewRound();
-  $A->Elect( 'William_GOLDIE_SNP');
-  $A->Elect( 'Allan_GRAHAM_Lab');
-  my $BCharge1 = $A->CalcCharge(120301);
-  is_deeply( $BCharge1, #1203
-    { Allan_GRAHAM_Lab => 83, William_GOLDIE_SNP => 67 },
-    'Calculate the charge for the first 2 elected with the larger test set'
-  );
-  FullCascadeCharge( $A->GetBallots, 120301, $BCharge1, $A->GetActive, 100 );
-  my $roundnum = $A->NewRound( 120301, $BCharge1 );
-  my $TC = $A->TopCount();
-$A->{'DEBUG'} = 1;
-  my @newly = $A->QuotaElectDo( 120301 );
-  my $lastcharge = $A->{'roundstatus'}{$roundnum -1 }{'charge'};
-  my $BCharge2 = $A->CalcCharge(120301);
-  is_deeply( $BCharge2, #1203
-    { Allan_GRAHAM_Lab => 78, William_GOLDIE_SNP => 67, Stephanie_MUIR_Lab => 93 },
-    'Calculate the charge adding the next quota winner'
-  );
-  my $Charge2F = FullCascadeCharge( $A->GetBallots, 120301, $BCharge2, $A->GetActive, 100 );
-note Dumper  $Charge2F;
-  my $balance = $A->VotesCast * 100;
-  TestBalance ( $A->GetBallots, $Charge2F, $balance, $A->Elected() );
-};
-
-
-WIG
-  name                      stage1  stage2  stage3  stage4  stage5
-                                          round2
-  BLACK, George (WDCP)       792  821.05  827.13  888.30    0.00
-  CONAGHAN, Karen (SNP)     1499 1499.00 1313.00 1313.00 1313.00
-  MCBRIDE, David (Lab)      1762 1313.00 1313.00 1313.00 1313.00
-  MCLAREN, Iain (SNP)        809  827.09  989.76  998.64 1254.05
-  MUIR, Andrew (Ind)         159  168.43  170.91    0.00    0.00
-  RUINE, Elizabeth (Lab)     584  910.17  915.01  937.18 1103.63
-  WALKER, Brian (Con)        957  979.68  980.55 1009.31 1147.13
-  non-transferable             0   43.58   52.64  102.58  431.19
-
-MEEK
-  name                      stage1 stage2 stage3 stage4 stage5
-                                          round2
-  BLACK, George (WDCP)       792  827.1  887.0    0.0    0.0
-  CONAGHAN, Karen (SNP)     1499 1302.1 1293.0 1235.7 1215.9
-  MCBRIDE, David (Lab)      1762 1302.1 1293.0 1235.7 1215.8
-  MCLAREN, Iain (SNP)        809 1001.6 1023.9 1343.6 1215.9
-  MUIR, Andrew (Ind)         159  170.6    0.0    0.0    0.0
-  RUINE, Elizabeth (Lab)     584  925.6  957.2 1217.3 1277.6
-  WALKER, Brian (Con)        957  981.6 1010.7 1146.2 1154.0
-  non-transferable             0   51.3   97.3  383.5  482.8
