@@ -50,7 +50,7 @@ my $DMB2 =
     FloorThresshold => 1,
     FloorRule => 'TopCount',
     DropRule => 'bottomrunoff',
-    # FinalPhase => 'approval',
+    FinalPhase => 0,
   );
 $DMB2->StartElection;
 @elected = $DMB2->Conduct();
@@ -71,7 +71,7 @@ my $DMB3 =
     FloorRule => 'TopCount',
     DropRule => 'topcount',
     AutomaticDefeat => 'none',
-    FinalPhase => 'approval',
+    FinalPhase => 1,
   );
 $DMB3->StartElection;
 @elected = $DMB3->Conduct();
@@ -88,7 +88,7 @@ my $BIG1 =
     FloorRule => 'TopCount',
     DropRule => 'topcount',
     AutomaticDefeat => 'none',
-    FinalPhase => 'approval',
+    FinalPhase => 1,
   );
 $BIG1->StartElection;
 @elected = $BIG1->Conduct();

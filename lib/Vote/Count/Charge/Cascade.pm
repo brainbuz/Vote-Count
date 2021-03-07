@@ -62,7 +62,7 @@ has 'TieBreakMethod' => (
 
 sub BUILD {
   my $I = shift;
-  $I->TieBreakMethod('precedence');
+  # $I->TieBreakMethod('precedence');
   $I->TieBreakerFallBackPrecedence(1);
   $I->{'roundstatus'}  = { 0 => {} };
   $I->{'currentround'} = 0;

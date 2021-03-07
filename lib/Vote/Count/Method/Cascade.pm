@@ -90,9 +90,23 @@ has 'DropRule' => (
 
 has 'FinalPhase' => (
   is      => 'rw',
-  isa     => 'Str',
-  default => '',
+  isa     => 'Bool',
+  default => 0,
 );
+
+has 'TieBreakMethod' => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => 'buildprecedence',
+);
+
+sub BUILD {
+  my $self = shift @_;
+  my $tbm = $self->TieBreakMethod();
+  unless ( $tbm eq 'precedence' || $tbm eq 'buildprecedence' ) {
+    die "TieBreaker is restricted to precedence or buildprecedence, $tbm is invalid\n"
+  }
+}
 
 sub _automatic_defeat ($I) {
   my @defeated = ();
@@ -104,18 +118,12 @@ sub _automatic_defeat ($I) {
   if (@defeated) {
     $I->logt( "Defeated by $rule: " . join( ', ', @defeated ) . '.' );
     $I->STVEvent( { round => $I->Round, defeat => \@defeated } );
-    $I->LastAction('defeat_automatic');
     return 1;
   }
   else {
     $I->logt("No Defeats by $rule.");
     return 0;
   }
-}
-
-sub LastAction ( $I, $action = undef ) {
-  if ($action) { $I->{'lastaction'} = $action }
-  else         { return $I->{'lastaction'} }
 }
 
 sub _set_quota ($I) {
@@ -167,36 +175,26 @@ sub _do_charge ( $I, $quota, @elected ) {
   $I->logv( ChargeTable( $chargecalc, $result ) );
   $I->STVEvent(
     { round => $I->Round, elected => [@elected], charge => $result } );
-  $I->LastAction('elect_quota');
   return $chargecalc;
 }
 
 sub _do_drop ( $I ) {
-  my $defeated = '';
-  if ( $I->DropRule eq 'bottomrunoff' ) { $defeated = $I->BottomRunOff }
+  if ( $I->DropRule eq 'bottomrunoff' ) {
+    return $I->BottomRunOff }
   elsif ( $I->DropRule eq 'approval' ) {
-    $defeated =
+    return
       [ $I->UntieActive( 'Approval', 'precedence' )->OrderedList() ]->[-1];
   }
   elsif ( $I->DropRule eq 'topcount' ) {
-    $defeated =
+    return
       [ $I->UntieActive( 'TopCount', 'precedence' )->OrderedList() ]->[-1];
   }
   else { die "Invalid DropRule: ${\ $I->DropRule }\n" }
-  $I->LastAction('defeat_drop');
-  return $defeated;
 }
 
 sub _finalphase ($I) {
   return 0 unless $I->FinalPhase;
   return 0 unless $I->SeatsOpen == 1;
-  # If the last action was elect_quota, it is necessary to
-  # skip so that quota can be tried again before going final.
-  if ( $I->LastAction eq 'elect_quota' ) {
-    $I->LastAction('skip_final');
-    $I->NewRound;
-    return 1;
-  }
   my @defeated = $I->Defeated();
   for my $choice (@defeated) {
     $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
@@ -216,13 +214,13 @@ sub _finalphase ($I) {
     }
   );
   $I->Elect($winner);
-  $I->LastAction('elect_final');
   return 1;
 }
 
 sub StartElection ( $Election ) {
   $Election->STVFloor();
   my @precedence = ();
+warn $Election->TieBreakMethod();
   if ( $Election->TieBreakMethod() eq 'precedence' ) {
     @precedence =
       path( $Election->PrecedenceFile() )->lines( { chomp => 1 } );
@@ -240,7 +238,6 @@ sub StartElection ( $Election ) {
   }
   my $prec = 0;
   $Election->logv( map { "${\ ++$prec }. $_" } @precedence );
-  $Election->LastAction('start');
 }
 
 sub Conduct ( $I ) {

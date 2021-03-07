@@ -328,7 +328,7 @@ sub STVFloor ( $I, $action='Withdraw' ) {
         $I->FloorRule(),
         $I->FloorThresshold()
       );
-    for my $choice ($I->GetChoices()) {
+    for my $choice (sort $I->GetChoices()) {
       unless( $newactive->{$choice}) {
         $I->$action( $choice );
         push @withdrawn, $choice;
