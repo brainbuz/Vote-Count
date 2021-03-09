@@ -44,6 +44,10 @@ subtest 'CountAbandoned, TCStats' => sub {
   is( $tcs->{'active_vote_value'}, 800, 'active vote value adjusted');
 };
 
+done_testing;
+
+=pod
+
 subtest 'WithdrawalList' => sub {
     my $A = Vote::Count::Charge->new(
     Seats     => 5,
@@ -104,6 +108,7 @@ subtest 'BottomRunOff' => sub {
   my $A = Vote::Count::Charge->new(
     Seats     => 5,
     VoteValue => 100,
+    TieBreakerFallBackPrecedence => 1,
     BallotSet => read_ballots('t/data/biggerset1.txt'),
   );
   is( $A->BottomRunOff, 'RUMRAISIN' );

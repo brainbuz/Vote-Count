@@ -95,6 +95,10 @@ subtest '_inits' => sub {
     { state => 'suspended', votes => 12 },
     'changed both status status values for a choice'
   );
+
+  $D->Defer( 'RUMRAISIN' );
+  is( $D->GetChoiceStatus('RUMRAISIN')->{state}, 'deferred');
+
   $D->Defeat('STRAWBERRY');
   is_deeply(
     $D->GetChoiceStatus('STRAWBERRY'),

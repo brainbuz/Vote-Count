@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use 5.022;
-use feature qw /postderef signatures/;
+use feature qw /postderef signatures switch/;
 
 package Vote::Count::Charge;
 use namespace::autoclean;
@@ -9,6 +9,7 @@ use Moose;
 extends 'Vote::Count';
 
 no warnings 'experimental::signatures';
+no warnings 'experimental::smartmatch';
 
 use Sort::Hash;
 use Data::Dumper;
@@ -55,6 +56,7 @@ sub _init_choice_status ( $I ) {
   $I->{'pending'}       = [];
   $I->{'elected'}       = [];
   $I->{'suspended'}     = [];
+  $I->{'deferred'}      = [];
   $I->{'stvlog'}        = [];
   $I->{'stvround'}      = 0;
   for my $c ( $I->GetChoices() ) {
@@ -121,7 +123,7 @@ CountAbandoned
 =cut
 
 sub CountAbandoned ($I) {
-  my @continuing = ( $I->Suspended(), $I->GetActiveList );
+  my @continuing = ( $I->Deferred(), $I->GetActiveList );
   my $set        = $I->GetBallots();
   my %res        = ( count_abandoned => 0, value_abandoned => 0, );
   for my $k ( keys $set->%* ) {
@@ -223,6 +225,19 @@ sub Suspended ($I ) {
   return $I->{'suspended'}->@*;
 }
 
+sub Defer ( $I, $choice ) {
+  delete $I->{'Active'}{$choice};
+  $I->{'choice_status'}->{$choice}{'state'} = 'deferred';
+  unless ( grep ( /^$choice$/, $I->{'deferred'}->@* ) ) {
+    push $I->{'deferred'}->@*, $choice;
+  }
+  return $I->Deferred();
+}
+
+sub Deferred ($I ) {
+  return $I->{'deferred'}->@*;
+}
+
 sub Pending ( $I, $choice = undef ) {
   if ($choice) {
     unless ( grep /^$choice$/, $I->{'pending'}->@* ) {
@@ -236,13 +251,24 @@ sub Pending ( $I, $choice = undef ) {
 
 sub Reinstate ( $I, @choices ) {
   # if no choices are given reinstate all.
-  @choices = $I->{'suspended'}->@* unless @choices;
+  @choices = ($I->{'suspended'}->@*, $I->{'deferred'}->@* ) unless @choices;
+  my @reinstated = ();
+REINSTATELOOP:
   for my $choice (@choices) {
-    next unless $I->{'choice_status'}->{$choice}{'state'} eq 'suspended';
-    $I->{'suspended'}->@* = grep ( !/^$choice$/, $I->{'suspended'}->@* );
+  # I'm a fan of the give/when construct, but go to lengths not to use it
+  # because of past issues and that after 15 years it is still experimental.
+    given ($I->{'choice_status'}{$choice}{'state'}){
+      when ( 'suspended') { }
+      when ( 'deferred' )  { }
+      default { next REINSTATELOOP }
+    };
+    ($I->{'suspended'}->@*) = grep ( !/^$choice$/, $I->{'suspended'}->@* );
+    ($I->{'deferred'}->@*) = grep ( !/^$choice$/, $I->{'deferred'}->@* );
     $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
     $I->{'Active'}{$choice} = 1;
+    push @reinstated, $choice;
   }
+  return @reinstated;
 }
 
 sub Charge ( $I, $choice, $quota, $charge=$I->VoteValue() ) {
@@ -396,9 +422,35 @@ This module provides methods that can be shared between Charge implementations a
 
 =head1 Candidate / Choices States
 
-Single Transferable Vote rules have more states than Active, Eliminated and Elected. Not all methods need all of the possible states. The SetChoiceStatus method is not linked to the underlying Vote::Count objects Active Set, the action methods: Elect, Defeat, Suspend, Reinstate, Withdraw do update the Active Set.
+Single Transferable Vote rules have more states than Active, Eliminated and Elected. Not all methods need all of the possible states. The SetChoiceStatus method is not linked to the underlying Vote::Count objects Active Set, the action methods: Elect, Defeat, Suspend, Defer, Reinstate, Withdraw do update the Active Set.
 
 Active choices are referred to as Hopeful. The normal methods for accessing the Active list are available. Although not prevented from doing so, STV Methods should not directly set the active list, but rely on methods that manipulate candidate state. The VCUpdateActive method will sync the Active set with the STV choice states corresponding to active.
+
+=over
+
+=item *
+
+hopeful: The default active state of a choice.
+
+=item *
+
+withdrawn: A choice that will be treated as not present.
+
+=item *
+
+defeated: A choice that will no longer be considered for election.
+
+=item *
+
+deferred and suspended:
+
+A choice that is temporarily removed from consideration. Suspended is treated the same as Defeated, but is eligible for reinstatement. Deferred is removed from the ActiveSet, but treated as present when calculating Quota and Non-Continuing Votes.
+
+=item *
+
+elected and pending:
+
+Elected and Pending choices are removed from the Active Set, but Pending choices are not yet considered elected. The Pending state is available to hold newly elected choices for a method that will not immediately complete processing their election.
 
 =head3 GetChoiceStatus
 
@@ -428,11 +480,15 @@ Takes an Choice to set as Pending. Returns the list of Pending Choices.
 
 In methods that set the Quota only once, choices eliminated before setting Quota are Withdrawn and may result in null ballots that can be exluded. Choices eliminated after setting Quota are Defeated. Some rules bring eliminated Choices back in later Rounds, Suspended distinguishes those eligible to return.
 
-=head3 Defeat, Withdraw, Suspend
+=head3 Defeat, Defer, Withdraw, Suspend
 
-Perform the corresponding action for a Choice. Reinstate
+Perform the corresponding action for a Choice.
 
-  $E->Defeat('MARMALADE');
+  $Election->Defeat('MARMALADE');
+
+=head3 Defeated, Deferred, Withdrawn, Suspended
+
+Returns a list of choices in that state.
 
 =head3 Reinstate
 

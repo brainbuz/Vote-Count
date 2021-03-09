@@ -78,14 +78,27 @@ subtest 'Elect, Defeat, et al' => sub {
   $F->Suspend('ROCKYROAD');
   $F->Suspend('PISTACHIO');
   $F->Suspend('STRAWBERRY');
-  $F->Suspend('STRAWBERRY')
-    ;    # a second time to prove it wont be in list twice.
+  $F->Suspend('STRAWBERRY');    # a second time to prove it wont be in list twice.
   is_deeply(
     [ sort( $F->Suspended() ) ],
     [qw/PISTACHIO ROCKYROAD STRAWBERRY/],
     'confirm list of suspended choices'
   );
-  $F->Reinstate();
+  $F->Reinstate('STRAWBERRY');
+  $F->Defer('STRAWBERRY');
+  is_deeply(
+    [ sort( $F->Suspended() ) ],
+    [qw/PISTACHIO ROCKYROAD/],
+    'moved strawberry to deferred, no longer in suspended'
+  );
+
+  is_deeply(
+    [ sort( $F->Deferred() ) ],
+    [qw/STRAWBERRY/],
+    'moved strawberry to deferred, in deferred now'
+  );
+  is_deeply( [sort $F->Reinstate()], ['PISTACHIO', 'ROCKYROAD','STRAWBERRY'],
+    'check list of reinstated choices from reinstate');
   is( $F->Suspended(), 0,
     'group reinstated choices no longer on suspended list' );
   is( $F->GetChoiceStatus('STRAWBERRY')->{state},

@@ -13,6 +13,8 @@ use feature qw /postderef signatures/;
 use Vote::Count::Charge::Utility 'FullCascadeCharge', 'NthApproval',
   'WeightedTable', 'ChargeTable';
 use Vote::Count::TextTableTiny qw/generate_table/;
+use Vote::Count::Method::CondorcetIRV;
+    # import Vote::Count::Method::CondorcetIRV;
 
 use Storable 3.15 'dclone';
 use Sort::Hash;
@@ -94,10 +96,22 @@ has 'FinalPhase' => (
   default => 0,
 );
 
+has 'FinalPhaseMethod' => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => 'approval',
+);
+
 has 'TieBreakMethod' => (
   is      => 'rw',
   isa     => 'Str',
   default => 'buildprecedence',
+);
+
+has 'QuotaTrigger' => (
+  is => 'rw',
+  isa => 'Int',
+  required => 1,
 );
 
 sub BUILD {
@@ -133,6 +147,13 @@ sub _set_quota ($I) {
   $I->logv("Active Vote Value: $av (${\ int ( $av / $I->VoteValue()) }) ");
   $I->logt("Quota is $quota (${\ int $quota / $I->VoteValue() })");
   return $quota;
+}
+
+sub _check_quota_changed ($I, $quota) {
+  return 0 unless $I->Elected();
+  my $qf =  $I->{'lastquota'} - ( $I->VoteValue * $I->QuotaTrigger );
+  if ( $quota < $qf ) { return 1 }
+  return 0;
 }
 
 sub _check_seatschoices ($I ) {
@@ -174,8 +195,18 @@ sub _do_charge ( $I, $quota, @elected ) {
   $I->{'lastcharge'} = $chargecalc;
   $I->logv( ChargeTable( $chargecalc, $result ) );
   $I->STVEvent(
-    { round => $I->Round, elected => [@elected], charge => $result } );
+    { round => $I->Round, elected => [@elected],
+    result => $result, charge => $chargecalc,  } );
   return $chargecalc;
+}
+
+sub _re_charge ( $I, $quota ) {
+  # my $chargecalc = $I->CalcCharge($quota);
+  # my $result =
+  #   FullCascadeCharge( $I->GetBallots, $quota, $chargecalc, $I->GetActive,
+  #   $I->VoteValue );
+  # return { charge => $chargecalc, result => $result }
+  die 'recharge';
 }
 
 sub _do_drop ( $I ) {
@@ -195,17 +226,47 @@ sub _do_drop ( $I ) {
 sub _finalphase ($I) {
   return 0 unless $I->FinalPhase;
   return 0 unless $I->SeatsOpen == 1;
-  my @defeated = $I->Defeated();
-  for my $choice (@defeated) {
-    $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
-    $I->{'Active'}{$choice} = 1;
-  }
-  $I->logv("Only One Seat Remains, Elect last choice by Approval");
-  $I->logv("reinstating ${\ join ', ', @defeated } ") if @defeated;
+  my $finalmthd = $I->FinalPhaseMethod;
+  my @suspended = $I->Suspended();
+  $I->Reinstate( @suspended );
+  # my @defeated = $I->Defeated();
+  # for my $choice (@defeated) {
+  #   $I->{'choice_status'}->{$choice}{'state'} = 'hopeful';
+  #   $I->{'Active'}{$choice} = 1;
+  # }
+
+# path('/tmp/mockd.pl')->spew( Dumper $I->BallotSet() );
+# path('/tmp/mockdactive.txt')->spew( map { "$_\n"} ( $I->GetActiveList));
+  $I->logv("Only One Seat Remains, Elect last choice by $finalmthd");
+  $I->logv("reinstating ${\ join ', ',  } ") if @suspended;
   $I->logv( WeightedTable($I) );
-  my @list   = $I->UntieActive( 'Approval', 'precedence' )->OrderedList();
-  my $winner = $list[0];
-  $I->logt("Last Seat By Approval. Elected: $winner");
+  my $winner = undef;
+  if ( $finalmthd =~ /Approval|TopCount/ ) {
+      $winner = do {
+        my @l = $I->UntieActive( $finalmthd, 'precedence' )->OrderedList();
+        $l[0];
+        };
+    }
+  elsif ( $finalmthd eq 'IRV' ) {
+    $winner = $I->RunIRV()->{'winner'};
+  }  elsif ( $finalmthd =~ /smith/i ) {
+    # die "Smith IRV is unweighted aborting";
+warn "precedencefile ${\ $I->PrecedenceFile }";
+    my $CIRV = Vote::Count::Method::CondorcetIRV->new(
+      BallotSet => $I->BallotSet(),
+      TieBreakMethod => 'precedence',
+      PrecedenceFile => $I->PrecedenceFile,
+    );
+    $CIRV->SetActive( dclone $I->GetActive );
+warn "CIRV active = @{[ $CIRV->GetActiveList ]}"    ;
+    $winner = $CIRV->SmithSetIRV()->{'winner'};
+# die $CIRV->logd;
+    $I->logv( $CIRV->PairMatrix->MatrixTable );
+    $I->logv( $CIRV->PairMatrix->ScoreTable );
+    $I->logv( $CIRV->PairMatrix->PairingVotesTable );
+    $I->logv( $CIRV->logv );
+  }
+  $I->logt("Last Seat By ${finalmthd}. Elected: $winner");
   $I->STVEvent(
     { round      => $I->Round,
       finalphase => 'approval',
@@ -220,7 +281,6 @@ sub _finalphase ($I) {
 sub StartElection ( $Election ) {
   $Election->STVFloor();
   my @precedence = ();
-warn $Election->TieBreakMethod();
   if ( $Election->TieBreakMethod() eq 'precedence' ) {
     @precedence =
       path( $Election->PrecedenceFile() )->lines( { chomp => 1 } );
@@ -238,21 +298,43 @@ warn $Election->TieBreakMethod();
   }
   my $prec = 0;
   $Election->logv( map { "${\ ++$prec }. $_" } @precedence );
+  $Election->{'lastquota'} = 0;
 }
 
 sub Conduct ( $I ) {
   my $forever = () = $I->GetChoices;
   $forever += 2;
-  $I->NewRound();
   # Check Complete is in loop condition
 CONDUCTCASCADELOOP: while ( $I->SeatsOpen() ) {
     # uncoverable something
     if ( $forever-- < 0 ) {
       warn "infinite loop break from CONDUCTCASCADELOOP\n";
-      last;
+      last CONDUCTCASCADELOOP;
     }
     $I->logt("## Round ${\ $I->Round() }");
-    $I->logv( WeightedTable($I) );
+    # Quota
+    my $quota = $I->_set_quota();
+my $changed = $I->_check_quota_changed( $quota ) ;
+warn "--- changed $changed";
+warn "*** quota set $quota . check changed $changed *** ${\ $I->{lastquota} } - " ;     $changed = $I->_check_quota_changed( $quota ) ;
+warn "^^^ quota set $quota . check changed $changed *** ${\ $I->{lastquota} } - " ;
+    if ( $I->_check_quota_changed( $quota ) ) {
+      my $maxtries = 10;
+      my $result = {};
+warn "maxtries $maxtries --- "  . $I->_check_quota_changed( $quota );
+warn ~~$I->_check_quota_changed . " $maxtries";
+      until ( ! $I->_check_quota_changed  ) {
+        last unless $maxtries;
+die 'here'        ;
+        $result = $I->_re_charge( $quota );
+        $maxtries--;
+        $I->{'lastquota'} = $quota;
+        $quota = $I->_set_quota();
+      }
+      $I->STVEvent( { round => $I->Round, quota => $quota } );
+      $I->Logv( "Recharge Round ${\ $I->Round }\n" .
+        ChargeTable( $result->{charge}, $result->{result} ) );
+    }
     $I->STVEvent(
       {
         round    => $I->Round,
@@ -260,13 +342,19 @@ CONDUCTCASCADELOOP: while ( $I->SeatsOpen() ) {
         topcount => $I->TopCount->RawCount
       }
     );
+    $I->logv( WeightedTable($I) );
+    # Automatic Defeat
+    if ($I->_automatic_defeat() ) {
+      $I->NewRound($quota);
+      next CONDUCTCASCADELOOP;
+    }
     # Check Seats vs remaining.
     # Start Electing Remaining Choices, apply Final Phase if applicable.
-    next CONDUCTCASCADELOOP if $I->_check_seatschoices();
-    # Automatic Defeat
-    next CONDUCTCASCADELOOP if $I->_automatic_defeat();
-    # Quota
-    my $quota = $I->_set_quota();
+    if ($I->_check_seatschoices()) {
+      $I->NewRound($quota);
+      next CONDUCTCASCADELOOP;
+    }
+
     # Elect
     my @elected = $I->QuotaElectDo($quota);
     # Charge
@@ -282,12 +370,14 @@ CONDUCTCASCADELOOP: while ( $I->SeatsOpen() ) {
     next CONDUCTCASCADELOOP if $I->_finalphase();
     # Drop Rule
     if ( my $defeat = $I->_do_drop() ) {
-      $I->Defeat($defeat);
-      $I->logv("Defeating: $defeat");
-      $I->STVEvent( { round => $I->Round, defeat => [$defeat] } );
+      $I->Suspend($defeat);
+      $I->logv("Suspending: $defeat");
+      $I->STVEvent( { round => $I->Round, suspend => [$defeat] } );
       $I->NewRound($quota);
       next CONDUCTCASCADELOOP;
     }
+ENDROUND:
+
   }
   $I->logt( "Elected: " . join ', ', ( sort $I->Elected ) );
   $I->STVEvent( { elected => [ sort $I->Elected ] } );
