@@ -8,7 +8,7 @@ use Test2::Bundle::More;
 use Test::Exception;
 use Test2::Tools::Exception qw/dies lives/;
 use File::Temp qw/tempfile tempdir/;
-use Vote::Count::Charge::Utility qw/ WeightedTable /;
+# use Vote::Count::Charge::Utility qw/ WeightedTable /;
 # use Test::Exception;
 use Carp;
 use Data::Dumper;
