@@ -40,6 +40,14 @@ is_deeply(
   'After resetting active the Active Set matches the BallotSet choices'  );
 is( $VC1->VotesActive(), 10, 'after reset VotesActive is 10' );
 
+is( !!$VC1->Defeat( 'STRAWBERRY'), 1,
+  'Defeating a Choice returns a true value');
+is( $VC1->Defeat('YAKMILK'), undef,
+  'Defeating a choice that isnt active returns undef');
+is( $VC1->{'Active'}{'STRAWBERRY'}, undef,
+  'Defeated choice is no longer in Active Set');
+
+
 $VC1->logt('A Terse Entry');
 $VC1->logv('A Verbose Entry');
 $VC1->logd('A Debug Entry');

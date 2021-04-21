@@ -34,7 +34,7 @@ my $B2 = Vote::Count->new(
 my $Invert = Vote::Count->new(
   BallotSet => read_ballots( 't/data/tcinvertapproval.txt'),
   PrecedenceFile => 't/data/tcinvertapproval.prec.txt',
-  TieBreakerFallBackPrecedence => 1 );
+  TieBreakMethod => 'precedence' );
 
 like(
   dies { BottomRunOff( $B1 ) },

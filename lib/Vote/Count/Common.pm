@@ -89,6 +89,10 @@ sub GetActiveList( $self ) {
   return ( sort( keys( $self->Active->%* ) ) );
 }
 
+sub Defeat ( $self, $choice ) {
+  delete $self->{'Active'}{$choice};
+}
+
 sub VotesCast ( $self ) {
   return $self->BallotSet()->{'votescast'};
 }
@@ -162,7 +166,6 @@ Returns an array of all of the Choices in the Ballot Set.
 
 Returns a simple array of the members of the Active Set.
 
-
 =head3 ResetActive
 
 Sets the Active Set to the full choices list of the BallotSet.
@@ -175,6 +178,11 @@ Sets the Active Set to provided HashRef. The values to the hashref should evalua
 
 Same as SetActive except it takes an ArrayRef of the choices to be set as Active.
 
+=head3 Defeat
+
+Remove $choice from current Active List.
+
+  $Election->Defeat( $choice );
 
 =head3 BallotSet
 

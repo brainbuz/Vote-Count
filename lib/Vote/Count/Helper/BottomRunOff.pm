@@ -19,12 +19,17 @@ Bottom RunOff is an elimination method which takes the two lowest choices, usual
 =head1 Synopsis
 
   use Vote::Count::Helper::BottomRunOff
-  my $eliminate = BottomRunOff( $Election, ....);
+  my $eliminate = BottomRunOff( $Election );
+  # log the pairing result
+  $Election->logd( $eliminate->{'runoff'} );
+  $Election->logv( "eliminated ${\ $eliminate->{'eliminated'} }."
+  delete $Election->{'active'}{$eliminate->{'eliminated'}};
 
-=head1 BottomRunOff
+=head1 BottomRunOff ($method)
 
-The method BottomRunOff is exported. Precedence must be setup,
+The method BottomRunOff is exported. The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence must be true or BottomRunOff will die. It takes a parameter of method, which is the method used to rank the active choices. The default method is 'TopCount', 'Approval' is a common alternative, any method which returns a RankCount object could be used.
 
+  my $result = BottomRunOff( $Election, 'Approval' );
 
 =cut
 

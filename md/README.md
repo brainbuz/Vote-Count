@@ -174,11 +174,9 @@ The [Vote::Count::ReadBallots](https://metacpan.org/pod/Vote::Count::ReadBallots
 
 ## Voting Method and Component Modules
 
-The Modules in the space Vote::Count::%Component% provide functionality needed to create a functioning Voting Method. Many of these are consumed as Roles by the Vote::Count object, some such as RankCount and Matrix return their own objects.
+The Modules in the space Vote::Count::%Component% provide functionality needed to create a functioning Voting Method. These are mostly consumed as Roles by Vote::Count, some such as RankCount and Matrix return their own objects.
 
-The Modules in the space Vote::Count::Method::%Something% implement a Voting Method such as IRV. These Modules inherit the parent Vote::Count and all of the Components available to it. These modules all return a Hash Reference with the following key: *winner*, some return additional keys. Methods that can be tied will have additional keys *tie* and *tied*. When there is no winner the value of *winner* will be false.
-
-Simpler Methods such as single iteration Borda or Approval can be run directly from the Vote::Count Object.
+The Modules in the space Vote::Count::Method::%Something% implement a Voting Method that isn't globally available. The Borda and IRV modules for example are loaded into every Vote::Count object. These Modules inherit the parent Vote::Count and all of the Components available to it. These modules all return a Hash Reference with the following key: *winner*, some return additional keys. Methods that can be tied will have additional keys *tie* and *tied*. When there is no winner the value of *winner* will be false.
 
 ## Vote::Count Module
 
@@ -253,7 +251,7 @@ Get a Matrix Object for the Active Set. Generated and cached on the first reques
 
 ### UpdatePairMatrix
 
-Regenerate and cache Matrix with current Active Set. 
+Regenerate and cache Matrix with current Active Set.
 
 ### VotesCast
 
@@ -265,7 +263,7 @@ Returns the number of non-exhausted ballots based on the current Active Set.
 
 # Minimum Perl Version
 
-It is the policy of Vote::Count to only develop with recent versions of Perl. Support for older versions will be dropped as they either start failing tests or impair adoption of new features. 
+It is the policy of Vote::Count to only develop with recent versions of Perl. Support for older versions will be dropped as they either start failing tests or impair adoption of new features.
 
 ## Components
 
@@ -274,7 +272,7 @@ It is the policy of Vote::Count to only develop with recent versions of Perl. Su
 Directory of Vote Counting Methods linking to the Vote::Count module for it.
 
   * [Catalog](https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Catalog.pod)
-  
+
 ### Consumed As Roles By Vote::Count
 
   * [Vote::Count::Approval](https://metacpan.org/pod/Vote::Count::Approval)
@@ -296,7 +294,7 @@ Directory of Vote Counting Methods linking to the Vote::Count module for it.
   * [Vote::Count::Method::CondorcetDropping](https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping)
   * [Vote::Count::Method::CondorcetIRV](https://metacpan.org/pod/Vote::Count::Method::CondorcetIRV)
   * [Vote::Count::Method::CondorcetVsIRV](https://metacpan.org/pod/Vote::Count::Method::CondorcetVsIRV)
-  * [Vote::Count::Method::MinMax](https://metacpan.org/pod/Vote::Count::Method::MinMax)  
+  * [Vote::Count::Method::MinMax](https://metacpan.org/pod/Vote::Count::Method::MinMax)
   * [Vote::Count::Method::STAR](https://metacpan.org/pod/Vote::Count::Method::STAR)
 
 ### Non Object Oriented Components

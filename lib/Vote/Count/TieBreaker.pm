@@ -329,7 +329,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
 
 sub UnTieList ( $I, $method, @tied ) {
   return $I->_precedence_sort( @tied ) if ( lc($method) eq 'precedence' );
-  unless ( $I->TieBreakerFallBackPrecedence() ) {
+  unless ( $I->TieBreakerFallBackPrecedence() or $I->TieBreakMethod eq 'precedence') {
     croak
 "TieBreakerFallBackPrecedence must be enabled or the specified method must be precedence to use UnTieList";
   }
