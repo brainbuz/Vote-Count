@@ -26,7 +26,6 @@ requires "base" => "0";
 requires "feature" => "0";
 requires "namespace::autoclean" => "0";
 requires "parent" => "0";
-requires "perl" => "5.028";
 requires "strict" => "0";
 requires "utf8" => "0";
 requires "warnings" => "0";

@@ -39,15 +39,19 @@ jobs:
           cpanfile: "cpanfile"
           sudo: false
 
-      - name: distzilla and authordeps install-with-cpm
-        uses: perl-actions/install-with-cpm@stable
-        with:
-          install: |
-            Dist::Zilla::PluginBundle::Basic
-            Software::License::Perl_5
+      - name: Run Tests
+        run: |
+          prove -lv t/*.t
 
-      - name: test the distribution
-        run: dzil test
+      # - name: distzilla and authordeps install-with-cpm
+      #   uses: perl-actions/install-with-cpm@stable
+      #   with:
+      #     install: |
+      #       Dist::Zilla::PluginBundle::Basic
+      #       Software::License::Perl_5
+
+      # - name: test the distribution
+      #   run: dzil test
 
 
 

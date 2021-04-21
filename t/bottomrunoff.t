@@ -17,7 +17,7 @@ use Storable 'dclone';
 
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
-use Vote::Count::Helper::BottomRunOff;
+# use Vote::Count::Helper::BottomRunOff;
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
@@ -37,67 +37,65 @@ my $Invert = Vote::Count->new(
   TieBreakMethod => 'precedence' );
 
 like(
-  dies { BottomRunOff( $B1 ) },
+  dies { $B1->BottomRunOff() },
   qr/TieBreakerFallBackPrecedence must be enabled/,
   "BottomRunOff dies if Precedence isnt available."
 );
 
-my $eliminate = BottomRunOff( $B2 );
+my $eliminate = $B2->BottomRunOff;
 my $etable = qq/Elimination Runoff:
 | Rank | Choice    | Votes |
 |------|-----------|-------|
 | 1    | RUMRAISIN | 36    |
 | 2    | ROCKYROAD | 21    |
 /;
-is_deeply( BottomRunOff( $B2 ),
+is_deeply(  $B2->BottomRunOff(),
  { loser => 'ROCKYROAD', continuing => 'RUMRAISIN', runoff => $etable },
  'BottomRunOff picked the winner and loser and had the right message'
  );
 
-my $B2active = $B2->Active();
-
 note( 'Delete some of the bottom choices');
 for my $loser ( qw( ROCKYROAD RUMRAISIN STRAWBERRY TOAD) ) {
-  delete $B2active->{ $loser };
+  $B2->Defeat( $loser );
 }
-my $r = BottomRunOff( $B2 );
+my $r = $B2->BottomRunOff(  );
 is( $r->{'continuing'}, 'CARAMEL', 'check continuing after some eliminations');
 is( $r->{'loser'}, 'SOGGYCHIPS', 'check the new loser too');
 
 note( 'Delete more of the bottom choices');
 for my $loser ( qw( CARAMEL SOGGYCHIPS CHOCOANTS VOMIT) ) {
-  delete $B2active->{ $loser };
+  $B2->Defeat( $loser );
 }
 
-$r = BottomRunOff( $B2 );
+$r = $B2->BottomRunOff();
 is( $r->{'continuing'}, 'CHOCOLATE', 'check continuing after more eliminations');
 is( $r->{'loser'}, 'PISTACHIO', 'check the new loser too');
 
 note( 'Now checking with Data where the ranking of choices is inverted between
 topcount and approval!');
-$r = BottomRunOff( $Invert, 'TopCount' );
+$r = $Invert->BottomRunOff( 'TopCount' );
 is( $r->{'continuing'}, 'STRAWBERRY', 'With these choices STRAWBERRY beats');
 is( $r->{'loser'}, 'CARAMEL', 'CARAMEL');
-$r = BottomRunOff( $Invert, 'Approval' );
+$r = $Invert->BottomRunOff( 'Approval' );
 note( 'switching to approval changes who is at the bottom:');
 is( $r->{'continuing'}, 'VANILLA', 'With approval VANILLA beats');
 is( $r->{'loser'}, 'CHOCOLATE', 'CHOCOLATE');
 note( 'now reduce to 2 choices');
-delete $Invert->{Active}{'CHOCOLATE'};
-delete $Invert->{Active}{'STRAWBERRY'};
+$Invert->Defeat('CHOCOLATE');
+$Invert->Defeat('STRAWBERRY');
 
 is_deeply(
-  BottomRunOff( $Invert ),
-  BottomRunOff( $Invert, 'Approval' ),
+  $Invert->BottomRunOff(),
+  $Invert->BottomRunOff( 'Approval' ),
   'with just two choices topcount and approval hold the same runoff'
 );
-$r = BottomRunOff( $Invert );
+$r = $Invert->BottomRunOff();
 is( $r->{'continuing'}, 'CARAMEL', 'with just 2 CARAMEL continues,');
 is( $r->{'loser'}, 'VANILLA', 'VANILLA loses,');
 
 note( 'now leave only one choice' );
-delete $Invert->{Active}{'VANILLA'};
-$r = BottomRunOff( $Invert );
+$Invert->Defeat('VANILLA');
+$r = $Invert->BottomRunOff();
 is( $r->{'continuing'}, 'CARAMEL', 'only 1 choice remains, so wins runoff');
 is( $r->{'loser'}, '', 'loser is the empty string with only 1 choice');
 

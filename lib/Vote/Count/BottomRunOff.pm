@@ -1,4 +1,5 @@
-package Vote::Count::Helper::BottomRunOff;
+package Vote::Count::BottomRunOff;
+use Moose::Role;
 
 use 5.022;
 no warnings 'experimental';
@@ -8,7 +9,7 @@ our $VERSION='1.10';
 
 =head1 NAME
 
-Vote::Count::Helper::BottomRunOff
+Vote::Count::BottomRunOff
 
 =head1 VERSION 1.10
 
@@ -18,25 +19,19 @@ Bottom RunOff is an elimination method which takes the two lowest choices, usual
 
 =head1 Synopsis
 
-  use Vote::Count::Helper::BottomRunOff
-  my $eliminate = BottomRunOff( $Election );
+  my $eliminate = $Election->BottomRunOff();
   # log the pairing result
   $Election->logd( $eliminate->{'runoff'} );
   $Election->logv( "eliminated ${\ $eliminate->{'eliminated'} }."
-  delete $Election->{'active'}{$eliminate->{'eliminated'}};
+  $Election->Defeat( $eliminate->{'eliminated'} );
 
 =head1 BottomRunOff ($method)
 
-The method BottomRunOff is exported. The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence must be true or BottomRunOff will die. It takes a parameter of method, which is the method used to rank the active choices. The default method is 'TopCount', 'Approval' is a common alternative, any method which returns a RankCount object could be used.
+The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence must be true or BottomRunOff will die. It takes a parameter of method, which is the method used to rank the active choices. The default method is 'TopCount', 'Approval' is a common alternative, any method which returns a RankCount object could be used.
 
   my $result = BottomRunOff( $Election, 'Approval' );
 
 =cut
-
-# ABSTRACT: Helpers for Vote::Count
-
-use Exporter::Easy (
-  EXPORT => [ 'BottomRunOff' ] );
 
 sub BottomRunOff ( $Election, $method1='TopCount' ) {
   my @ranked = $Election->UntieActive($method1, 'precedence' )->OrderedList();

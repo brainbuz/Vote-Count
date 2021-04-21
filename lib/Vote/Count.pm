@@ -69,6 +69,7 @@ with
   'Vote::Count::Common',
   'Vote::Count::Approval',
   'Vote::Count::Borda',
+  'Vote::Count::BottomRunOff',
   'Vote::Count::Floor',
   'Vote::Count::IRV',
   'Vote::Count::Log',
