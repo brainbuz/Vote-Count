@@ -96,7 +96,7 @@ my $B = Vote::Count::Charge->new(
   );
   is( scalar $B->STVFloor('Defeat'),
     6,
-    'Topcount with thresshold 1 eliminated 6'
+    'Top count with thresshold 1 eliminated 6'
   );
   is( $B->GetChoiceStatus( 'TOAD')->{'state'},
     'defeated',

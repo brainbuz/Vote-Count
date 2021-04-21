@@ -333,12 +333,13 @@ sub UnTieList ( $I, $method, @tied ) {
     croak
 "TieBreakerFallBackPrecedence must be enabled or the specified method must be precedence to use UnTieList";
   }
+  return @tied if scalar(@tied) == 1;
   my @ordered = ();
+  no warnings 'uninitialized';
   my %active  = ( map { $_ => 1 } @tied );
   # method should be topcount borda or approval which all take argument of active.
   my $RC = $I->$method(\%active)->HashByRank();
 
-  # my $nonrc   = 0;
   for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
     my @l = @{ $RC->{$level} };
     my @suborder =
@@ -364,7 +365,6 @@ sub UntieActive ( $I, $method1, $method2='precedence' ) {
   }
   my @ordered = ();
   my $first   = $I->$method1()->HashByRank();
-
   for my $level ( sort { $a <=> $b } ( keys %{$first} ) ) {
     my @l = @{ $first->{$level} };
     my @suborder =
@@ -373,7 +373,6 @@ sub UntieActive ( $I, $method1, $method2='precedence' ) {
       : $I->UnTieList( $method2, @l );
     push @ordered, @suborder;
   }
-  my $position = 0;
   return Vote::Count::RankCount->newFromList( @ordered );
 }
 

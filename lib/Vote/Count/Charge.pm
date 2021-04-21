@@ -369,17 +369,6 @@ sub STVFloor ( $I, $action='Withdraw' ) {
   }
 }
 
-sub BottomRunOff ( $I, $method1='TopCount', $method2='precedence' ) {
-  my @ranked = $I->UntieActive($method1, $method2)->OrderedList();
-  my @runoff = $I->UnTieList( 'TopCount', $ranked[-1],  $ranked[-2]);
-  my ( $continuing, $loser ) = @runoff;
-  my $tc = $I->TopCount( { $continuing => 1,  $loser => 1} );
-  $I->STVEvent({ bottomrunoff => {
-    defeat => $loser , continuing => $continuing , votes => $tc->RawCount} });
-  $I->logv( "Elimination Runoff: *$continuing*, $loser\n" . $tc->RankTable );
-  return $loser;
-}
-
 =head1 NAME
 
 Vote::Count::Charge

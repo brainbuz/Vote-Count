@@ -46,7 +46,12 @@ Finds the choice that would fill the last seat if the remaining seats were to be
 
 =cut
 
-use Exporter::Easy ( OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ], );
+use Exporter::Easy (
+  OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ],
+  TAGS => [
+    all =>
+    [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ]],
+);
 
 sub FullCascadeCharge ( $ballots, $quota, $cost, $active, $votevalue ) {
   for my $b ( keys $ballots->%* ) {

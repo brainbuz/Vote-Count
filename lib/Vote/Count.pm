@@ -33,16 +33,6 @@ Vote::Count
 
 has 'BallotSet' => ( is => 'ro', isa => 'HashRef', required => 1 );
 
-sub _load_ballotset ( $self ) {
-  if ( $self->{'BallotSet'}{'read_ballots'} ) {
-    $self->{'BallotSet'}
-      = read_ballots( $self->{'BallotSet'}{'read_ballots'} );
-  } elsif ( $self->{'BallotSet'}{'read_range_ballots'} ) {
-    $self->{'BallotSet'}
-      = read_range_ballots( $self->{'BallotSet'}{'read_range_ballots'} );
-  }
-}
-
 has 'PairMatrix' => (
   is      => 'ro',
   isa     => 'Object',
@@ -65,8 +55,6 @@ sub _buildmatrix ( $self ) {
 
 sub BUILD {
   my $self = shift;
-  # If files were given to ballotset they need to be loaded
-  $self->_load_ballotset();
   # Verbose Log
   $self->{'LogV'} = localtime->cdate . "\n";
   # Debugging Log

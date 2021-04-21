@@ -1,0 +1,25 @@
+=pod
+
+=head1 Name
+
+Vote::Count::Helper
+
+=head1 Description
+
+Helpers for Vote::Count.
+
+=head1 Inventory
+
+=over 1
+
+=item L<BottomRunOff|http://metacpan.org/pod/Vote::Count::Helper::BottomRunOff>
+
+=item L<FullCascadeCharge|http://metacpan.org/pod/Vote::Count::Helper::FullCascadeCharge>
+
+=item L<NthApproval|http://metacpan.org/pod/Vote::Count::Helper::NthApproval>
+
+=item L<Table|http://metacpan.org/pod/Vote::Count::Helper::Table>
+
+=back
+
+=cut
