@@ -1,6 +1,6 @@
 package Vote::Count::Start;
 
-use 5.022;
+use 5.024;
 use feature qw/postderef signatures/;
 no warnings qw/experimental/;
 use Path::Tiny 0.108;
@@ -11,13 +11,13 @@ use Try::Tiny;
 use Vote::Count;
 use Vote::Count::ReadBallots 'read_ballots';
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Start
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

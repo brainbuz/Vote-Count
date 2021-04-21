@@ -6,7 +6,7 @@ Provides a Toolkit for implementing multiple voting systems, allowing a wide ran
 
 # Synopsis
 
-  use 5.022; # Minimum Perl, or any later Perl.
+  use 5.024; # Minimum Perl, or any later Perl.
   use feature qw /postderef signatures/;
 
   use Vote::Count;

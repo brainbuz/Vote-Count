@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 # use feature qw /postderef signatures/;
 
 package Vote::Count::Charge::TestBalance;

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 package Vote::Count::Common;
 use Moose::Role;
@@ -13,13 +13,13 @@ use Path::Tiny;
 
 # ABSTRACT: Role shared by Count and Matrix for common functionality. See Vote::Count Documentation.
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Common
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =head1 Synopsis
 

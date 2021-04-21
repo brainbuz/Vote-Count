@@ -2,7 +2,7 @@ package Vote::Count::Redact;
 
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 use feature qw /postderef signatures/;
 use Storable 3.15 qw(dclone);
 
@@ -10,13 +10,13 @@ use namespace::autoclean;
 
 no warnings 'experimental';
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Redact
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 Methods for Redacting Ballots.
 

@@ -6,7 +6,7 @@
 
 Vote::Count::Range
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

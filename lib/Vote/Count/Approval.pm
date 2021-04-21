@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 use feature qw /postderef signatures/;
 
@@ -10,13 +10,13 @@ use Moose::Role;
 no warnings 'experimental';
 use Carp;
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Approval
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

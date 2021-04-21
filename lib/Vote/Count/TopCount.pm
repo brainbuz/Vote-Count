@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 use feature qw /postderef signatures/;
 
@@ -17,13 +17,13 @@ use Storable 'dclone';
 
 # ABSTRACT: TopCount and related methods for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::TopCount
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =head1 Synopsis
 

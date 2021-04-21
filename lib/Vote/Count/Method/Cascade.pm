@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 package Vote::Count::Method::Cascade;
 use namespace::autoclean;
@@ -23,13 +23,13 @@ use Try::Tiny;
 use Path::Tiny;
 use Carp;
 
-our $VERSION = '1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Method::Cascade
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

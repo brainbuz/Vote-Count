@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 use feature qw /postderef signatures switch/;
 
 package Vote::Count::Charge;
@@ -20,7 +20,7 @@ use JSON::MaybeXS;
 use YAML::XS;
 # use Storable 3.15 'dclone';
 
-our $VERSION = '1.10';
+our $VERSION='1.20';
 
 has 'Seats' => (
   is       => 'ro',
@@ -373,7 +373,7 @@ sub STVFloor ( $I, $action='Withdraw' ) {
 
 Vote::Count::Charge
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

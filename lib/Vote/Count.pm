@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 use feature qw /postderef signatures/;
 
 # ABSTRACT: toolkit for implementing voting methods.
@@ -18,14 +18,14 @@ use Vote::Count::ReadBallots qw( read_ballots read_range_ballots);
 
 no warnings 'experimental';
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count
 
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 
@@ -95,7 +95,7 @@ Provides a Toolkit for implementing multiple voting systems, allowing a wide ran
 
 =head1 Synopsis
 
-  use 5.022; # Minimum Perl, or any later Perl.
+  use 5.024; # Minimum Perl, or any later Perl.
   use feature qw /postderef signatures/;
 
   use Vote::Count;
@@ -344,11 +344,9 @@ The L<Vote::Count::ReadBallots|https://metacpan.org/pod/Vote::Count::ReadBallots
 
 =head2 Voting Method and Component Modules
 
-The Modules in the space Vote::Count::%Component% provide functionality needed to create a functioning Voting Method. Many of these are consumed as Roles by the Vote::Count object, some such as RankCount and Matrix return their own objects.
+The Modules in the space Vote::Count::%Component% provide functionality needed to create a functioning Voting Method. These are mostly consumed as Roles by Vote::Count, some such as RankCount and Matrix return their own objects.
 
-The Modules in the space Vote::Count::Method::%Something% implement a Voting Method such as IRV. These Modules inherit the parent Vote::Count and all of the Components available to it. These modules all return a Hash Reference with the following key: I<winner>, some return additional keys. Methods that can be tied will have additional keys I<tie> and I<tied>. When there is no winner the value of I<winner> will be false.
-
-Simpler Methods such as single iteration Borda or Approval can be run directly from the Vote::Count Object.
+The Modules in the space Vote::Count::Method::%Something% implement a Voting Method that isn't globally available. The Borda and IRV modules for example are loaded into every Vote::Count object. These Modules inherit the parent Vote::Count and all of the Components available to it. These modules all return a Hash Reference with the following key: I<winner>, some return additional keys. Methods that can be tied will have additional keys I<tie> and I<tied>. When there is no winner the value of I<winner> will be false.
 
 
 =head2 Vote::Count Module
@@ -560,7 +558,6 @@ L<Vote::Count::Method::CondorcetVsIRV|https://metacpan.org/pod/Vote::Count::Meth
 =item *
 
 L<Vote::Count::Method::MinMax|https://metacpan.org/pod/Vote::Count::Method::MinMax>
-
 
 
 =item *

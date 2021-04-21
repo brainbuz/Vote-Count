@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 use feature qw /postderef signatures/;
 
 package Vote::Count::Method::CondorcetDropping;
@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 
@@ -40,7 +40,7 @@ This module implements dropping methodologies for resolving a Condorcet Matrix w
 
 =head2 Basic Dropping Methods
 
-Supported Dropping Methods are: 'borda' count (with all the attendant weighting issues), 'approval', 'topcount' ('plurality'), and 'greatestloss'. 
+Supported Dropping Methods are: 'borda' count (with all the attendant weighting issues), 'approval', 'topcount' ('plurality'), and 'greatestloss'.
 
 =head2 Option SkipLoserDrop
 

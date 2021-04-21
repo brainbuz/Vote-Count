@@ -1,17 +1,17 @@
 package Vote::Count::BottomRunOff;
 use Moose::Role;
 
-use 5.022;
+use 5.024;
 no warnings 'experimental';
 use feature ( 'signatures');
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::BottomRunOff
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =head2 Description
 

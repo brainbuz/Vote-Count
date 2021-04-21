@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 package Vote::Count::Method::WIGM;
 use namespace::autoclean;
@@ -15,13 +15,13 @@ use Mojo::Template;
 use Sort::Hash;
 use Data::Dumper;
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::Method::WIGM
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

@@ -46,5 +46,5 @@ on 'test' => sub {
 
 on 'configure' => sub {
   requires "ExtUtils::MakeMaker" => "0";
-  requires "perl" => "5.022";
+  requires "perl" => "5.024";
 };

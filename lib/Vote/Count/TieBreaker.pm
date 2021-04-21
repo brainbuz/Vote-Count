@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 use feature qw /postderef signatures/;
 
@@ -14,13 +14,13 @@ use Data::Dumper;
 use Vote::Count::RankCount;
 use Carp;
 
-our $VERSION = '1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::TieBreaker
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =head1 Synopsis
 

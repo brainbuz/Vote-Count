@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use 5.022;
+use 5.024;
 
 package Vote::Count::RankCount;
 
@@ -10,13 +10,13 @@ use List::Util qw( min max sum);
 use Vote::Count::TextTableTiny qw/generate_table/;
 use Sort::Hash;
 
-our $VERSION='1.10';
+our $VERSION='1.20';
 
 =head1 NAME
 
 Vote::Count::RankCount
 
-=head1 VERSION 1.10
+=head1 VERSION 1.20
 
 =cut
 

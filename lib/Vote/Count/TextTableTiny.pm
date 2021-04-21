@@ -1,6 +1,6 @@
 package Vote::Count::TextTableTiny;
 
-use 5.022;
+use 5.024;
 use strict;
 use warnings;
 use utf8;
