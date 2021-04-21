@@ -43,7 +43,6 @@ on 'test' => sub {
   requires "Test::Fatal" => "0";
   requires "Test::More" => "0";
   requires "lib" => "0";
-  requires "perl" => "5.028";
 };
 
 on 'configure' => sub {
