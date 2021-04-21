@@ -328,6 +328,7 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
 }
 
 sub UnTieList ( $I, $method, @tied ) {
+  no warnings 'uninitialized';
   return $I->_precedence_sort( @tied ) if ( lc($method) eq 'precedence' );
   unless ( $I->TieBreakerFallBackPrecedence() or $I->TieBreakMethod eq 'precedence') {
     croak
@@ -335,7 +336,6 @@ sub UnTieList ( $I, $method, @tied ) {
   }
   return @tied if scalar(@tied) == 1;
   my @ordered = ();
-  no warnings 'uninitialized';
   my %active  = ( map { $_ => 1 } @tied );
   # method should be topcount borda or approval which all take argument of active.
   my $RC = $I->$method(\%active)->HashByRank();
