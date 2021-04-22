@@ -18,7 +18,8 @@ use JSON::MaybeXS;
 use YAML::XS;
 use Path::Tiny;
 use Carp;
-use Vote::Count::Charge::Utility('FullCascadeCharge', 'NthApproval');
+use Vote::Count::Helper::FullCascadeCharge;
+use Vote::Count::Helper::NthApproval;
 
 our $VERSION = '1.10';
 

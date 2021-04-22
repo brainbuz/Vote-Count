@@ -12,8 +12,6 @@ Helpers for Vote::Count.
 
 =over 1
 
-=item L<BottomRunOff|http://metacpan.org/pod/Vote::Count::Helper::BottomRunOff>
-
 =item L<FullCascadeCharge|http://metacpan.org/pod/Vote::Count::Helper::FullCascadeCharge>
 
 =item L<NthApproval|http://metacpan.org/pod/Vote::Count::Helper::NthApproval>

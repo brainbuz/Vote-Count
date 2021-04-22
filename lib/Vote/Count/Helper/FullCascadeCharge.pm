@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.024;
 
-package Vote::Count::Charge::Utility;
+package Vote::Count::Helper::FullCascadeCharge;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 use Sort::Hash;
@@ -14,7 +14,7 @@ our $VERSION = '1.10';
 
 =head1 NAME
 
-Vote::Count::Method::VoteCharge::Utility
+Vote::Count::Helper::FullCascadeCharge
 
 =head1 VERSION 1.10
 
@@ -24,7 +24,7 @@ Vote::Count::Method::VoteCharge::Utility
 
 =head1 SYNOPSIS
 
-  use Vote::Count::Method::VoteCharge::Utility 'FullCascadeCharge';
+  use Vote::Count::Helper::FullCascadeCharge;
   my $charged = FullCascadeCharge(
     $Election->GetBallots(), $quota, $cost, $active, $votevalue );
 
@@ -40,17 +40,10 @@ The method is non-OO (thus the need to import it). This permits isolation of val
 
 The Ballots are passed as a HashRef and the votevalue will be modified, if you do not want the Ballots modified, provide a copy of them (Storable 'dclone' is recommended)
 
-=head1 NthApproval
-
-Finds the choice that would fill the last seat if the remaining seats were to be filled by highest Top Count, and sets the Vote Value for that Choice as the requirement. All Choices that do not have a weighted Approval greater than that requirement are returned, they will never be elected and are safe to defeat immediately.
-
 =cut
 
 use Exporter::Easy (
-  OK => [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ],
-  TAGS => [
-    all =>
-    [ 'FullCascadeCharge', 'NthApproval', 'WeightedTable', 'ChargeTable' ]],
+  EXPORT => [ 'FullCascadeCharge' ],
 );
 
 sub FullCascadeCharge ( $ballots, $quota, $cost, $active, $votevalue ) {
@@ -83,82 +76,4 @@ FullChargeBALLOTLOOP1:
   return \%chargedval;
 }
 
-# untilist method
-# moved to tiebreaker
-# add tests where ties in the middle move bottom running.
-
-sub NthApproval ( $I ) {
-  my $tc            = $I->TopCount();
-  my $ac            = $I->Approval();
-  my $seats         = $I->Seats() - $I->Elected();
-  my @defeat        = ();
-  my $bottomrunning = $tc->HashByRank()->{$seats}[0];
-  my $bar           = $tc->RawCount()->{$bottomrunning};
-  for my $A ( $I->GetActiveList ) {
-    next if $A eq $bottomrunning;
-    my $avv = $ac->{'rawcount'}{$A};
-    push @defeat, ($A) if $avv <= $bar;
-  }
-  if (@defeat) {
-    my $deflst = join( ', ', @defeat );
-    $I->logv( qq/
-      Seats: $seats Choice $seats: $bottomrunning ( $bar )
-
-      Choices Not Over $bar by Weighted Approval: $deflst
-    /);
-  }
-  return @defeat;
-}
-
-sub ChargeTable ( $estimate, $result ) {
-  my @rows = (['Choice','Charge','Value Charged', 'Votes Charged','Surplus'] );
-  for my $c ( sort keys $estimate->%* ) {
-    push @rows, [
-      $c, $estimate->{$c},
-      $result->{$c}{'value'},
-      $result->{$c}{'count'},
-      $result->{$c}{'surplus'}
-    ]
-  }
-  return generate_table(
-      rows => \@rows,
-      style => 'markdown',
-      align => [qw/ l l r r r/]
-      ) . "\n";
-}
-
-sub WeightedTable ( $I ) {
-  my $approval = $I->Approval()->RawCount();
-  my $tc = $I->TopCount();
-  my $tcr = $tc->RawCount();
-  my $vv = $I->VoteValue();
-  my %data =();
-  my @active = $I->GetActiveList();
-  for my $choice ( @active ) {
-    $data{ $choice } = {
-      'votevalue' => $tcr->{ $choice },
-      'votes' => sprintf( "%.2f",$tcr->{ $choice } / $vv),
-      'approvalvalue' => $approval->{ $choice },
-      'approval' => sprintf( "%.2f", $approval->{ $choice } / $vv),
-    };
-  }
-  my @rows = ( [ 'Rank', 'Choice', 'Votes', 'VoteValue', 'Approval', 'Approval Value' ] );
-  my %byrank = $tc->HashByRank()->%*;
-  for my $r ( sort { $a <=> $b } ( keys %byrank ) ) {
-    my @choice = sort $byrank{$r}->@*;
-    for my $choice (@choice) {
-      # my $votes = $tcr->{$choice};
-      my $D = $data{$choice};
-      my @row = (
-          $r, $choice, $D->{'votes'}, $D->{'votevalue'},
-          $D->{'approval'}, $D->{'approvalvalue'} );
-      push @rows, ( \@row );
-    }
-  }
-  return generate_table(
-    rows => \@rows,
-    style => 'markdown',
-    align => [qw/ l l r r r r/]
-    ) . "\n";
-}
 1;

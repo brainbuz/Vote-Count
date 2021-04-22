@@ -13,7 +13,6 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Vote::Count::Charge::Cascade;
-use Vote::Count::Charge::Utility 'FullCascadeCharge';
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
