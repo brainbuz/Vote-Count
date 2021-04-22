@@ -5,13 +5,13 @@ use 5.024;
 no warnings 'experimental';
 use feature ( 'signatures');
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::BottomRunOff
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =head2 Description
 
@@ -60,10 +60,11 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2020,2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
 
 =cut
+

@@ -10,13 +10,13 @@ use Moose::Role;
 
 no warnings 'experimental';
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::Floor
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =cut
 
@@ -50,6 +50,8 @@ sub _FloorRnd ( $I, $num ) {
 
 sub _FloorMin ( $I, $floorpct ) {
   my $pct = $floorpct >= 1 ? $floorpct / 100 : $floorpct;
+# warn "floorpct = $floorpct $pct cast = ${\ $I->VotesCast() }";
+# warn "FloorMin = ${\ $I->_FloorRnd( $I->VotesCast() * $pct )}";
   return $I->_FloorRnd( $I->VotesCast() * $pct );
 }
 
@@ -218,10 +220,11 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
 
 =cut
+

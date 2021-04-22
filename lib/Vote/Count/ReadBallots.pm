@@ -11,13 +11,13 @@ use YAML::XS;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =head1 SYNOPSIS
 
@@ -225,6 +225,7 @@ sub read_range_ballots ( $source, $format = 'json' ) {
 1;
 
 #buildpod
+
 #FOOTER
 
 =pod
@@ -239,7 +240,7 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 

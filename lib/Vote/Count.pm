@@ -18,14 +18,14 @@ use Vote::Count::ReadBallots qw( read_ballots read_range_ballots);
 
 no warnings 'experimental';
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count
 
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =cut
 

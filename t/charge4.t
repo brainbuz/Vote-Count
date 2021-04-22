@@ -16,7 +16,7 @@ use Try::Tiny;
 use Vote::Count::Charge;
 # use Vote::Count::Helper::FullCascadeCharge;
 # use Vote::Count::Helper::NthApproval;
-# use Vote::Count::Helper::Table 'WeightedTable' ;
+use Vote::Count::Helper::Table 'WeightedTable' ;
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
@@ -46,10 +46,6 @@ subtest 'CountAbandoned, TCStats' => sub {
   is( $tcs->{'active_vote_value'}, 800, 'active vote value adjusted');
 };
 
-done_testing;
-
-=pod
-
 subtest 'WithdrawalList' => sub {
     my $A = Vote::Count::Charge->new(
     Seats     => 5,
@@ -62,6 +58,23 @@ subtest 'WithdrawalList' => sub {
   is( $A->{'choice_status'}{'POISON_APPLE'}, undef,
     'Withdrawn choice not present in ballots doesnt get added by bug');
   is_deeply( [$A->Withdrawn], [ qw( CARAMEL ROCKYROAD RUMRAISIN )]);
+};
+
+subtest 'SetQuota' => sub {
+  my $A = Vote::Count::Charge->new(
+    Seats     => 5,
+    VoteValue => 100,
+    BallotSet => read_ballots('t/data/biggerset1.txt'),
+  );
+  my $B = Vote::Count::Charge->new(
+    Seats     => 3,
+    VoteValue => 100,
+    BallotSet => read_ballots('t/data/biggerset1.txt'),
+  );
+  is( $A->SetQuota, 3751, 'calculate quota with default (droop)');
+  is( $B->SetQuota('droop'), 5626, 'calculate quota requesting droop');
+  is( $A->SetQuota('hare'), 4500, 'calc quota with hare');
+  is( $B->SetQuota('hare'), 7500, 'calc hare with different number of seats');
 };
 
 subtest 'STVFloor' => sub {
@@ -97,23 +110,17 @@ my $B = Vote::Count::Charge->new(
     FloorThresshold => 1,
   );
   is( scalar $B->STVFloor('Defeat'),
-    6,
-    'Top count with thresshold 1 eliminated 6'
+    5,
+    'Top count with thresshold 1 eliminated 5'
   );
   is( $B->GetChoiceStatus( 'TOAD')->{'state'},
+    'hopeful',
+    'choice right at cutoff wasnt eliminated'
+  );
+  is( $B->GetChoiceStatus( 'SOGGYCHIPS')->{'state'},
     'defeated',
-    'eliminated choice is defeated because it was requested'
+    'eliminated choice is defeated because it was requested instead of default withdrawn'
   );
 };
 
-subtest 'BottomRunOff' => sub {
-  my $A = Vote::Count::Charge->new(
-    Seats     => 5,
-    VoteValue => 100,
-    TieBreakerFallBackPrecedence => 1,
-    BallotSet => read_ballots('t/data/biggerset1.txt'),
-  );
-  is( $A->BottomRunOff, 'RUMRAISIN' );
-};
-
-done_testing();
+done_testing;

@@ -23,9 +23,11 @@ replace the version strings in modules.
 
 Someday I may make a Dist::Zilla plugin out of this.
 
-=head1 SYNAPSIS
+=head1 SYNOPSIS
 
 ./buildpod.pl
+
+./buildpod.pl fixfooter
 
 =cut
 
@@ -52,15 +54,11 @@ use Data::Printer;
 
 =pod
 
-=head1 buildpod.pl
-
-=head1 SYNOPSIS
-
-=head1 VERSION 2019.0902
+=head1 VERSION 2021.0422
 
 =cut
 
-our $VERSION='2019.0902';
+our $VERSION='2021.0422';
 
 my $m2p = Markdown::Pod->new;
 
@@ -117,7 +115,7 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019-2020 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 
@@ -127,6 +125,11 @@ This module is released under the GNU Public License Version 3. See license file
 
 FOOTER
 
+my $fixfooter = 0;
+for (@ARGV) {
+  $fixfooter = 1 if $_ eq 'fixfooter';
+}
+
 my $dist = path( './dist.ini')->slurp;
 $dist =~ /version\s? =\s?(\d+\.\d+)/;
 my $version = $1;
@@ -134,8 +137,10 @@ my $version = $1;
 my @mdfiles = path("./md")->children( qr/md$/ );
 my @pmfiles1 = path("./lib/Vote/Count")->children( qr/pm$|pod$/);
 my @pmfiles2 = path("./lib/Vote/Count/Method")->children( qr/pm$/);
+my @pmfiles3 = path("./lib/Vote/Count/Charge")->children( qr/pm$/);
+my @pmfiles4 = path("./lib/Vote/Count/Helper")->children( qr/pm$/);
 my $countpm = path( "./lib/Vote/Count.pm");
-my @pmfiles = ( @pmfiles1, @pmfiles2, $countpm);
+my @pmfiles = ( @pmfiles1, @pmfiles2, @pmfiles3, @pmfiles4,$countpm);
 my %pmkeys = ();
 for my $pm (@pmfiles ) {
   $pm =~ /(.*)\.(pm$|pod$)/; # extract the part of the string before .pm
@@ -171,6 +176,14 @@ warn $versionline;
 warn "fixing $pm"    ;
     my $pmtext = path($pm)->slurp;
     unless ($pmtext =~ /\#FOOTER/) { $pmtext .= $footer ; }
+    elsif ( $fixfooter ) {
+      say "updateding footer $pm"      ;
+      # $pmtext =~ s/(?s)\#FOOTER.*/$footer/;
+      my $splitstr = "#FOOTER\n";
+      my ($body, @trim) = split /$splitstr/, $pmtext;
+      $body =~ s/\n+$/\n/g;
+      $pmtext = $body . $footer;
+    }
     path($pm)->spew( fix_version( $pmtext, $version) );
     say "updated version in $pm";
   }

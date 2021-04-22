@@ -13,13 +13,13 @@ use Path::Tiny;
 
 # ABSTRACT: Role shared by Count and Matrix for common functionality. See Vote::Count Documentation.
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::Common
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =head1 Synopsis
 
@@ -231,10 +231,11 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
 
 =cut
+

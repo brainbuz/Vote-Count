@@ -20,7 +20,7 @@ use JSON::MaybeXS;
 use YAML::XS;
 # use Storable 3.15 'dclone';
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 has 'Seats' => (
   is       => 'ro',
@@ -40,14 +40,6 @@ has 'FloorThresshold' => (
   default => 0,
   );
 
-# $choice_status->{'choice'} = {
-#   key : 'NAME',
-#   state => elected, pending, defeated, withdrawn, active, suspended
-#   eliminated covers both the withdrawn and defeated states of STV rules.
-#   for rules that remove and return choices the suspended status
-#   distinguishes from defeated (won't return).
-#   votes => 0,
-# }
 my @choice_valid_states =
   qw( elected pending defeated withdrawn active suspended );
 
@@ -364,16 +356,29 @@ sub STVFloor ( $I, $action='Withdraw' ) {
     my $done = $action;
     $done = 'Withdrawn' if $action eq 'Withdraw';
     $done = 'Defeated' if $action eq 'Defeat';
-    # $I->logv( "$done by Floor Rule: ${\ join(', ', @withdrawn) }." );
     return @withdrawn;
   }
+}
+
+sub SetQuota ($I, $style='droop') {
+  my $abandoned   = $I->CountAbandoned();
+  my $abndnvotes  = $abandoned->{'value_abandoned'};
+  my $cast        = $I->BallotSet->{'votescast'};
+  my $numerator   = ( $cast * $I->VoteValue ) - $abndnvotes;
+  my $denominator = $I->Seats();
+  my $adjust = 0;
+  if ( $style eq 'droop' ) {
+    $denominator++;
+    $adjust = 1;
+  }
+  return ( $adjust + int( $numerator / $denominator ) );
 }
 
 =head1 NAME
 
 Vote::Count::Charge
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =cut
 
@@ -495,6 +500,15 @@ Takes a reference as argument to add that reference to an Event History. This ne
 
 Writes JSON and YAML logs (path based on LogTo) of the STVEvents.
 
+=head2 SetQuota
+
+Calculate the Hare or Droop Quota. After the Division the result is rounded down and 1 is added to the result. The default is the Droop Quota, but either C<'hare'> or C<'droop'> may be requested as an optional parameter.
+
+  my $droopquota = $Election->SetQuota();
+  my $harequota = $Election->SetQuota('hare');
+
+The Hare formula is Active Votes divided by number of Seats. Droop adds 1 to the number of seats, and to the result after rounding, resulting in a lower quota. The Droop Quota is the smallest for which it is impossible for more choices than the number of seats to reach the quota.
+
 =head2 Charge
 
 Charges Ballots for election of choice, parameters are $choice, $quota and $charge (defaults to VoteValue ).
@@ -526,7 +540,7 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019-2020 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 

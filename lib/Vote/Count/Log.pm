@@ -10,13 +10,13 @@ use Moose::Role;
 no warnings 'experimental';
 use Path::Tiny 0.108;
 
-our $VERSION='1.20';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::Log
 
-=head1 VERSION 1.20
+=head1 VERSION 1.21
 
 =cut
 
@@ -148,7 +148,7 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 

@@ -21,13 +21,13 @@ use Carp;
 use Vote::Count::Helper::FullCascadeCharge;
 use Vote::Count::Helper::NthApproval;
 
-our $VERSION = '1.10';
+our $VERSION='1.21';
 
 =head1 NAME
 
 Vote::Count::Charge::Cascade
 
-=head1 VERSION 1.10
+=head1 VERSION 1.21
 
 =cut
 
@@ -85,15 +85,6 @@ sub NewRound ( $I, $quota = 0, $charge = {} ) {
   };
   if ( keys $charge->%* ) { $I->{'lastcharge'} = $charge }
   return $round;
-}
-
-sub SetQuota ($I) {
-  my $abandoned   = $I->CountAbandoned();
-  my $abndnvotes  = $abandoned->{'value_abandoned'};
-  my $cast        = $I->BallotSet->{'votescast'};
-  my $numerator   = ( $cast * $I->VoteValue ) - $abndnvotes;
-  my $denominator = $I->Seats() + 1;
-  return ( 1 + int( $numerator / $denominator ) );
 }
 
 sub _preEstimate ( $I, $quota, @elected ) {
@@ -227,7 +218,6 @@ sub CalcCharge ( $I, $quota ) {
 __PACKAGE__->meta->make_immutable;
 1;
 
-
 #FOOTER
 
 =pod
@@ -242,10 +232,11 @@ John Karr (BRAINBUZ) brainbuz@cpan.org
 
 CONTRIBUTORS
 
-Copyright 2020,2019 by John Karr (BRAINBUZ) brainbuz@cpan.org.
+Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
 
 =cut
+
