@@ -6,8 +6,7 @@ package Vote::Count::Charge::NthApproval;
 use Moose::Role;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
-use Sort::Hash;
-use Vote::Count::TextTableTiny qw/generate_table/;
+# use Vote::Count::TextTableTiny qw/generate_table/;
 
 our $VERSION='1.21';
 

@@ -2,7 +2,21 @@
 
 ## A Toolkit for determining the outcome of Preferential Ballots.
 
-Provides a Toolkit for implementing multiple voting systems, allowing a wide range of method options. This library allows the creation of election resolution methods matching a set of Election Rules that are written in an organization's governing rules, and not requiring the bylaws to specify the rules of the software that will be used for the election, especially important given that many of the other libraries available do not provide a bylaws compatible explanation of their process.
+Provides a Toolkit for implementing multiple voting systems, allowing a wide range of method options. Vote::Count provides a lot of options to facilitate writing code to match your election rules.
+
+# Documentation
+
+## Overview of Preferential Voting Methods
+
+Provides a review of the election methods Vote::Count can resolve. If you are new to the topic this is a must read as it explains the methods.
+
+## [Catalog](catalog.md)
+
+A catalog of common Vote Counting Systems and their implementation in Vote::Count
+
+## Hand Counting
+
+
 
 # Synopsis
 
@@ -13,6 +27,7 @@ Provides a Toolkit for implementing multiple voting systems, allowing a wide ran
   use Vote::Count::ReadBallots;
   use Vote::Count::Method::CondorcetDropping;
 
+  ```perl
   # example uses biggerset1 from the distribution test data.
   my $ballotset = read_ballots 't/data/biggerset1.txt' ;
   my $CondorcetElection =
@@ -56,6 +71,8 @@ Provides a Toolkit for implementing multiple voting systems, allowing a wide ran
   say "Plurality Winner: $PluralityWinner->{'winner'}";
   say "IRV Winner: $IRVResult->{'winner'}";
   say "Condorcet Winner: $Winner";
+
+```
 
 # Overview
 
@@ -182,10 +199,12 @@ The Modules in the space Vote::Count::Method::%Something% implement a Voting Met
 
 The Core Module requires a Ballot Set (which can be obtained from ReadBallots).
 
+```perl
   my $Election = Vote::Count->new(
       BallotSet => read_ballots( 'ballotfile'), # imported from ReadBallots
       ActiveSet => { 'A' => 1, 'B' => 1, 'C' => 1 }, # Optional
   );
+```
 
 ### Optional Paramters to Vote::Count
 
