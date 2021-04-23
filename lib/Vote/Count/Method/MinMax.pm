@@ -232,9 +232,9 @@ sub MinMax ( $self, $method ) {
 
 =head2 Floor Rules
 
-It is recommended to use a low Floor or no Floor Rule at all.
+It is recommended to use a low Floor.
 
-This method specifies that the scores from less worst pairings be used as the tie breaker, removing inconsequential choices can affect both the resolveability of the tie breaker and the outcome. Unlike IRV where the presence of inconsequential choices can be seen as a randomizing factor, and their bulk removal as improving the consistency of the method, there is no benefit gained by this method from a Floor Rule.
+This method specifies that the scores from less worst pairings be used as the tie breaker, removing inconsequential choices can affect the resolveability of the tie breaker. Unlike IRV where the presence of inconsequential choices can be seen as a randomizing factor, and their bulk removal as improving the consistency of the method, this method does not benefit from that.
 
 =cut
 

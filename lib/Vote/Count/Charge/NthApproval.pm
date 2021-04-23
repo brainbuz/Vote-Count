@@ -2,7 +2,8 @@ use strict;
 use warnings;
 use 5.024;
 
-package Vote::Count::Helper::NthApproval;
+package Vote::Count::Charge::NthApproval;
+use Moose::Role;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 use Sort::Hash;
@@ -10,11 +11,11 @@ use Vote::Count::TextTableTiny qw/generate_table/;
 
 our $VERSION='1.21';
 
-# ABSTRACT: Non OO Components for the Vote::Charge implementation of STV.
+# ABSTRACT: Nth Approval Defeat rule for STV elections.
 
 =head1 NAME
 
-Vote::Count::Helper::NthApproval
+Vote::Count::Charge::NthApproval
 
 =head1 VERSION 1.21
 
@@ -24,7 +25,10 @@ Vote::Count::Helper::NthApproval
 
 =head1 SYNOPSIS
 
-  use Vote::Count::Helper::NthApproval;
+  package MySTVElection;
+  use Moose;
+  extends 'Vote::Count::Charge';
+  with 'Vote::Count::Charge::NthApproval';
   for my $defeat ( NthApproval( $STV_Election ) ) {
      $STV_Election->Defeat( $defeat );
   }
@@ -36,10 +40,6 @@ Finds the choice that would fill the last seat if the remaining seats were to be
 Results are logged to the verbose log,
 
 =cut
-
-use Exporter::Easy (
-  EXPORT => [ 'NthApproval' ],
-);
 
 sub NthApproval ( $I ) {
   my $tc            = $I->TopCount();

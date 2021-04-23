@@ -12,32 +12,36 @@ use Test2::Bundle::More;
 # use Try::Tiny;
 # use Storable 'dclone';
 
-use Vote::Count::Charge;
+package TestN {
+  use Moose;
+  extends 'Vote::Count::Charge';
+  with 'Vote::Count::Charge::NthApproval';
+};
+
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
-use Vote::Count::Helper::NthApproval;
 
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
   my $B =
-    Vote::Count::Charge->new(
+    TestN->new(
       Seats     => 2,
       BallotSet => read_ballots('t/data/data2.txt'),
       VoteValue => 100,
     );
   is_deeply(
-    [ sort ( NthApproval($B) ) ],
+    [ sort ( $B->NthApproval() ) ],
     [ qw( CARAMEL PISTACHIO ROCKYROAD RUMRAISIN STRAWBERRY ) ],
     'returned list to eliminate'
   );
   my $C =
-    Vote::Count::Charge->new(
+    TestN->new(
       Seats     => 3,
       BallotSet => read_ballots('t/data/data2.txt'),
       VoteValue => 100,
     );
   is_deeply(
-    [ sort ( NthApproval($C) ) ],
+    [ sort ( $C->NthApproval() ) ],
     [ qw( CARAMEL ROCKYROAD RUMRAISIN ) ],
     'another choice had approval == Nth place topcount'
   );
