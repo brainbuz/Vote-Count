@@ -6,6 +6,8 @@ package Vote::Count::Charge::Cascade;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count::Charge';
+# with 'Vote::Count::Charge::NthApproval';
+
 no warnings 'experimental';
 use feature qw /postderef signatures/;
 
@@ -19,7 +21,6 @@ use YAML::XS;
 use Path::Tiny;
 use Carp;
 use Vote::Count::Helper::FullCascadeCharge;
-use Vote::Count::Helper::NthApproval;
 
 our $VERSION='1.21';
 

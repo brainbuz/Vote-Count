@@ -13,7 +13,6 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 # use Path::Tiny;
 use Vote::Count::Charge::Cascade;
-use Vote::Count::Helper::NthApproval;
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
@@ -22,11 +21,19 @@ use Storable 3.15 'dclone';
 use Data::Dumper;
 # use Carp::Always;
 
+package TestC {
+  use Moose;
+  extends 'Vote::Count::Charge::Cascade';
+  use namespace::autoclean;
+  with 'Vote::Count::Charge::NthApproval';
+  __PACKAGE__->meta->make_immutable;
+};
+
 my $dumbarton = read_ballots('t/data/Scotland2017/Dumbarton.txt');
 my $burlington = read_ballots('t/data/burlington2009.txt');
 
 sub newB ( $lname='burlington') {
-  Vote::Count::Charge::Cascade->new(
+  TestC->new(
     Seats     => 3,
     BallotSet => dclone $burlington,
     VoteValue => 100,
@@ -36,7 +43,7 @@ sub newB ( $lname='burlington') {
 
 subtest 'setup' => sub {
   my $B = newB();
-  is_deeply( [NthApproval( $B )],
+  is_deeply( [ $B->NthApproval() ],
     [ 'WRITEIN'],
     'sure loser defeated a choice at setup for burlington');
   $B->Defeat( 'WRITEIN' ) ;
@@ -52,7 +59,7 @@ subtest 'setup' => sub {
   }
 
   $B->NewRound();
-  is_deeply( [ NthApproval( $B ) ], [ 'SIMPSON' ],
+  is_deeply( [  $B->NthApproval() ], [ 'SIMPSON' ],
       'burl Nth Approval defeated a choice in second round');
   $B->Defeat( 'SIMPSON');
   $B->NewRound();

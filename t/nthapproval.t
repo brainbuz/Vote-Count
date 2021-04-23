@@ -15,7 +15,9 @@ use Test2::Bundle::More;
 package TestN {
   use Moose;
   extends 'Vote::Count::Charge';
+  use namespace::autoclean;
   with 'Vote::Count::Charge::NthApproval';
+  __PACKAGE__->meta->make_immutable;
 };
 
 use Vote::Count::ReadBallots 'read_ballots', 'read_range_ballots';
