@@ -27,6 +27,15 @@ This Role is consumed by Vote::Count and Vote::Count::Matrix. It provides common
 
 =cut
 
+has 'BallotSet' => ( is => 'ro', isa => 'HashRef', required => 1 );
+
+has 'PairMatrix' => (
+  is      => 'ro',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_buildmatrix',
+);
+
 has 'Active' => (
   is      => 'ro',
   isa     => 'HashRef',

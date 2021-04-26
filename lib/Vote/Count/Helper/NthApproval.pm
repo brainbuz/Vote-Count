@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.024;
 
-package Vote::Count::Charge::NthApproval;
+package Vote::Count::Helper::NthApproval;
 use Moose::Role;
 no warnings 'experimental';
 use feature qw /postderef signatures/;
@@ -14,7 +14,7 @@ our $VERSION='1.21';
 
 =head1 NAME
 
-Vote::Count::Charge::NthApproval
+Vote::Count::Helper::NthApproval
 
 =head1 VERSION 1.21
 

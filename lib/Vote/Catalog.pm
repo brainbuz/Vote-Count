@@ -8,7 +8,6 @@
 
 Catalog
 
-
 =head1 Description
 
 A catalog of common Vote Counting Systems and their implementation in Vote::Count.
@@ -19,7 +18,7 @@ A catalog of common Vote Counting Systems and their implementation in Vote::Coun
 
 =head2 Borda Count
 
-And other Methods which assign scores to choices by their ranking. 
+And other Methods which assign scores to choices by their ranking.
 
 =over
 
@@ -184,7 +183,10 @@ LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
 
+SUPPORT
+
+This software is provided as is, per the terms of the GNU Public License. Professional Support, Validation and Customization services are available, please contact the Author for a quote.
+
 =cut
 
-
-=cut
+1;

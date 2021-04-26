@@ -17,7 +17,7 @@ use Vote::Count::Helper::FullCascadeCharge;
 use Vote::Count::ReadBallots 'read_ballots';
 use Test2::Tools::Exception qw/dies lives/;
 use Test2::Tools::Warnings qw/warns warning warnings no_warnings/;
-use Vote::Count::Charge::TestBalance 'balance_ok';
+use Vote::Count::Helper::TestBalance 'balance_ok';
 use Storable 3.15 'dclone';
 use Data::Dumper;
 # use Carp::Always;

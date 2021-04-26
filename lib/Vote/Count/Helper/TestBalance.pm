@@ -3,7 +3,32 @@ use warnings;
 use 5.024;
 # use feature qw /postderef signatures/;
 
-package Vote::Count::Charge::TestBalance;
+package Vote::Count::Helper::TestBalance;
+
+our $VERSION='1.21';
+
+# ABSTRACT: Custom Test for checking STV charge calculations.
+
+=head1 NAME
+
+Vote::Count::Helper::TestBalance;
+
+=head1 VERSION 1.21
+
+=head1 Synopsis
+
+  my $Charges = { 'choice1' => 55, 'choice2' => 79 };
+  my $balanceValue = $remaining_vote_value;
+  balance_ok( $BallotSet, $charges, $balanceValue, [ @elected ], $test_name);
+
+=head1 balance_ok
+
+Compare current charges with the ballotset and the remaining vote_value to confirm that the charges would balance. Used for testing FullCascade Charge.
+
+This method is exported.
+
+=cut
+
 use Test2::API qw/context/;
 
 our @EXPORT = qw/balance_ok/;

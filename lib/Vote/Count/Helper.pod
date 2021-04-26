@@ -10,13 +10,27 @@ Helpers for Vote::Count.
 
 =head1 Inventory
 
+=head2 Non Object Oriented
+
+These Helpers export methods.
+
 =over 1
 
 =item L<FullCascadeCharge|http://metacpan.org/pod/Vote::Count::Helper::FullCascadeCharge>
 
-=item L<NthApproval|http://metacpan.org/pod/Vote::Count::Helper::NthApproval>
-
 =item L<Table|http://metacpan.org/pod/Vote::Count::Helper::Table>
+
+=item L<Table|http://metacpan.org/pod/Vote::Count::Helper::TestBalance>
+
+=back
+
+=head2 Roles
+
+These Helpers provide Moose Roles.
+
+=over 1
+
+=item L<NthApproval|http://metacpan.org/pod/Vote::Count::Helper::NthApproval>
 
 =back
 

@@ -138,7 +138,8 @@ my $dist = path( './dist.ini')->slurp;
 $dist =~ /version\s? =\s?(\d+\.\d+)/;
 my $version = $1;
 
-my @mdfiles = path("./md")->children( qr/md$/ );
+# my @mdfiles = path(".")->children( qr/md$/ );
+
 my @pmfiles1 = path("./lib/Vote/Count")->children( qr/pm$|pod$/);
 my @pmfiles2 = path("./lib/Vote/Count/Method")->children( qr/pm$/);
 my @pmfiles3 = path("./lib/Vote/Count/Charge")->children( qr/pm$/);
@@ -151,31 +152,36 @@ for my $pm (@pmfiles ) {
   my @bits = split /\//, $1; # split extracted on /, llast bit is basename
   $pmkeys{ $bits[-1] } = $pm ; # put the path object in the hash keyed on the basename.
 }
-FORMD:
-for my $md ( @mdfiles ) {
-  my $name = $md->basename;
-  $name =~ s/\.md$//;
-  say "base name $name";
-  if ( $pmkeys{ $name }) {
-    my $pm = delete $pmkeys{ $name }; # remove from keys, so we dont repeat it later.
-    my $mdtext = path($md)->slurp();
-    my $pmtext = path($pm)->slurp();
-    $pmtext = add_pod( $pmtext, $mdtext );
-    $pmtext = fix_version( $pmtext, $version);
-    $pm->spew( $pmtext );
-    say "updated $pm added pod from $md";
-  } else {
-      next FORMD if $md =~ /README/ ;
-      my $mdtext = path($md)->slurp();
-      $mdtext =~ s/(\# ABSTRACT.*)\n//;
-      my $abstract = $1;
-      my $pod =  $m2p->markdown_to_pod( markdown => $mdtext );
-      my $versionline = "=head1 VERSION $version";
-warn $versionline;
-      # $pod = "$abstract\n$versionline\n$pod\n$footer";
-      $pod = "$abstract\n\n=pod\n\n$versionline\n$pod\n$footer\n=cut\n";
-      path( "./lib/Vote/$name.pod")->spew($pod);
-  }
+# FORMD:
+# for my $md ( @mdfiles ) {
+#   my $name = $md->basename;
+# say "ORI base name $name";
+#   $name =~ s/\.md$//;
+#   say "base name $name";
+#   if ( $pmkeys{ $name }) {
+#     my $pm = delete $pmkeys{ $name }; # remove from keys, so we dont repeat it later.
+#     my $mdtext = path($md)->slurp();
+#     my $pmtext = path($pm)->slurp();
+#     $pmtext = add_pod( $pmtext, $mdtext );
+#     $pmtext = fix_version( $pmtext, $version);
+#     $pm->spew( $pmtext );
+#     say "updated $pm added pod from $md";
+#   } else {
+#       next FORMD if $md =~ /README/ ;
+#       my $mdtext = try { path($md)->slurp(); }
+#         catch { warn "failed to slurp $md"};
+#       $mdtext =~ s/(\# ABSTRACT.*)\n//;
+#       my $abstract = $1;
+#       my $pod =  $m2p->markdown_to_pod( markdown => $mdtext );
+#       my $versionline = "=head1 VERSION $version";
+# warn $versionline;
+#       # $pod = "$abstract\n$versionline\n$pod\n$footer";
+#       $pod = "$abstract\n\n=pod\n\n$versionline\n$pod\n$footer\n=cut\n";
+#       path( "./lib/Vote/$name.pod")->spew($pod);
+#   }
+
+# }
+
   for my $pm ( values %pmkeys ) {
 warn "fixing $pm"    ;
     my $pmtext = path($pm)->slurp;
@@ -191,4 +197,3 @@ warn "fixing $pm"    ;
     path($pm)->spew( fix_version( $pmtext, $version) );
     say "updated version in $pm";
   }
-}

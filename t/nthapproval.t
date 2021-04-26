@@ -16,7 +16,7 @@ package TestN {
   use Moose;
   extends 'Vote::Count::Charge';
   use namespace::autoclean;
-  with 'Vote::Count::Charge::NthApproval';
+  with 'Vote::Count::Helper::NthApproval';
   __PACKAGE__->meta->make_immutable;
 };
 
