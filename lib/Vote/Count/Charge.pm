@@ -20,7 +20,7 @@ use JSON::MaybeXS;
 use YAML::XS;
 # use Storable 3.15 'dclone';
 
-our $VERSION='1.21';
+our $VERSION='1.212';
 
 has 'Seats' => (
   is       => 'ro',
@@ -378,7 +378,7 @@ sub SetQuota ($I, $style='droop') {
 
 Vote::Count::Charge
 
-=head1 VERSION 1.21
+=head1 VERSION 1.212
 
 =cut
 

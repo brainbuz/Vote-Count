@@ -5,7 +5,7 @@ use feature qw/signatures postderef/;
 no warnings qw/experimental uninitialized/;
 use utf8::all;
 use Try::Tiny;
-# use Data::Printer;
+use Data::Printer;
 
 =pod
 
@@ -148,6 +148,7 @@ my $countpm = path( "./lib/Vote/Count.pm");
 my @pmfiles = ( @pmfiles1, @pmfiles2, @pmfiles3, @pmfiles4,$countpm);
 my %pmkeys = ();
 for my $pm (@pmfiles ) {
+  next if $pm =~ /TextTableTiny/;
   $pm =~ /(.*)\.(pm$|pod$)/; # extract the part of the string before .pm
   my @bits = split /\//, $1; # split extracted on /, llast bit is basename
   $pmkeys{ $bits[-1] } = $pm ; # put the path object in the hash keyed on the basename.
@@ -181,6 +182,40 @@ for my $pm (@pmfiles ) {
 #   }
 
 # }
+
+sub updateCountIndex {
+  my @modules = sort map {
+      my $p = $_->canonpath ;
+      my $d = path( $p)->slurp();
+      $d =~ /head1 NAME\s+(.*)/i;
+      my $n = $1;
+      unless ( $n ) {
+        $n = $_->basename;
+      }
+      $n;
+  } @pmfiles;
+  my $countmod = path('lib/Vote/Count.pm')->slurp();
+  my $index = join("\n", map {"=item *\n\nL<$_>\n"} @modules);
+  # p @modules;
+# $countmod =~ /(?s)#BEGININDEX(.*)/;
+  my ( $part1, $part2, $part3 ) = split( /#INDEXSECTION|#FOOTER/, $countmod );
+
+my $countmod = qq|$part1\n
+#INDEXSECTION\n
+=pod\n
+=head1 INDEX of Vote::Count Modules and Documentation\n
+=over\n
+$index\n
+=back\n
+=cut\n
+#FOOTER\n
+$part3|;
+  $countmod =~ s/\n\n+/\n\n/g;
+
+  path('lib/Vote/Count.pm')->spew($countmod);
+}
+
+updateCountIndex();
 
   for my $pm ( values %pmkeys ) {
 warn "fixing $pm"    ;

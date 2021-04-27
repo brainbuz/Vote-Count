@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='1.21';
+our $VERSION='1.212';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetDropping
 
-=head1 VERSION 1.21
+=head1 VERSION 1.212
 
 =cut
 
@@ -55,7 +55,6 @@ no warnings 'experimental';
 use Vote::Count::Matrix;
 use Carp;
 # use Try::Tiny;
-# use Text::Table::Tiny 'generate_table';
 # use Data::Dumper;
 
 has 'Matrix' => (

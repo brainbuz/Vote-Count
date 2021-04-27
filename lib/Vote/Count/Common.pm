@@ -13,13 +13,13 @@ use Path::Tiny;
 
 # ABSTRACT: Role shared by Count and Matrix for common functionality. See Vote::Count Documentation.
 
-our $VERSION='1.21';
+our $VERSION='1.212';
 
 =head1 NAME
 
 Vote::Count::Common
 
-=head1 VERSION 1.21
+=head1 VERSION 1.212
 
 =head1 Synopsis
 
@@ -28,13 +28,6 @@ This Role is consumed by Vote::Count and Vote::Count::Matrix. It provides common
 =cut
 
 has 'BallotSet' => ( is => 'ro', isa => 'HashRef', required => 1 );
-
-has 'PairMatrix' => (
-  is      => 'ro',
-  isa     => 'Object',
-  lazy    => 1,
-  builder => '_buildmatrix',
-);
 
 has 'Active' => (
   is      => 'ro',
@@ -143,9 +136,123 @@ sub GetBallots ( $self ) {
 
 1;
 
-=head2 Usage
+=head1 Usage
 
-This role is consumed by Vote::Count and Vote::Count::Matrix.
+This role is consumed by Vote::Count and Vote::Count::Matrix, providing a common set of functions to all Vote::Count objects.
+
+=head1 new
+
+The only required parameter is BallotSet. The BallotSet is provided by L<Vote::Count::ReadBallots>, you may place the BallotSet in a variable or more typically read it from within the new method.
+
+  use Vote::Count;
+  use Vote::Count::ReadBallots;
+  my $Election = Vote::Count->new( BallotSet => read_ballots( $ballotfile ) );
+
+=head3 Optional Paramters to Vote::Count
+
+=head4 Active
+
+Optionally the ActiveSet can be set via new the ActiveSet
+
+=head4 LogTo
+
+Sets a path and Naming pattern for writing logs with the WriteLogs method.
+
+  'LogTo' => '/loggingI<path/election>name'
+
+The WriteLogs method will write the logs appending '.brief', '.full', and '.debug' for the three logs where brief is a summary written with the logt (log terse) method, the full transcript log written with logv, and finally the debug log written with logd. Each higher log level captures all events of the lower log levels.
+
+The default log location is '/tmp/votecount'.
+
+When logging from your methods, use logt for events that produce a summary, use logv for events that should be in the full transcript such as round counts, and finally debug is for events that may be helpful in debugging but which should not be in the transcript.
+
+
+=head3 Active Sets
+
+Active sets are typically represented as a Hash Reference where the keys represent the active choices and the value is true. The VoteCount Object contains an Active Set which can be Accessed via the Active() method which will return a reference to the Active Set (changing the reference will change the active set). The GetActive and SetActive methods do not preserve any reference links and should be preferred. GetActiveList returns the Active Set as a sorted list.
+
+Many Components will take an argument for $activeset or default to the current Active set of the Vote::Count object, which will default to the Choices defined in the BallotSet.
+
+
+=head1 Vote::Count Methods
+
+Most of these are provided by the Role Common and available directly in both Matrix objects and Vote::Count Objects. Vote::Count objects create a child Matrix object: PairMatrix.
+
+
+=head3 new
+
+Arguments to new
+
+=head3 Active
+
+Get Active Set as HashRef to the active set. Changing the new HashRef will change the internal Active Set, GetActive is recommended as it will return a HashRef that is a copy instead.
+
+
+=head3 GetActive
+
+Returns a hashref containing a copy of the Active Set.
+
+
+=head3 GetActiveList
+
+Returns a simple array of the members of the Active Set.
+
+
+=head3 ResetActive
+
+Sets the Active Set to the full choices list of the BallotSet.
+
+
+=head3 SetActive
+
+Sets the Active Set to provided HashRef. The values to the hashref should evaluate as True.
+
+
+=head3 SetActiveFromArrayRef
+
+Same as SetActive except it takes an ArrayRef of the choices to be set as Active.
+
+
+=head3 BallotSet
+
+Get BallotSet
+
+
+=head3 PairMatrix
+
+Get a Matrix Object for the Active Set. Generated and cached on the first request.
+
+
+=head3 UpdatePairMatrix
+
+Regenerate and cache Matrix with current Active Set.
+
+
+=head3 VotesCast
+
+Returns the number of votes cast.
+
+
+=head3 VotesActive
+
+Returns the number of non-exhausted ballots based on the current Active Set.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 =head3 new
 

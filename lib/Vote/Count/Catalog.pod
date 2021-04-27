@@ -2,16 +2,15 @@
 
 =pod
 
-=head1 VERSION 1.21
+=head1 VERSION 1.212
 
 =head1 NAME
 
-Catalog
+Vote::Count::Catalog
 
 =head1 Description
 
 A catalog of common Vote Counting Systems and their implementation in Vote::Count.
-
 
 =head1 Methods by Family
 

@@ -8,13 +8,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='1.21';
+our $VERSION='1.212';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 1.21
+=head1 VERSION 1.212
 
 =cut
 
