@@ -21,23 +21,23 @@ our $VERSION='1.212';
 
 =head1 NAME
 
-Vote::Count
+Vote::Count - a tool kit for preferential ballots
 
 =head1 VERSION 1.212
 
-=head2 A Toolkit for determining the outcome of Preferential Ballots.
+=head2 A Toolkit for Resolving Preferential Ballots.
 
-Vote::Count a Toolkit for implementing multiple voting systems, allowing a wide range of method options. Vote::Count provides a lot of options to facilitate writing code to match your election rules.
+Vote::Count provides a combination of methods and variations for conducting elections and studying different methods of resolving preferential ballots.
 
 =head1 DOCUMENTATION
+
+=head2 L<OVERVIEW|Overview>
+
+An overview of Preferential Voting and an introduction to Vote::Count. Read this document first.
 
 =head2 L<COMMON|Vote::Count::Common>
 
 The core methods of Vote::Count are documented in this Module.
-
-=head2 L<OVERVIEW|Overview>
-
-An overview of Preferential Voting and introduction to Vote::Count.
 
 =head2 L<CATALOG|Catalog>
 

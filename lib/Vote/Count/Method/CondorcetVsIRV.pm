@@ -93,6 +93,8 @@ The form implemented by Vote::Count is:
 
 3. If there is a Condorcet Winner, elect the first Condorcet Winner, if there is none, elect the IRV Winner. (The redaction cannot make the IRV Winner a Condorcet Winner if it isn't already one).
 
+=back
+
 =cut
 
 =head1 Criteria

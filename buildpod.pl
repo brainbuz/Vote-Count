@@ -52,13 +52,7 @@ use Data::Printer;
 # use Test::More;
 # use Getopt::Long::Descriptive;
 
-=pod
-
-=head1 VERSION 2021.0422
-
-=cut
-
-our $VERSION='2021.0422';
+our $VERSION='2021.0427';
 
 my $m2p = Markdown::Pod->new;
 
@@ -123,7 +117,7 @@ This module is released under the GNU Public License Version 3. See license file
 
 SUPPORT
 
-This software is provided as is, per the terms of the GNU Public License. Professional Support, Validation and Customization services are available, please contact the Author for a quote.
+This software is provided as is, per the terms of the GNU Public License. Professional support and customisation services are available from the author.
 
 =cut
 
@@ -181,8 +175,6 @@ for my $pm (@pmfiles ) {
 #       path( "./lib/Vote/$name.pod")->spew($pod);
 #   }
 
-# }
-
 sub updateCountIndex {
   my @modules = sort map {
       my $p = $_->canonpath ;
@@ -217,7 +209,8 @@ $part3|;
 
 updateCountIndex();
 
-  for my $pm ( values %pmkeys ) {
+  for my $pm ( values @pmfiles ) {
+# for my $pm ( values %pmkeys ) {
 warn "fixing $pm"    ;
     my $pmtext = path($pm)->slurp;
     unless ($pmtext =~ /\#FOOTER/) { $pmtext .= $footer ; }

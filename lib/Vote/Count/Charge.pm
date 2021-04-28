@@ -382,7 +382,7 @@ Vote::Count::Charge
 
 =cut
 
-# ABSTRACT: Vote::Charge implementation of STV.
+# ABSTRACT: Vote::Charge - implementation of STV.
 
 =pod
 
@@ -445,6 +445,8 @@ A choice that is temporarily removed from consideration. Suspended is treated th
 elected and pending:
 
 Elected and Pending choices are removed from the Active Set, but Pending choices are not yet considered elected. The Pending state is available to hold newly elected choices for a method that will not immediately complete processing their election.
+
+=back
 
 =head3 GetChoiceStatus
 

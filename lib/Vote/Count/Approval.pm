@@ -33,7 +33,7 @@ Returns a RankCount object for the current Active Set taking an optional argumen
   my $Approval = $Election->Approval();
   say $Approval->RankTable;
 
-  # to specify the activeset
+  # to specify the active set
   my $Approval = $Election->Approval( $activeset );
 
   # to specify a cutoff on Range Ballots
@@ -41,21 +41,21 @@ Returns a RankCount object for the current Active Set taking an optional argumen
 
 For RCV, Approval respects weighting, 'votevalue' is defaulted to 1 by readballots. Integers or Floating point values may be used.
 
-=head3 LastApprovalBallots
+=head2 Method LastApprovalBallots
 
 Returns a hashref of the unweighted raw count from the last Approval operation.
 
-=head1 Method NonApproval
+=head2 Method NonApproval
 
 The opposite of Approval. Returns a RankCount object for the current Active Set of the non-exhausted ballots not supporting a choice. It does not have the option to provide an Active Set. Only available for Ranked Ballots.
 
-=head2 Cut Off (Range Ballots Only)
+=head3 Cutoff (Range Ballots Only)
+
+When counting Approval on Range Ballots an optional cutoff value may be provided as a second argument to the Approval Method. When doing so the Active Set argument must be provided. The Cutoff value is a score below which the ballot is considered to not approve of the choice.
 
 When counting Approval on Range Ballots it is appropriate to set a threshold below which a choice is not considered to be supported by the voter, but indicated to represent a preference to even lower or unranked choices.
 
-A good value is half of the maximum possible score, however, the default action must be to treat all choices with a score as approved. With a Range of 0-10 a cutoff of 5 would be recommended, choices scored 4 or lower would not be counted for approval. If cutoff isn't provided it defaults to 0 producing the desired default behaviour.
-
-For Ranked Ballots the cutoff is ignored. If a cutoff is desired for Ranked Ballots a Neutral Preference Option should be included on the Ballot to indicate when subequent choices should not be considered Approved. This is not currently available in Vote::Count.
+For Ranked Ballots the equivalent would be to provide a 'Nuetral Preference' indicator, for voters to indicate that any choices ranked lower should not be considered approved. This is not presently implemented, but may be at some point in the future.
 
 =cut
 

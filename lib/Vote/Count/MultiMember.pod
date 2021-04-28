@@ -1,12 +1,14 @@
-# Abstract Overview of Multi Member elections and Vote::Count support for them.
+# Abstract Vote::Count::MultiMember - Overview of Multi Member elections and Vote::Count support for them.
 
 =pod
+
+=encoding utf8
 
 =head1 VERSION 1.212
 
 =head1 NAME
 
-Vote::Count::MultiMember
+Vote::Count::MultiMember - Overview of Multi Member elections and Vote::Count support for them.
 
 =head1 DESCRIPTION
 
@@ -103,8 +105,5 @@ This module is released under the GNU Public License Version 3. See license file
 SUPPORT
 
 This software is provided as is, per the terms of the GNU Public License. Professional Support, Validation and Customization services are available, please contact the Author for a quote.
-
-=cut
-
 
 =cut

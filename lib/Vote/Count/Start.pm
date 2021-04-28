@@ -1,6 +1,8 @@
 package Vote::Count::Start;
 
 use 5.024;
+use strict;
+use warnings;
 use feature qw/postderef signatures/;
 no warnings qw/experimental/;
 use Path::Tiny 0.108;
@@ -154,7 +156,7 @@ sub _do_approval ( $Election ) {
 
 sub _do_borda ( $Election ) {
   my $Borda = $Election->Approval();
-  $Election->logv( "\Borda Count", $Borda->RankTable(), );
+  $Election->logv( "Borda Count", $Borda->RankTable(), );
   my $AWinner = $Borda->Leader();
   if ( $AWinner->{'winner'} ) {
     $Election->logt( "Borda Winner: " . $AWinner->{'winner'}, '' );

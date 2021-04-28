@@ -23,13 +23,13 @@ use Try::Tiny;
 use Path::Tiny;
 use Carp;
 
-our $VERSION='1.20';
+our $VERSION='1.212';
 
 =head1 NAME
 
 Vote::Count::Method::Cascade
 
-=head1 VERSION 1.20
+=head1 VERSION 1.212
 
 =cut
 

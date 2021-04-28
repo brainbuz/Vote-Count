@@ -16,71 +16,39 @@ An Overview of Alternative Voting and Preferential Methods and Introduction to V
 
 Provides a Toolkit for implementing multiple voting systems, allowing a wide range of method options. Vote::Count provides a lot of options to facilitate writing code to match your election rules.
 
-=head2 Preferential Voting Methods
+=head1 Preferential Voting Methods
 
-Provides a review of the election methods Vote::Count can resolve. If you are new to the topic this is a must read as it explains the methods.
+Several alternatives to the familiar vote for one ballot type have been proposed. Some of these alternatives are:
 
-=head1 Synopsis
+=over
 
-  # use 5.024; # Minimum Perl, or any later Perl.
-  # use feature qw /postderef signatures/;
+=item
 
-  # use Vote::Count;
-  # use Vote::Count::ReadBallots;
-  # use Vote::Count::Method::CondorcetDropping;
+Approval: Voters indicate multiple choices
 
-  # ```perl
-  # # example uses biggerset1 from the distribution test data.
-  # my $ballotset = read_ballots 't/data/biggerset1.txt' ;
-  # my $CondorcetElection =
-  #   Vote::Count::Method::CondorcetDropping->new(
-  #     'BallotSet' => $ballotset ,
-  #     'DropStyle' => 'all',
-  #     'DropRule'  => 'topcount',
-  #   );
-  # # ChoicesAfterFloor a hashref of choices meeting the
-  # # ApprovalFloor which defaulted to 5%.
-  # my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
-  # # Apply the ChoicesAfterFloor to the Election.
-  # $CondorcetElection->SetActive( $ChoicesAfterFloor );
-  # # Get Smith Set and the Election with it as the Active List.
-  # my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
-  # $CondorcetElection->logt(
-  #   "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
-  # my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
+=item
 
-  # # Create an object for IRV, use the same Floor as Condorcet
+Ranked: Voters indicate a preference order among choices. Also known as Ordinal.
 
-  # my $IRVElection = Vote::Count->new(
-  #   'BallotSet' => $ballotset,
-  #   'Active' => $ChoicesAfterFloor );
-  # # Get a RankCount Object for the
-  # my $Plurality = $IRVElection->TopCount();
-  # my $PluralityWinner = $Plurality->Leader();
-  # $IRVElection->logv( "Plurality Results", $Plurality->RankTable);
-  # if ( $PluralityWinner->{'winner'}) {
-  #   $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
-  # } else {
-  #   $IRVElection->logt(
-  #     "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
-  # }
-  # my $IRVResult = $IRVElection->RunIRV();
+=item
 
-  # # Now print the logs and winning information.
-  # say $CondorcetElection->logv();
-  # say $IRVElection->logv();
-  # say '*'x60;
-  # say "Plurality Winner: $PluralityWinner->{'winner'}";
-  # say "IRV Winner: $IRVResult->{'winner'}";
-  # say "Condorcet Winner: $Winner";
+Range: Voters assign a value to choices. Also known as Score or Cardinal. Typically Range Ballots allow multiple choices to be assigned the same value, if that is not allowed, the ballot may be interpreted as either a Cardinal or Ordinal Ballot.
+
+=item
+
+Yes/No and Yes/No/Neutral: Voters indicate which of the 3 states they view each choice, un-ranked choices default to Neutral.
+
+=back
+
+L<Vote::Count> is only concerned with Preferential Ballots: the Ranked and Range Ballot Types. While Yes/No/Neutral can be viewed as a Cardinal ballot type, neither the ballot type nor any methods specifying it are supported by L<Vote::Count>.
 
 =head2 Brief Review of Voting Methods
 
-Several alternatives have been proposed to the simple vote for a single choice method that has been used in most elections for a single member. In addition a number of different methods have been used for multiple members. For alternative single member voting, the three common alternatives are I<Approval> (voters indicate all choices that they approve of), I<Ranked Choice> (Voters rank the choices), and I<Score> also known as I<Range> (voters give choices a score according to a scale).
-
 I<Vote for One> ballots may be resolved by one of two methods: I<Majority> and I<Plurality>. Majority vote requires a majority of votes to win (but frequently produces no winner), and Plurality which selects the choice with the most votes.
 
-Numerous methods have been proposed and tried for I<Ranked Choice Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
+Several alternatives have been proposed to the simple vote for a single choice method that has been used in most elections for a single member. In addition a number of different methods have been used for multiple members. For alternative single member voting, the three common alternatives are I<Approval> (voters indicate all choices that they approve of), I<Ranked Choice> (Voters rank the choices), and I<Score> also known as I<Range> (voters give choices a score according to a scale).
+
+Numerous methods have been proposed and tried for I<Preferentail Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
 
 
 =head3 The Criteria for Resolving Ranked Choice (including Score) Ballots
@@ -104,14 +72,11 @@ I<Smith Criteria> the winner should belong to the smallest set of choices which 
 
 The Consistency Criteria collectively state: Changes to non-winning alternatives that would not obviously alter the outcome should not change the winner. Adding or removing non-winning choices, or altering the votes for non-winning choices, except in a manner which directly changes the outcome should not alter the outcome. If votes are moved between non-winning alternatives in a manner that has no direct affect on the winner, the winner should not change. Changes to non-winning choices which increase support for the winner should not then cause a different choice to win.
 
-To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cream and Chocolate always wins; one morning the three voters who always vote 1:RockyRoad 2:Chocolate simply vote for Chocolate, consistency is violated if Chocolate loses on that day.
+To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cream and Chocolate always wins; one morning the three voters who always vote 1:RockyRoad 2:Chocolate discover that a member of the group has a nut allergy and vote for just Chocolate, consistency is violated if Chocolate loses on that day. This example illustrates B<Monotonic> Consistency and B<Independence of Irrelevant Alternatives>.
 
-Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win.
+B<Clone Independence>. Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one or both of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win.
 
-The cases described above: Monotonocity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as separate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
-
-There is a specific Criteria that is sometimes called Consistency, in this discussion consistency is discussed in the broad context. No method passes every possible consistency criteria, from a policy perspective a method is consistent if it has no major consistency failures.
-
+The cases described above: Monotonicity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as separate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
 
 =head4 Complexity
 
@@ -258,13 +223,69 @@ I wanted to be able to evaluate alternative methods for resolving elections and 
 The objective is to have a library that can handle any of the myriad variants that one might consider either from a study perspective or what is called for by the elections rules of our entity.
 
 
-=head1 Basics
+=head1 Vote::Count Basics
 
+=head1 Synopsis
+
+  use 5.024; # Minimum Perl, or any later Perl.
+  use feature qw /postderef signatures/;
+
+  use Vote::Count;
+  use Vote::Count::ReadBallots;
+  use Vote::Count::Method::CondorcetDropping;
+
+  ```perl
+  # example uses biggerset1 from the distribution test data.
+  my $ballotset = read_ballots 't/data/biggerset1.txt' ;
+  my $CondorcetElection =
+    Vote::Count::Method::CondorcetDropping->new(
+      'BallotSet' => $ballotset ,
+      'DropStyle' => 'all',
+      'DropRule'  => 'topcount',
+    );
+  # ChoicesAfterFloor a hashref of choices meeting the
+  # ApprovalFloor which defaulted to 5%.
+  my $ChoicesAfterFloor = $CondorcetElection->ApprovalFloor();
+  # Apply the ChoicesAfterFloor to the Election.
+  $CondorcetElection->SetActive( $ChoicesAfterFloor );
+  # Get Smith Set and the Election with it as the Active List.
+  my $SmithSet = $CondorcetElection->Matrix()->SmithSet() ;
+  $CondorcetElection->logt(
+    "Dominant Set Is: " . join( ', ', keys( $SmithSet->%* )));
+  my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
+
+  # Create an object for IRV, use the same Floor as Condorcet
+
+  my $IRVElection = Vote::Count->new(
+    'BallotSet' => $ballotset,
+    'Active' => $ChoicesAfterFloor );
+  # Get a RankCount Object for the
+  my $Plurality = $IRVElection->TopCount();
+  my $PluralityWinner = $Plurality->Leader();
+  $IRVElection->logv( "Plurality Results", $Plurality->RankTable);
+  if ( $PluralityWinner->{'winner'}) {
+    $IRVElection->logt( "Plurality Winner: ", $PluralityWinner->{'winner'} )
+  } else {
+    $IRVElection->logt(
+      "Plurality Tie: " . join( ', ', $PluralityWinner->{'tied'}->@*) )
+  }
+  my $IRVResult = $IRVElection->RunIRV();
+
+  # Now print the logs and winning information.
+  say $CondorcetElection->logv();
+  say $IRVElection->logv();
+  say '*'x60;
+  say "Plurality Winner: $PluralityWinner->{'winner'}";
+  say "IRV Winner: $IRVResult->{'winner'}";
+  say "Condorcet Winner: $Winner";
 
 =head2 Reading Ballots
 
 The L<Vote::Count::ReadBallots|Vote::Count::ReadBallots> library provides functionality for reading files from disc. Currently it defines a format for a ballot file and reads that from disk. In the future additional formats may be added. Range Ballots may be in either JSON or YAML formats.
 
+=head2 L<RankCount|Vote::Count::RankCount> Object
+
+Votes are frequently put into a tabular form by some criteria, such as L<Approval|Vote::Count::Approval> or L<Top Count|Vote::Count::TopCount>. Performing such operations returns a L<Vote::Count::RankCount> object.
 
 =head2 Voting Method and Component Modules
 
