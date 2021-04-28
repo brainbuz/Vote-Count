@@ -17,13 +17,13 @@ use Vote::Count::Matrix;
 
 no warnings 'experimental';
 
-our $VERSION='1.212';
+our $VERSION='1.213';
 
 =head1 NAME
 
 Vote::Count - a tool kit for preferential ballots
 
-=head1 VERSION 1.212
+=head1 VERSION 1.213
 
 =head2 A Toolkit for Resolving Preferential Ballots.
 
@@ -107,7 +107,7 @@ __PACKAGE__->meta->make_immutable;
 
 =item *
 
-L<Vote::Count>
+L<Vote::Count - a tool kit for preferential ballots>
 
 =item *
 
@@ -203,7 +203,7 @@ L<Vote::Count::Method::WIGM>
 
 =item *
 
-L<Vote::Count::MultiMember>
+L<Vote::Count::MultiMember - Overview of Multi Member elections and Vote::Count support for them.>
 
 =item *
 
@@ -271,7 +271,7 @@ This module is released under the GNU Public License Version 3. See license file
 
 SUPPORT
 
-This software is provided as is, per the terms of the GNU Public License. Professional Support, Validation and Customization services are available, please contact the Author for a quote.
+This software is provided as is, per the terms of the GNU Public License. Professional support and customisation services are available from the author.
 
 =cut
 

@@ -4,7 +4,7 @@
 
 =encoding utf8
 
-=head1 VERSION 1.212
+=head1 VERSION 1.213
 
 =head1 NAME
 
@@ -104,6 +104,7 @@ This module is released under the GNU Public License Version 3. See license file
 
 SUPPORT
 
-This software is provided as is, per the terms of the GNU Public License. Professional Support, Validation and Customization services are available, please contact the Author for a quote.
+This software is provided as is, per the terms of the GNU Public License. Professional support and customisation services are available from the author.
 
 =cut
+

@@ -8,7 +8,7 @@ no warnings 'experimental';
 use feature qw /postderef signatures/;
 # use Vote::Count::TextTableTiny qw/generate_table/;
 
-our $VERSION='1.212';
+our $VERSION='1.213';
 
 # ABSTRACT: Nth Approval Defeat rule for STV elections.
 
@@ -16,7 +16,7 @@ our $VERSION='1.212';
 
 Vote::Count::Helper::NthApproval
 
-=head1 VERSION 1.212
+=head1 VERSION 1.213
 
 =cut
 
@@ -82,6 +82,10 @@ Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+SUPPORT
+
+This software is provided as is, per the terms of the GNU Public License. Professional support and customisation services are available from the author.
 
 =cut
 

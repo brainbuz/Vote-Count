@@ -16,7 +16,7 @@ use Vote::Count::Method::CondorcetIRV;
 use Try::Tiny;
 use Data::Dumper;
 
-our $VERSION='1.212';
+our $VERSION='1.213';
 
 # no warnings 'uninitialized';
 no warnings qw/experimental/;
@@ -25,7 +25,7 @@ no warnings qw/experimental/;
 
 Vote::Count::Method::CondorcetVsIRV
 
-=head1 VERSION 1.212
+=head1 VERSION 1.213
 
 =cut
 
@@ -396,6 +396,10 @@ Copyright 2019-2021 by John Karr (BRAINBUZ) brainbuz@cpan.org.
 LICENSE
 
 This module is released under the GNU Public License Version 3. See license file for details. For more information on this license visit L<http://fsf.org>.
+
+SUPPORT
+
+This software is provided as is, per the terms of the GNU Public License. Professional support and customisation services are available from the author.
 
 =cut
 
