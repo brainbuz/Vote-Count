@@ -62,36 +62,36 @@ sub fix_version ( $text, $version ) {
   return $text;
 }
 
-sub add_pod ( $text, $markdown ) {
-  my $pod = $m2p->markdown_to_pod(
-    markdown => $markdown,
-  );
-  my $markerstr = '#buildpod';
-  my $num_markers = () = $text =~ /$markerstr/g;
-say "Counted Markers: $num_markers";
-  return $text unless $num_markers;
-  if ( $num_markers >2 ) {
-    die "There are too many $markerstr markers in the current file\\n"
-  }
-  my @beforepod = ();
-  my @afterpod = ();
-  my $aftermarker = 0;
-  for my $l ( split /\n/, $text ) {
-    if ($aftermarker == $num_markers ) { push @afterpod, $l }
-    elsif ($aftermarker == 1 ) {
-      $aftermarker++ if $l =~ /$markerstr/;
-    } else {
-      if ( $l =~ /$markerstr/ ) {
-      $aftermarker++ if $l =~ /$markerstr/;
-      } else {
-        push @beforepod, $l;
-      }
-    }
-  }
-  return join( "\n",
-    ( @beforepod, $markerstr, "\n=pod\n$pod\n=cut\n", $markerstr, @afterpod )
-  )
-}
+# sub add_pod ( $text, $markdown ) {
+#   my $pod = $m2p->markdown_to_pod(
+#     markdown => $markdown,
+#   );
+#   my $markerstr = '#buildpod';
+#   my $num_markers = () = $text =~ /$markerstr/g;
+# say "Counted Markers: $num_markers";
+#   return $text unless $num_markers;
+#   if ( $num_markers >2 ) {
+#     die "There are too many $markerstr markers in the current file\\n"
+#   }
+#   my @beforepod = ();
+#   my @afterpod = ();
+#   my $aftermarker = 0;
+#   for my $l ( split /\n/, $text ) {
+#     if ($aftermarker == $num_markers ) { push @afterpod, $l }
+#     elsif ($aftermarker == 1 ) {
+#       $aftermarker++ if $l =~ /$markerstr/;
+#     } else {
+#       if ( $l =~ /$markerstr/ ) {
+#       $aftermarker++ if $l =~ /$markerstr/;
+#       } else {
+#         push @beforepod, $l;
+#       }
+#     }
+#   }
+#   return join( "\n",
+#     ( @beforepod, $markerstr, "\n=pod\n$pod\n=cut\n", $markerstr, @afterpod )
+#   )
+# }
 
 my $footer = <<'FOOTER';
 
@@ -192,7 +192,7 @@ sub updateCountIndex {
 # $countmod =~ /(?s)#BEGININDEX(.*)/;
   my ( $part1, $part2, $part3 ) = split( /#INDEXSECTION|#FOOTER/, $countmod );
 
-my $countmod = qq|$part1\n
+  $countmod = qq|$part1\n
 #INDEXSECTION\n
 =pod\n
 =head1 INDEX of Vote::Count Modules and Documentation\n
@@ -219,9 +219,9 @@ warn "fixing $pm"    ;
       # $pmtext =~ s/(?s)\#FOOTER.*/$footer/;
       my $splitstr = "#FOOTER\n";
       my ($body, @trim) = split /$splitstr/, $pmtext;
-      $body =~ s/\n+$/\n/g;
       $pmtext = $body . $footer;
     }
+    $pmtext =~ s/\n\n\n+/\n\n/g;
     path($pm)->spew( fix_version( $pmtext, $version) );
     say "updated version in $pm";
   }

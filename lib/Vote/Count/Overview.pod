@@ -48,7 +48,7 @@ I<Vote for One> ballots may be resolved by one of two methods: I<Majority> and I
 
 Several alternatives have been proposed to the simple vote for a single choice method that has been used in most elections for a single member. In addition a number of different methods have been used for multiple members. For alternative single member voting, the three common alternatives are I<Approval> (voters indicate all choices that they approve of), I<Ranked Choice> (Voters rank the choices), and I<Score> also known as I<Range> (voters give choices a score according to a scale).
 
-Numerous methods have been proposed and tried for I<Preferentail Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
+Numerous methods have been proposed and tried for choosing the winner of I<Preferential Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
 
 
 =head3 The Criteria for Resolving Ranked Choice (including Score) Ballots
@@ -61,9 +61,9 @@ Marking a later Choice on a Ballot should not cause a Voter's higher ranked choi
 
 =head4 Condorcet Criteria
 
-I<Condorcet Loser> states that a method should not choose a winner that would be defeated in a direct matchup to all other choices.
+I<Condorcet Loser> states that a method should not choose a winner that would be defeated in a direct match up to all other choices.
 
-I<Condorcet Winner> states a choice which defeats all others in direct matchups should be the Winner.
+I<Condorcet Winner> states a choice which defeats all others in direct match-ups should be the Winner.
 
 I<Smith Criteria> the winner should belong to the smallest set of choices which defeats all choices outside of that set.
 
@@ -72,15 +72,15 @@ I<Smith Criteria> the winner should belong to the smallest set of choices which 
 
 The Consistency Criteria collectively state: Changes to non-winning alternatives that would not obviously alter the outcome should not change the winner. Adding or removing non-winning choices, or altering the votes for non-winning choices, except in a manner which directly changes the outcome should not alter the outcome. If votes are moved between non-winning alternatives in a manner that has no direct affect on the winner, the winner should not change. Changes to non-winning choices which increase support for the winner should not then cause a different choice to win.
 
-To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cream and Chocolate always wins; one morning the three voters who always vote 1:RockyRoad 2:Chocolate discover that a member of the group has a nut allergy and vote for just Chocolate, consistency is violated if Chocolate loses on that day. This example illustrates B<Monotonic> Consistency and B<Independence of Irrelevant Alternatives>.
+To illustrate inconsistency: suppose every morning we vote on a flavor of Ice Cream and Chocolate always wins; one morning the three voters who always vote 1:RockyRoad 2:Chocolate discover that a member of the group has a nut allergy and vote for just Chocolate, consistency is violated if Chocolate loses on that day. This example illustrates B<Independence of Irrelevant Alternatives>, and B<Monotonic> Consistency, which can be considered a subcategory of Irrelevant Alternatives.
 
-B<Clone Independence>. Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one or both of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win.
+B<Clone Independence>. Cloning occurs when similar choices are available, such as Vanilla and Vanilla Bean. If one or both of the clones would win without the presence of the other, the presence of both should not cause a non-clone to win. Cloning effects are extremely common in real world elections, and poor clone performance should be considered a serious shortcoming.
 
-The cases described above: Monotonicity, Independence of Irrelevant Alternatives and Clone Independence are normally discussed as separate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
+The cases described above: Monotonicity, Independence of Irrelevant Alternatives and Clone Independence are usually discussed as separate criteria rather than components of one. Additional sub-criteria that haven't been mentioned include: Reversal Symmetry, Participation Consistency, and Later No Help (which could also be considered a sub-criteria of Later Harm).
 
 =head4 Complexity
 
-Is it feasible to count 100 ballots by hand? How difficult is it to understand the process (can the average middle school student understand it at all)? How many steps?
+Is it feasible to count 100 ballots by hand? How difficult is it to understand the process (can the average middle school student understand it at all)? How many steps? People by their nature are likely to reject things they don't understand, and conversely are likely to embrace something that makes sense, especially if it took a little bit of effort to understand.
 
 
 =head4 Resolvability
@@ -90,8 +90,7 @@ I<Majority> meets all of the above criteria, however, unless votes are restricte
 
 =head4 Incentive for Strategic Voting
 
-Voting systems have weaknesses which can incentivize voters to vote in an insincere manner. Later Harm Violation is a strong driver for tactical voting. Inconsistency may create circumstances by which a block of voters by voting in certain ways can boost or harm a choice, this vulnerability type is often referred to as an attack.
-
+Voting systems have weaknesses which can incentivize voters to vote in an insincere manner. Later Harm Violation is a strong driver for tactical voting. Inconsistency may create circumstances by which a coordinated block of voters can boost or harm a choice, this vulnerability type is often referred to as an attack.
 
 =head3 Arrow's Theorem
 
@@ -124,8 +123,7 @@ Fails Condorcet Winner (but meets Condorcet Loser).
 
 =item *
 
-Fails many Consistency Criteria (The example given for Consistency can happen with IRV). IRV handles clones poorly.
-
+Fails many Consistency Criteria (The example given for Monotonic Consistency failure can happen with IRV). IRV handles clones poorly.
 
 =back
 
@@ -184,8 +182,7 @@ Complexity Varies among sub-methods.
 
 =item *
 
-Fails Later Harm.
-
+Fails Later Harm. The Later Harm effect is much lower than with Approval or Borda, because Later Harm manifests when the later choice defeats the preferred choice in pairing. Using an IRV based method for the fallback when there isn't a Condorcet Winner also limits the Later Harm effect.
 
 
 =item *
@@ -196,7 +193,7 @@ Meets both Condorcet Criteria.
 
 =item *
 
-When a Condorcet Winner is present Consistency is very high. When there is no Condorcet Winner this Consistency applies between a Dominant (Smith) Set and the rest of the choices, but not within the Smith Set. Sub-methods vary in consistency when there is no Condorcet Winner.
+When a Condorcet Winner is present Consistency is very high. When there is no Condorcet Winner this Consistency applies between a Dominant (Smith) Set and the rest of the choices, but not within the Smith Set.
 
 
 
@@ -207,9 +204,9 @@ When a Condorcet Winner is present Consistency is very high. When there is no Co
 
 Most Methods for Ranked Choice Ballots can be used for Range Ballots.
 
-Score Voting proposals typically implement I<Borda Count>, with a fixed depth of choices. I<STAR>, creates a virtual runoff between the top two I<Borda Count> Choices.
+Voters rate the choices on a scale, with the highest rating being their most favored (the inverse of Ranked where 1 is the best), the scores from all the votes are added together for a ranking. I<STAR>, creates a virtual runoff between the top two Choices.
 
-Advocates claim that this Ballot Style is a better expression of voter preference. Where it shows a clear advantage is in allowing Voters to directly mitigate Later Harm by ranking a strongly favored choice with the highest score and weaker choices with the lowest. The downside to this strategy is that the voter is giving little help to later choices reaching the automatic runoff. Given a case with two roughly equal main factions, where one faction give strong support to all of its options, and the other faction's supporters give weak support to all later choices; the runoff will be between the two best choices of the first faction, even if the choices of the second faction all defeat any of the first's choices in pairwise comparison.
+Advocates claim that this Ballot Style is a better expression of voter preference. Where it shows a clear advantage is in allowing Voters to directly mitigate Later Harm by ranking a strongly favored choice with the highest score and weaker choices with the lowest. The downside to this strategy is that the voter is giving little help to later choices reaching the automatic runoff. Given a case with two roughly equal main factions, where one faction gives strong support to all of its options, and the other faction's supporters give weak support to all later choices; the runoff will be between the two best choices of the first faction, even if the choices of the second faction all defeat any of the first's choices in pairwise comparison.
 
 The Range Ballot resolves the Borda weighting problem and allows the voter to manage the later harm effect, so it is clearly a better choice than Borda. Condorcet and IRV can resolve Range Ballots, but ignore the extra information and would prefer strict ordinality (not allowing equal ranking).
 
@@ -234,7 +231,6 @@ The objective is to have a library that can handle any of the myriad variants th
   use Vote::Count::ReadBallots;
   use Vote::Count::Method::CondorcetDropping;
 
-  ```perl
   # example uses biggerset1 from the distribution test data.
   my $ballotset = read_ballots 't/data/biggerset1.txt' ;
   my $CondorcetElection =

@@ -55,7 +55,7 @@ When counting Approval on Range Ballots an optional cutoff value may be provided
 
 When counting Approval on Range Ballots it is appropriate to set a threshold below which a choice is not considered to be supported by the voter, but indicated to represent a preference to even lower or unranked choices.
 
-For Ranked Ballots the equivalent would be to provide a 'Nuetral Preference' indicator, for voters to indicate that any choices ranked lower should not be considered approved. This is not presently implemented, but may be at some point in the future.
+For Ranked Ballots the equivalent would be to provide a 'Nuetral Preference', for voters to indicate that any choices ranked lower should not be considered approved. This is not presently implemented, but may be at some point in the future.
 
 =cut
 
