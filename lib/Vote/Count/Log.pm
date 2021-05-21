@@ -46,9 +46,19 @@ Sets the Base portion of the logfile names, but only if LogPath is specified. Th
 
 Write the logs appending '.brief', '.full', and '.debug' for the three logs where brief is a summary written with the logt (log terse) method, the full transcript log written with logv, and finally the debug log written with logd. Each higher log level captures all events of the lower log levels.
 
+Logged events are not written until WriteLog is called. A fatal runtime error, would prevent execution of a writelog at the end of the script. If you need to see the logs when your program is crashing, set the Debug Flag to write the events as warnings to STDERR while the script is running.
+
 =head1 Logging Events
 
 When logging from your methods, use logt for events that produce a summary, use logv for events that should be in the full transcript such as round counts, and finally debug is for events that may be helpful in debugging but which should not be in the transcript. Events written to logt will be included in the verbose log and all events in the verbose log will be in the debug log.
+
+=head2 logt
+
+Record message to the terse (.brief)
+
+=head2 logv
+
+=head2 logd
 
 =head1 Debug Flag
 

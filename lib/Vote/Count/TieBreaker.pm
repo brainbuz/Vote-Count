@@ -35,7 +35,7 @@ Vote::Count::TieBreaker
 
 =head1 Tie Breakers
 
-The most important thing for a Tie Breaker to do is it should use some reproducible difference in the Ballots to pick a winner from a Tie. The next thing it should do is make sense. Finally, the ideal Tie Breaker will resolve when there is any difference to be found. Arguably the best use of Borda Count is as a Tie Breaker, First Choice votes and Approval are also other great choices.
+The most important thing for a Tie Breaker to do is it should use some reproducible difference in the Ballots to pick a winner from a Tie. The next thing it should do is make sense. Finally, the ideal Tie Breaker will resolve when there is any difference to be found. The only fully resolvable method is unfortunately Random, but that is not reproducable between runs. Precedence sets a fixed resolution order and can be used to make Random reproducible.
 
 TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker is called internally from the resolution method via the TieBreaker function, which requires the caller to pass its TieBreakMethod.
 
@@ -195,6 +195,8 @@ The Precedence list takes the choices of the election one per line. Choices defe
    BallotSet => read_ballots('somefile'),
    TieBreakMethod => 'precedence',
    PrecedenceFile => '/path/to/precedencefile');
+
+A compound Tie Breaker can be created with a precedence list and any other methods that create an ordered list (Top Count, Approval, Borda), that can then be used for a new Precdence File. This is slight different than using Precedence as a fall back as the methods are normally checked against the current state, this variant only used the initial state.
 
 =head2 CreatePrecedenceRandom
 

@@ -36,7 +36,9 @@ Vote::Count::Helper::NthApproval
 
 Finds the choice that would fill the last seat if the remaining seats were to be filled by highest Top Count, and sets the Vote Value for that Choice as the requirement. All Choices that do not have a weighted Approval greater than that requirement are returned, they will never be elected and are safe to defeat immediately.
 
-Results are logged to the verbose log,
+Results are logged to the verbose log.
+
+This rule is not strictly LNH safe.
 
 =cut
 

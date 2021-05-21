@@ -31,7 +31,7 @@ Vote::Count provides a combination of methods and variations for conducting elec
 
 =head1 DOCUMENTATION
 
-=head2 L<OVERVIEW|Overview>
+=head2 L<OVERVIEW|Vote::Count::Overview>
 
 An overview of Preferential Voting and an introduction to Vote::Count. Read this document first.
 

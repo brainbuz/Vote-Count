@@ -264,14 +264,12 @@ Vote::Count::TextTableTiny
 
 L<https://github.com/neilb/Text-Table-Tiny>
 
-
 =head1 AUTHOR
 
 Neil Bowers <neilb@cpan.org>
 
 The original version was written by Creighton Higgins <chiggins@chiggins.com>,
 but the module was entirely rewritten for 0.05_01.
-
 
 =head1 COPYRIGHT AND LICENSE
 

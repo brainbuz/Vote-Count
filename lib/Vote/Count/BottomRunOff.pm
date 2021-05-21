@@ -22,8 +22,8 @@ Bottom RunOff is an elimination method which takes the two lowest choices, usual
   my $eliminate = $Election->BottomRunOff();
   # log the pairing result
   $Election->logd( $eliminate->{'runoff'} );
-  $Election->logv( "eliminated ${\ $eliminate->{'eliminated'} }."
-  $Election->Defeat( $eliminate->{'eliminated'} );
+  $Election->logv( "eliminated ${\ $eliminate->{'eliminate'} }."
+  $Election->Defeat( $eliminate->{'eliminate'} );
 
 =head1 BottomRunOff ($method)
 
@@ -31,14 +31,16 @@ The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence m
 
   my $result = BottomRunOff( $Election, 'Approval' );
 
+The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff is formatted as a table.
+
 =cut
 
 sub BottomRunOff ( $Election, $method1='TopCount' ) {
   my @ranked = $Election->UntieActive($method1, 'precedence' )->OrderedList();
-  my ( $continuing, $loser ) = $Election->UnTieList( 'TopCount', $ranked[-1],  $ranked[-2]);
-  my $tc = $Election->TopCount( { $continuing => 1,  $loser => 1} );
+  my ( $continuing, $eliminate ) = $Election->UnTieList( 'TopCount', $ranked[-1],  $ranked[-2]);
+  my $tc = $Election->TopCount( { $continuing => 1,  $eliminate => 1} );
   return {
-    loser => $loser,
+    eliminate => $eliminate,
     continuing => $continuing,
     runoff => "Elimination Runoff:\n${\ $tc->RankTable }"
   };

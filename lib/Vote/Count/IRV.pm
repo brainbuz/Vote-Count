@@ -158,7 +158,7 @@ Supports the Vote::Count logt, logv, and logd methods for providing details of t
 
 Uses TieBreaker from the TieBreaker Role. The default is 'all', which is to not break ties. 'none' the default for the Matrix (Condorcet) Object should not be used for IRV.
 
-All was chosen as the module default because it is Later Harm safe. Modified Grand Junction is the most resolvable and is the recommended option.
+All was chosen as the module default because it is Later Harm safe. Modified Grand Junction is extremely resolvable and simple.
 
 In the event that the tie-breaker returns a tie eliminate all that remain tied is used, unless that would eliminate all choices, in which case the election returns a tie.
 

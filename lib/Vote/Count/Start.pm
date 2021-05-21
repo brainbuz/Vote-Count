@@ -41,7 +41,7 @@ Vote::Count::Start
 
 =head1 Description
 
-Does common startup steps useful accross methods. Written to avoid a lot of Boiler Plate for the common case of running an election and beginning with a summary of the votes and the winners by the basic simple methods
+Does common startup steps useful accross methods. It includes a lot of the boiler plate for common usage. Use for resolving elections where the rules don't require customization, or as an example for writing more customized methods.
 
 =over
 

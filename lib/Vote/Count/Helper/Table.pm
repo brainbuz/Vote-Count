@@ -20,7 +20,7 @@ Vote::Count::Helper::Table
 
 =head1 Description
 
-Table Formatting Helpers for use within Vote::Count
+Table Formatting Helpers for use within Vote::Count.
 
 =cut
 
