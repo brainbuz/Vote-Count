@@ -38,7 +38,7 @@ The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and 
 sub BottomRunOff ( $Election, $method1='TopCount' ) {
   my @ranked = $Election->UntieActive($method1, 'precedence' )->OrderedList();
   my ( $continuing, $eliminate ) = $Election->UnTieList( 'TopCount', $ranked[-1],  $ranked[-2]);
-  my $tc = $Election->TopCount( { $continuing => 1,  $eliminate => 1} );
+  my $tc = $Election->$method1( { $continuing => 1,  $eliminate => 1} );
   return {
     eliminate => $eliminate,
     continuing => $continuing,

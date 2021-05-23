@@ -47,6 +47,14 @@ is_deeply(
 );
 note $S3->logv;
 
+# todo 'btrirv' => sub {
+#   my $S1 = Vote::Count::Method::CondorcetIRV->new(
+#     'BallotSet' => read_ballots('t/data/ties1.txt'),
+#   );
+#   my $result = $S1->BTRIRV();
+#   note $S1->logd();
+# };
+
 subtest 'synpsis' => sub {
   my $someballotset = read_ballots('t/data/biggerset1.txt');
 

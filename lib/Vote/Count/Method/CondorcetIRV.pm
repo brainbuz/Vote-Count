@@ -7,6 +7,7 @@ package Vote::Count::Method::CondorcetIRV;
 use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
+with 'Vote::Count::BottomRunOff';
 
 our $VERSION='1.214';
 
@@ -118,6 +119,60 @@ sub SmithSetIRV ( $E, $tiebreaker = 'all' ) {
     return $IRV;
   }
 }
+
+# sub BTRIRV ( $E ) {
+
+# }
+
+
+# sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
+#   # external $active should not be changed.
+#   if ( defined $active ) { $active = dclone $active }
+#   # Object's active is altered by IRV.
+#   else { $active = dclone $self->Active() }
+#   unless ( defined $tiebreaker ) {
+#     if ( defined $self->TieBreakMethod() ) {
+#       $tiebreaker = $self->TieBreakMethod();
+#     }
+#     else {
+#       $tiebreaker = 'all';
+#     }
+#   }
+#   my $roundctr = 0;
+#   my $maxround = scalar( keys %{$active} );
+#   $self->logt( "Instant Runoff Voting",
+#     'Choices: ', join( ', ', ( sort keys %{$active} ) ) );
+#   # forever loop normally ends with return from $majority
+#   # a tie should be detected and also generate a
+#   # return from the else loop.
+#   # if something goes wrong roundcountr/maxround
+#   # will generate exception.
+# IRVLOOP:
+#   until (0) {
+#     $roundctr++;
+#     die "IRVLOOP infinite stopped at $roundctr" if $roundctr > $maxround;
+#     my $round = $self->TopCount($active);
+#     $self->logv( '---', "IRV Round $roundctr", $round->RankTable() );
+#     my $majority = $self->EvaluateTopCountMajority($round);
+#     if ( defined $majority->{'winner'} ) {
+#       return $majority;
+#     }
+#     else {
+#       my @bottom =
+#         $self->_ResolveTie( $active, $tiebreaker, $round->ArrayBottom()->@* );
+#       if ( scalar(@bottom) == scalar( keys %{$active} ) ) {
+#         # if there is a tie at the end, the finalists should
+#         # be both top and bottom and the active set.
+#         $self->logt( "Tied: " . join( ', ', @bottom ) );
+#         return { tie => 1, tied => \@bottom, winner => 0 };
+#       }
+#       $self->logv( "Eliminating: " . join( ', ', @bottom ) );
+#       for my $b (@bottom) {
+#         delete $active->{$b};
+#       }
+#     }
+#   }
+# }
 
 1;
 

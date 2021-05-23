@@ -84,14 +84,14 @@ note( 'now reduce to 2 choices');
 $Invert->Defeat('CHOCOLATE');
 $Invert->Defeat('STRAWBERRY');
 
-is_deeply(
-  $Invert->BottomRunOff(),
-  $Invert->BottomRunOff( 'Approval' ),
-  'with just two choices topcount and approval hold the same runoff'
-);
-$r = $Invert->BottomRunOff();
-is( $r->{'continuing'}, 'CARAMEL', 'with just 2 CARAMEL continues,');
-is( $r->{'eliminate'}, 'VANILLA', 'VANILLA loses,');
+subtest 'runoff with approval' => sub {
+  my $r = $Invert->BottomRunOff('Approval');
+  $r->{runoff} =~ /CARAMEL \| (\d+)/;
+  my $caravotes = $1;
+  is( $caravotes, 16, 'correct votes 16 for CARAMEL with approval');
+  is( $r->{'continuing'}, 'CARAMEL', 'CARAMEL won with approval,');
+  is( $r->{'eliminate'}, 'VANILLA', 'VANILLA lost with approval,');
+};
 
 note( 'now leave only one choice' );
 $Invert->Defeat('VANILLA');
