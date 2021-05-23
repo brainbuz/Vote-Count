@@ -82,7 +82,13 @@ The argument in favor of Woodhull over Smith would be that: Anything which alter
 
 =head1 Method Common Name: Bottom Two Runoff IRV, BTR IRV (Implementation Soon)
 
-This is the simplest modification to IRV which meets the Condorcet Winner Criteria. Instead of eliminating the low choice, the lowest two choices enter a virtual runoff, eliminating the loser. This is the easiest Hand Count Condorcet method, there will always be fewer pairings than choices. This method fails LNH, when there is no Condorcet Winner the LNH impact may substantial.
+This is the simplest modification to IRV which meets the Condorcet Winner Criteria. Instead of eliminating the low choice, the lowest two choices enter a virtual runoff, eliminating the loser. This is the easiest Hand Count Condorcet method, there will always be fewer pairings than choices. This method fails LNH, when there is no Condorcet Winner the LNH impact may substantial since it can come into play for each runoff. BTR IRV will only eliminate a member of the Smith Set when both members of the runoff are in it, it can never eliminate the final member of the Smith Set. BTR IRV meets both Condorcet Criteria and the Smith Criteria.
+
+=head1 Method Common Names: Benham, Benham IRV
+
+This method modifies IRV by checking for a Condorcet Winner each round, and then drops the low choice as regular IRV. It is probably the most widely used Condorcet Method for Hand Counting because it does not require a full matrix. For each choice it is only required to determine if they lose to any of the other active choices.
+
+This method is implemented by L<Vote::Count::Method::CondorcetDropping|Vote::Count::Method::CondorcetDropping/Benham>.
 
 =cut
 

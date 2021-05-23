@@ -19,32 +19,68 @@ Vote::Count::Method::CondorcetDropping
 
 =cut
 
-# ABSTRACT: Methods which use simple dropping rules to resolve a Winnerless Condorcet Matrix.
+# ABSTRACT: Methods which use simple dropping rules to resolve a Winner-less Condorcet Matrix.
 
 =pod
+
+=head1 Method Description for Simple Dropping
+
+Simple Dropping eliminates the I<weakest> choice until there is a Condorcet Winner. This method is simple and widely used.
 
 =head1 SYNOPSIS
 
   my $CondorcetElection =
     Vote::Count::Method::CondorcetDropping->new(
       'BallotSet' => $ballotset ,
-      'DropStyle' => 'all',
-      'DropRule'  => 'topcount',
+      'DropStyle' => 'all', # default = leastwins
+      'DropRule'  => 'topcount', # default
+      'TieBreakMethod' => 'none', # default
     );
 
-  my $Winner = $CondorcetElection->RunCondorcetDropping( $SmithSet )->{'winner'};
+  my $Winner = $CondorcetElection->RunCondorcetDropping( $ActiveSet )->{'winner'};
 
-=head1 Condorcet Dropping Methods
+=head1 RunCondorcetDropping
 
-This module implements dropping methodologies for resolving a Condorcet Matrix with no Winner. Dropping Methodologies apply a rule to either all remaining choices or to those with the least wins to select a choice for elimination.
+Takes an optional parameter of an Active Set as a HashRef. Returns a HashRef with the standard result keys: winner, tie, tied. Writes details to the Vote::Count logs.
 
-=head2 Basic Dropping Methods
+=head1 Dropping Options
 
-Supported Dropping Methods are: 'borda' count (with all the attendant weighting issues), 'approval', 'topcount' ('plurality'), and 'greatestloss'.
+=head2 DropStyle
 
-=head2 Option SkipLoserDrop
+Set DropStyle to 'all' for dropping against all choices or 'leastwins' to only consider those choices.
 
-Normally RunCondorcetDropping eliminates Condorcet Losers whenever they are discovered. However, the Benham method, which is probably the most widely used method that uses simple dropping, only considers Condorcet Winners.
+Default is leastwins.
+
+=head2 DropRule
+
+Determines the rule by which choices will be eliminated when there is no Condorcet Winner. Supported Dropping Rules are: 'borda' count (with all the attendant weighting issues), 'approval', 'topcount' ('plurality'), and 'greatestloss'.
+
+default is plurality (topcount)
+
+=head2 SkipLoserDrop
+
+Normally RunCondorcetDropping eliminates Condorcet Losers whenever they are discovered. Dropping Condorcet Losers will be skipped if set to 1.
+
+=head1 Benham
+
+This method modifies IRV by checking for a Condorcet Winner each round, and then drops the low choice as regular IRV. It is probably the most widely used Condorcet Method for Hand Counting because it does not require a full matrix. For each choice it is only required to determine if they lose to any of the other active choices. By Counting Approval at the beginning, it is often possible to determine that a choice will lose at least one pairing without conducting any pairings, then it is only necessary to check choices that possibly have no losses.
+
+This method is fairly simple, and meets Condorcet Winner/Loser, but fails LNH, and inherits IRV's failings on consistency. BTR-IRV is even easier to Hand Count and is Smith Compliant, Benham has no obvious advantage to it, other than having been used more widely in the past.
+
+The original method specified Random for Tie Breaker, which can be done in a reproducable manner with L<Precedence|Vote::Count::TieBreaker/Precedence>.
+
+The following example implements Benham, resolving ties with a precedence file generated using the number of ballots cast as the random seed.
+
+  my $Benham = Vote::Count::Method::CondorcetDropping->new(
+    'BallotSet'      => $someballotset,
+    'DropStyle'      => 'all',
+    'DropRule'       => 'topcount',
+    'SkipLoserDrop'  => 1,
+    'TieBreakMethod' => 'precedence',
+    'PrecedenceFile' => '/tmp/benhamties.txt',
+  );
+  $Benham->CreatePrecedenceRandom( '/tmp/benhamties.txt' );
+  my $Result = $Benham->RunCondorcetDropping();
 
 =cut
 

@@ -22,7 +22,7 @@ And other Methods which assign scores to choices by their ranking.
 
 =item *
 
-Borda Count: core L<Vote::Count::Borda|https://metacpan.org/pod/Vote::Count::Borda>
+Borda Count: core L<Vote::Count::Borda>
 
 =item *
 
@@ -34,7 +34,7 @@ Baldwin: I<needs example>
 
 =item *
 
-STAR: L<Vote::Count::Method::STAR|https://metacpan.org/pod/Vote::Count::Method::STAR>
+STAR: L<Vote::Count::Method::STAR>
 
 =back
 
@@ -44,15 +44,19 @@ STAR: L<Vote::Count::Method::STAR|https://metacpan.org/pod/Vote::Count::Method::
 
 =item *
 
-Instant Runoff Voting: core L<Vote::Count::IRV|https://metacpan.org/pod/Vote::Count::IRV>
+Instant Runoff Voting: core L<Vote::Count::IRV>
 
 =item *
 
-Benham Condorcet IRV: L<Hand Count|https://metacpan.org/pod/release/BRAINBUZ/Vote-Count/Hand_Count.pod> methods documentation, implemented by L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping>
+Benham Condorcet IRV: L<Vote::Count::Method::CondorcetDropping|Vote::Count::Method::CondorcetDropping/Benham>
 
 =item *
 
-SmithSet IRV: L<Vote::Count::Method::CondorcetIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetIRV>
+SmithSet IRV: L<Vote::Count::Method::CondorcetIRV>
+
+=item *
+
+BTR IRV: L<Vote::Count::Method::CondorcetIRV>
 
 =back
 
@@ -64,7 +68,7 @@ SmithSet IRV: L<Vote::Count::Method::CondorcetIRV|https://metacpan.org/pod/Vote:
 
 =item *
 
-MinMax (Opposition) L<Vote::Count::Method::MinMax|https://metacpan.org/pod/Vote::Count::Method::MinMax>
+MinMax (Opposition) L<Vote::Count::Method::MinMax>
 
 =back
 
@@ -74,19 +78,19 @@ MinMax (Opposition) L<Vote::Count::Method::MinMax|https://metacpan.org/pod/Vote:
 
 =item *
 
-Benham Condorcet IRV: L<HandCount|https://metacpan.org/pod/release/BRAINBUZ/Vote-Count/Hand_Count.pod> methods documentation, implemented by L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping>
+Benham Condorcet IRV: L<Vote::Count::Method::CondorcetDropping|Vote::Count::Method::CondorcetDropping/Benham>
 
 =item *
 
-Simple Dropping: L<Vote::Count::Method::CondorcetDropping|https://metacpan.org/pod/Vote::Count::Method::CondorcetDropping>
+Simple Dropping: L<Vote::Count::Method::CondorcetDropping>
 
 =item *
 
-SmithSet IRV: L<Vote::Count::Method::CondorcetIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetIRV>
+SmithSet IRV: L<Vote::Count::Method::CondorcetIRV>
 
 =item *
 
-MinMax (Winning Votes and Margin) L<Vote::Count::Method::MinMax|https://metacpan.org/pod/Vote::Count::Method::MinMax>
+MinMax (Winning Votes and Margin) L<Vote::Count::Method::MinMax>
 
 =back
 
@@ -96,7 +100,7 @@ MinMax (Winning Votes and Margin) L<Vote::Count::Method::MinMax|https://metacpan
 
 =item *
 
-Condorcet vs IRV: L<Vote::Count::Method::CondorcetVsIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetVsIRV>
+Condorcet vs IRV: L<Vote::Count::Method::CondorcetVsIRV>
 
 =item *
 
@@ -118,7 +122,21 @@ Kemmeny-Young: I<unimplemented>
 
 =item *
 
-Condorcet vs IRV: L<Vote::Count::Method::CondorcetVsIRV|https://metacpan.org/pod/Vote::Count::Method::CondorcetVsIRV>
+Condorcet vs IRV: L<Vote::Count::Method::CondorcetVsIRV>
+
+=back
+
+=head3 Single Transferable Vote
+
+=over
+
+=item *
+
+Weighted Inclusive Gregory (WIGM) L<Vote::Count::Method::WIGM>
+
+=item *
+
+Core Vote Charge (STV) Support L<Vote::Count::Charge>
 
 =back
 

@@ -372,6 +372,8 @@ L<Vote Count Helpers|Vote::Count::Helper>
 
 =back
 
+=head3 Example Folder
+
 =head3 Utilities
 
 =over
