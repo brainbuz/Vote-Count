@@ -15,13 +15,13 @@ use Mojo::Template;
 use Sort::Hash;
 use Data::Dumper;
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::Method::WIGM
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =cut
 
@@ -61,7 +61,7 @@ Run and log the Election.
 
 The Scottish Rules specify 5 decimal places, a weight of 100,000 is used which is equivalent.
 
-When more than one choice is Pending the rules call for a full Stage to elect each of them. Pending Choices cannot recieve additional votes, this implementation elects, charges, and rebates the Pending Choices, then starts a new Round. The final result will be the same, but Vote::Count::Method::WIGM rounds will not always match the stages.
+When more than one choice is Pending the rules call for a full Stage to elect each of them. Pending Choices cannot recieve additional votes, this implementation elects, charges, and rebates the Pending Choices, then starts a new Round. The final result will be the same, but Vote::Count::Method::WIGM rounds will not always match the stages of the Hand Count rules.
 
 =head1 Experimental
 

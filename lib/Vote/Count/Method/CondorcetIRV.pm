@@ -8,13 +8,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =cut
 
@@ -50,7 +50,7 @@ SmithSetIRV is exported and requires a Vote::Count object, an optional second ar
 
 =head3 Simplicity
 
-SmithSet IRV is easy to understand but requires a full matrix and thus is harder to handcount than Benham. If it desired to handcount, an aggressive Floor Rule like TCA (see Floor module) is recommended, or an Approval or Top Count Floor of up to 15%. 15% Top Count permits at most 6 choices, but 6 choices still require 15 pairings to complete the Matrix.
+SmithSet IRV is easy to understand but requires a full matrix and thus is harder to handcount than Benham or BTR IRV. If it desired to handcount, an aggressive Floor Rule like TCA (see Floor module) is recommended, or an Approval or Top Count Floor of up to 15%. 15% Top Count permits at most 6 choices, but 6 choices still require 15 pairings to complete the Matrix.
 
 =head3 Later Harm
 
@@ -76,9 +76,13 @@ MinMax methods do not meet the Smith Criteria nor the Condorcet Loser Criteria, 
 
 =head1 Method Common Name: Woodhull Method (Currently Unimplemented)
 
-The Woodhull method is similar to Smith Set IRV. The difference is: instead of eliminating the choices outside the Smith Set, Woodhull does not permit them to win. Since, it has to deal with the situation where an ineligible choice wins via IRV, it becomes slightly more complex. In addition, group elimination of unwinnable choices slightly improves consistency, which is another advantage to Smith Set IRV. As for possible differences in Later Harm effect, the Later Harm comes from the restriction of the victor to the Smith Set, which is the same effect for both methods.
+The Woodhull method is similar to Smith Set IRV. The difference is: instead of eliminating the choices outside the Smith Set, Woodhull does not permit them to win. Since, it has to deal with the situation where an ineligible choice wins via IRV, it becomes slightly more complex. In addition, group elimination of unwinnable choices improves consistency, which is another advantage to Smith Set IRV. As for possible differences in Later Harm effect, the Later Harm comes from the restriction of the victor to the Smith Set, which is the same effect for both methods.
 
 The argument in favor of Woodhull over Smith would be that: Anything which alters the dropping order can alter the outcome of IRV, and Woodhull preserves the IRV dropping order. Since, a dropping order change has an equal possiblity of helping or hurting one's preferred choice, this side-effect is a random flaw. Removing the least consequential choices is preventing them from impacting the election (in a random manner), thus this author sees it as an advantage for Smith Set IRV.
+
+=head1 Method Common Name: Bottom Two Runoff IRV, BTR IRV (Implementation Soon)
+
+This is the simplest modification to IRV which meets the Condorcet Winner Criteria. Instead of eliminating the low choice, the lowest two choices enter a virtual runoff, eliminating the loser. This is the easiest Hand Count Condorcet method, there will always be fewer pairings than choices. This method fails LNH, when there is no Condorcet Winner the LNH impact may substantial.
 
 =cut
 

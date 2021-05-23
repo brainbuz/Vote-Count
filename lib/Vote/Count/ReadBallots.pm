@@ -13,13 +13,13 @@ use YAML::XS;
 
 # ABSTRACT: Read Ballots for Vote::Count. Toolkit for vote counting.
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::ReadBallots
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =head1 SYNOPSIS
 

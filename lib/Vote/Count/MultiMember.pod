@@ -8,13 +8,15 @@
 
 =head1 NAME
 
-Vote::Count::MultiMember - Overview of Multi Member elections and Vote::Count support for them.
+Vote::Count::MultiMember - Overview of Multi Member and Proportional Elections and Vote::Count support for them.
 
 =head1 DESCRIPTION
 
 Multi Member Elections can be a good way of obtaining proportionality or at least minority representation. Instead of electing one representative for a seat, several are chosen.
 
-=head1 Overview of Multi-Member Methods
+Proportional Methods seek to obtain proportionality at the level of the entire body and may incorporate single member, multi-member, or elect a large body directly.
+
+=head1 Overview of Multi-Member and Proportional Methods
 
 =head2 Non STV Methods
 
@@ -36,21 +38,17 @@ Cumulative Approval gives the voter a fixed number of votes that they can distri
 
 Restricts the number of choices parties can offer and the number of choices a voter can select. Vote for up to X choices, but Y choices will be elected. This method can be used to guarantee minority seats in a body, but will not efficiently allocate those seats. X of Y is tabulated in the same manner as Approval.
 
-=head3 Party Lists
+=head3 Party Lists (Proportional)
 
 Parties put forward a list of choices, voters vote for the Party, the seats are apportioned. Party Lists also have the advantage that if a seat opens up during the term for any reason, the vacancy can immediately be filled by the next choice on the list.
 
-=head3 Under Hang
+=head3 Under Hang (Proportional)
 
 Combines District Elections with Party Lists. Voters elect representatives in their district via single member election. For the entire body the votes are tabulated by Party across all districts, based on the total Party vote under represented parties are awarded seats. Common Variations include setting a fixed number of seats to be available for Under Hang, and allowing Voters to select a Party for the Under Hang awards, which may be different than that of the Candidate they vote for in their district.
 
 =head1 Single Transferable Vote (STV)
 
-Most of the discussion on Multi Member methods focuses on this group.
-
-=head2 Generalized Description of STV
-
-STV uses a Ranked Ballot.
+Voters cast a single ranked ballot which may be transferred at times to multiple choices.
 
 A quota based on the number of valid ballots is set, there are two common formulas for this. The Droop Quota is B<1 + ( Ballots ÷ ( Number of Choices + 1 ) )>, which is the lowest possible quota for which it is impossible to elect more choices than seats. The Hare Quota is simply B<Ballots ÷ Number of Choices>.
 
@@ -58,11 +56,11 @@ Choices that exceed the quota are elected. The amount by which the choice exceed
 
 Typically if no choice reaches the quota, a choice is eliminated and their ballots are redistributed. When the number of choices remaining and seats remaining are equal, all the remaining choices are typically elected.
 
-=head3 Surplus Transfer
+=head3 Surplus Transfer Methods
 
 In some older methods the surplus was distributed Randomly -- surplus ballots would be picked randomly for distribution to their next choice. This method is not reproducible across runs, and won't be supported by Vote::Count, ever. If you have the misfortune to have inherited this as an election rule, keep hand counting until you can change the rules.
 
-Modern rules use a fractional transfer. The Surplus Transfer process is potentially infinite. Consider that several seats are being elected and many of the ballots for the choices which have met quota have another choice that has also met quota as their next choice. Each time surplus votes are transferred, each choice has more surplus which must then be distributed, which results in more surplus and transferring more fractions of votes. When using Real Number math this process will often be infinite, most STV methods limit the number of transfers to prevent this.
+Modern rules use a fractional transfer. Consider that several seats are being elected and many of the ballots for the choices which have met quota have another choice that has also met quota as their next choice. Each time surplus votes are transferred, each choice has more surplus which must then be distributed, which results in more surplus and transferring more fractions of votes. When using Real Number math this process will often be infinite, most STV methods limit the number of transfers to prevent this.
 
 =head3 Vote Charging
 

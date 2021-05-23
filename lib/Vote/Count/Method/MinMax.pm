@@ -9,13 +9,13 @@ use namespace::autoclean;
 use Moose;
 extends 'Vote::Count';
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::Method::MinMax
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =cut
 

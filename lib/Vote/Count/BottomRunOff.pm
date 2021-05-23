@@ -5,13 +5,13 @@ use 5.024;
 no warnings 'experimental';
 use feature ( 'signatures');
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::BottomRunOff
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =head2 Description
 

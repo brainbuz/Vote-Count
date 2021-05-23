@@ -10,7 +10,7 @@ Vote::Count::Overview
 
 An Overview of Alternative Voting and Preferential Methods and Introduction to Vote::Count.
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =head2 A Toolkit for determining the outcome of Preferential Ballots.
 
@@ -40,15 +40,13 @@ Yes/No and Yes/No/Neutral: Voters indicate which of the 3 states they view each 
 
 =back
 
-L<Vote::Count> is only concerned with Preferential Ballots: the Ranked and Range Ballot Types. While Yes/No/Neutral can be viewed as a Cardinal ballot type, neither the ballot type nor any methods specifying it are supported by L<Vote::Count>.
+L<Vote::Count> is only concerned with Preferential Ballots: the Ranked and Range Ballot Types. While Yes/No/Neutral can be viewed as a Cardinal ballot type, neither it nor any of the methods devised for it are implemented in L<Vote::Count>.
 
 =head2 Brief Review of Voting Methods
 
-I<Vote for One> ballots may be resolved by one of two methods: I<Majority> and I<Plurality>. Majority vote requires a majority of votes to win (but frequently produces no winner), and Plurality which selects the choice with the most votes.
+I<Vote for One> ballots are resolved by one of two methods: I<Majority> and I<Plurality>. Majority vote requires a majority of votes to win (but frequently produces no winner), and Plurality which selects the choice with the most votes.
 
-Several alternatives have been proposed to the simple vote for a single choice method that has been used in most elections for a single member. In addition a number of different methods have been used for multiple members. For alternative single member voting, the three common alternatives are I<Approval> (voters indicate all choices that they approve of), I<Ranked Choice> (Voters rank the choices), and I<Score> also known as I<Range> (voters give choices a score according to a scale).
-
-Numerous methods have been proposed and tried for choosing the winner of I<Preferential Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
+Numerous methods have been proposed and tried for choosing the winner of I<Preferential Ballots>. To compare these methods a number of criteria have been developed. While Mathematicians often treat these criteria as absolutes, from a policy perspective it may be more valuable to see them as a spectrum where a method may be considered to satisfy or fail with varying degrees of severity. From a policy perspective it is appropriate to group most of the criteria into a single group: Consistency, and then highlight the more important sub-criteria. Finally Mathematicians, typically, do not directly consider Complexity, but from a policy perspective this is just as important as any of the other criteria, and is definitely a scale not an absolute.
 
 =head3 The Criteria for Resolving Ranked Choice (including Score) Ballots
 
@@ -395,10 +393,6 @@ L<Vote::Count::Start>
 =item *
 
 L<Catalog|Vote::Count::Catalog>
-
-=item *
-
-L<Hand Count|https://metacpan.org/pod/distribution/Vote-Count/lib/Vote/Hand_Count.pod>
 
 =item *
 

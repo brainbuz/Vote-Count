@@ -14,13 +14,13 @@ use Data::Dumper;
 use Vote::Count::RankCount;
 use Carp;
 
-our $VERSION='1.213';
+our $VERSION='1.214';
 
 =head1 NAME
 
 Vote::Count::TieBreaker
 
-=head1 VERSION 1.213
+=head1 VERSION 1.214
 
 =head1 Synopsis
 
