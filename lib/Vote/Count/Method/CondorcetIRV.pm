@@ -9,13 +9,13 @@ use Moose;
 extends 'Vote::Count';
 with 'Vote::Count::BottomRunOff';
 
-our $VERSION='1.214';
+our $VERSION='2.00';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 1.214
+=head1 VERSION 2.00
 
 =cut
 
@@ -123,7 +123,6 @@ sub SmithSetIRV ( $E, $tiebreaker = 'all' ) {
 # sub BTRIRV ( $E ) {
 
 # }
-
 
 # sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
 #   # external $active should not be changed.

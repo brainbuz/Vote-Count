@@ -17,13 +17,13 @@ use Vote::Count::Matrix;
 
 no warnings 'experimental';
 
-our $VERSION='1.214';
+our $VERSION='2.00';
 
 =head1 NAME
 
 Vote::Count - a tool kit for preferential ballots
 
-=head1 VERSION 1.214
+=head1 VERSION 2.00
 
 =head2 A Toolkit for Resolving Preferential Ballots.
 
@@ -107,7 +107,7 @@ __PACKAGE__->meta->make_immutable;
 
 =item *
 
-L<Vote::Count>
+L<Vote::Count - a tool kit for preferential ballots>
 
 =item *
 
@@ -203,11 +203,11 @@ L<Vote::Count::Method::WIGM>
 
 =item *
 
-L<Vote::Count::MultiMember|Vote::Count::MultiMember - Overview of Proportional and Multi Member elections and Vote::Count support for them.>
+L<Vote::Count::MultiMember - Overview of Multi Member and Proportional Elections and Vote::Count support for them.>
 
 =item *
 
-L<Vote::Count::Overview|Vote::Count::Overview - Intorduction to Vote::Count and Alternative Voting>
+L<Vote::Count::Overview>
 
 =item *
 
@@ -232,6 +232,10 @@ L<Vote::Count::Score>
 =item *
 
 L<Vote::Count::Start>
+
+=item *
+
+L<Vote::Count::TextTableTiny>
 
 =item *
 
