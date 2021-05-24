@@ -157,7 +157,7 @@ sub VCUpdateActive ($I) {
   my $active = {};
   for my $k ( keys $I->GetChoiceStatus()->%* ) {
     $active->{$k} = 1 if $I->{'choice_status'}->{$k}{'state'} eq 'hopeful';
-    $active->{$k} = 1 if $I->{'choice_status'}->{$k}{'state'} eq 'pending';
+    # $active->{$k} = 1 if $I->{'choice_status'}->{$k}{'state'} eq 'pending';
   }
   $I->SetActive($active);
 }
@@ -457,7 +457,7 @@ Takes the arguments of a Choice and a hashref with the keys 'state' and 'votes'.
 
 =head3 VCUpdateActive
 
-Update the ActiveSet of the underlying Vote::Count object to match the set of Choices that are currently 'hopeful' or 'pending'.
+Update the ActiveSet of the underlying Vote::Count object to match the set of Choices that are currently 'hopeful'.
 
 =head2 Elected and Pending
 
