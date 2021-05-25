@@ -320,6 +320,16 @@ L<Vote::Count::TieBreaker>
 
 =back
 
+=head3 STV
+
+=over
+
+=item *
+
+L<Vote::Count::Charge>
+
+=back
+
 =head3 Return Their Own Objects
 
 =over
