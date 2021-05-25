@@ -107,7 +107,7 @@ __PACKAGE__->meta->make_immutable;
 
 =item *
 
-L<Vote::Count - a tool kit for preferential ballots>
+L<Vote::Count>
 
 =item *
 
@@ -203,7 +203,7 @@ L<Vote::Count::Method::WIGM>
 
 =item *
 
-L<Vote::Count::MultiMember - Overview of Multi Member and Proportional Elections and Vote::Count support for them.>
+L<Vote::Count::MultiMember>
 
 =item *
 
