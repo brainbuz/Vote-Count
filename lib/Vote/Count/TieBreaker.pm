@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use 5.024;
 
-use feature qw /postderef signatures/;
+use feature qw /postderef signatures switch/;
 
 package Vote::Count::TieBreaker;
 use Moose::Role;
@@ -13,6 +13,7 @@ use Path::Tiny;
 use Data::Dumper;
 use Vote::Count::RankCount;
 use Carp;
+use Try::Tiny;
 
 our $VERSION='2.00';
 
@@ -37,16 +38,20 @@ Vote::Count::TieBreaker
 
 The most important thing for a Tie Breaker to do is it should use some reproducible difference in the Ballots to pick a winner from a Tie. The next thing it should do is make sense. Finally, the ideal Tie Breaker will resolve when there is any difference to be found. The only fully resolvable method is unfortunately Random, but that is not reproducable between runs. Precedence sets a fixed resolution order and can be used to make Random reproducible.
 
-TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker is called internally from the resolution method via the TieBreaker function, which requires the caller to pass its TieBreakMethod.
+TieBreakMethod is specified as an argument to Vote::Count->new(). The TieBreaker is called internally from the resolution method via the TieBreaker function, the caller is required to pass its TieBreakMethod.
 
 =head1 TieBreakMethod argument to Vote::Count->new
 
   'approval'
+  'topcount'
   'all' [ eliminate all tied choices ]
-  'borda' [ applies Borda Count to current Active set ]
+  'borda' [ Borda Count to current Active set ]
+  'borda_all' [ includes all choices in Borda Count ]
   'grandjunction' [ more resolveable than simple TopCount would be ]
   'none' [ eliminate no choices ]
   'precedence' [ requires also setting PrecedenceFile ]
+
+Approval, TopCount, and Borda may be passed in either lower case or in the CamelCase form of the method name. These methods only consider the current choices. borda_all calculates the Borda Count with all choices which can yield a different result than just the current choices.
 
 =head1 Grand Junction
 
@@ -211,7 +216,7 @@ This optional argument enables or disables using precedence as a fallback, gener
 
 =head1 UntieList
 
-Sort a list in an order determined by a TieBreaker method, sorted in Descending Order. The TieBreaker must be a method that returns a RankCount object, Borda, TopCount, and Approval, Precedence. To guarrantee reliable resolution Precedence must be used or have been set for fallback.
+Sort a list in an order determined by a TieBreaker method, sorted in Descending Order. The TieBreaker must be a method that returns a RankCount object, Borda, TopCount, and Approval, or it must be Precedence. To guarrantee reliable resolution Precedence must be used or have been set for fallback.
 
   my @orderedlosers = $Election->UntieList( 'Approval', @unorderedlosers );
 
@@ -273,6 +278,7 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
 
 sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
   no warnings 'uninitialized';
+  $tiebreaker = lc $tiebreaker;
   if ( $tiebreaker eq 'none' ) { return @tiedchoices }
   if ( $tiebreaker eq 'all' )  { return () }
   my $choices_hashref = { map { $_ => 1 } @tiedchoices };
@@ -329,29 +335,81 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
   return (@highchoice);
 }
 
-sub UnTieList ( $I, $method, @tied ) {
-  no warnings 'uninitialized';
-  return $I->_precedence_sort( @tied ) if ( lc($method) eq 'precedence' );
-  unless ( $I->TieBreakerFallBackPrecedence() or $I->TieBreakMethod eq 'precedence') {
-    croak
-"TieBreakerFallBackPrecedence must be enabled or the specified method must be precedence to use UnTieList";
-  }
-  return @tied if scalar(@tied) == 1;
-  my @ordered = ();
-  my %active  = ( map { $_ => 1 } @tied );
-  # method should be topcount borda or approval which all take argument of active.
-  my $RC = $I->$method(\%active)->HashByRank();
+# untielist
+# xxxxxx 1. sort criteria
+# 2. tiebraker to rank count
+# 3. fallback (implied)
+# will untie a list according to tiebreaker and precedence fallback.
 
-  for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
-    my @l = @{ $RC->{$level} };
-    my @suborder =
-      ( 1 == @{ $RC->{$level} } )
-      ? @{ $RC->{$level} }
-      : $I->_precedence_sort( @l );
-    push @ordered, @suborder;
+sub UnTieList ( $I, %args ) { # $method, @tied
+  no warnings 'uninitialized';
+  unless ( $I->TieBreakerFallBackPrecedence() or  $I->TieBreakMethod eq 'precedence'  ) {
+    croak
+"TieBreakerFallBackPrecedence must be enabled or TieBreakMethod must be precedence to use UnTieList [UnTieActive and BottomRunOff call it]";
   }
+  my $method1 = $args{method1} ;
+  my $method2 = $args{method2} || undef;
+  my @tied = $args{tied}->@*;
+  # my $method = lc($I->TieBreakMethod());
+  return $I->_precedence_sort( @tied ) if ( $method1 eq 'precedence' );
+
+  # return @tied if scalar( @tied ) <= 1;
+  # given ( lc $method ) {
+  #   when ( 'topcount ') { $method = 'TopCount'}
+  #   when ( 'borda') { $method = 'Borda'}
+  #   when ( 'approval' ) { $method = 'Approval'}
+  #   default { warn "tiebreaker $method is not supported for UntieList, use precedence, borda, topcount or approval"}
+  # }
+  # my $ranked = $I->$method( )
+  my @ordered = ();
+
+  # my %stilltied = map { $_ => 1 } @tied;
+  # while ( keys %stilltied ) {
+  #   push @ordered, $I->TieBreaker( $I->TieBreakMethod, ( keys %stilltied ) );
+  # }
+  # my %active  = ( map { $_ => 1 } @tied );
+  # # method should be topcount borda or approval which all take argument of active.
+  # my $RC = $I->$method(\%active)->HashByRank();
+
+  # for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
+  #   my @l = @{ $RC->{$level} };
+  #   my @suborder = ();
+  #   if ( 1 == $RC->{$level}->@* ) { @suborder = @l }
+  #   else {
+  #     @suborder = $I->_precedence_sort( @l );
+  #   }
+  #   push @ordered, @suborder;
+  # }
   return @ordered;
 }
+
+# OLD version, will needed by untiactive.
+# sub UnTieList ( $I, $method, @tied ) {
+#   no warnings 'uninitialized';
+#   return $I->_precedence_sort( @tied ) if ( lc($method) eq 'precedence' );
+#   unless ( $I->TieBreakerFallBackPrecedence() or $I->TieBreakMethod() eq 'precedence' ) {
+#     croak
+# "TieBreakerFallBackPrecedence must be enabled or a specified method must be precedence to use UnTieList [UnTieActive and BottomRunOff call it]";
+#   }
+#   my $tiebreak = $I->TieBreakMethod;
+#   return @tied if scalar(@tied) == 1;
+#   my @ordered = ();
+#   my %active  = ( map { $_ => 1 } @tied );
+#   # method should be topcount borda or approval which all take argument of active.
+#   my $RC = $I->$method(\%active)->HashByRank();
+
+#   for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
+#     my @l = @{ $RC->{$level} };
+#     my @suborder = ();
+#     if ( 1 == $RC->{$level}->@* ) { @suborder = @l }
+#     else {
+#       @suborder = $I->_precedence_sort( @l );
+#     }
+#     push @ordered, @suborder;
+#   }
+#   return @ordered;
+# }
+
 
 sub UntieActive ( $I, $method1, $method2='precedence' ) {
    if ( lc($method1) eq 'precedence' ) {
@@ -360,7 +418,7 @@ sub UntieActive ( $I, $method1, $method2='precedence' ) {
     }
   my $hasprecedence = 0;
   $hasprecedence = 1 if 1 == $I->TieBreakerFallBackPrecedence();
-  $hasprecedence = 1 if lc($method2) eq 'precedence';
+  $hasprecedence = 1 if lc($method2) eq 'precedence' ;
   unless ($hasprecedence) {
     croak
 "TieBreakerFallBackPrecedence must be enabled or one of the specified methods must be precedence to use UntieActive";

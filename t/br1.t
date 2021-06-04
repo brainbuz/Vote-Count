@@ -58,6 +58,10 @@ is_deeply(  $B2->BottomRunOff(),
  'BottomRunOff picked the winner and eliminate and had the right message'
  );
 
+
+done_testing;
+=pod
+
 note( 'Delete some of the bottom choices');
 for my $eliminate ( qw( ROCKYROAD RUMRAISIN STRAWBERRY TOAD) ) {
   $B2->Defeat( $eliminate );

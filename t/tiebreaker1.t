@@ -77,7 +77,7 @@ subtest 'object tiebreakers' => sub {
 'borda_all returns choice that won (different winner than borda on active!)'
   );
   my @resolve4 =
-    sort $I5->TieBreaker( 'approval', $active, ( 'VANILLA', 'CHOCOLATE' ) );
+    sort $I5->TieBreaker( 'Approval', $active, ( 'VANILLA', 'CHOCOLATE' ) );
   is_deeply(
     \@resolve4,
     [ 'CHOCOLATE', 'VANILLA' ],

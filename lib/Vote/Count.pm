@@ -78,6 +78,10 @@ sub BUILD {
   $self->{'LogD'} .= localtime->cdate . "\n";
   # Terse Log
   $self->{'LogT'} = '';
+  # Force build of Active, Methods that deal with it often go to $self->{'Active'}
+  # make sure it is built before this happens, Active has to be built after
+  # loading ballotset.
+  $self->GetActive();
 }
 
 # load the roles providing the underlying ops.
@@ -85,7 +89,7 @@ with
   'Vote::Count::Common',
   'Vote::Count::Approval',
   'Vote::Count::Borda',
-  'Vote::Count::BottomRunOff',
+  # 'Vote::Count::BottomRunOff',
   'Vote::Count::Floor',
   'Vote::Count::IRV',
   'Vote::Count::Log',
