@@ -190,7 +190,7 @@ Implements some basic methods for resolving ties. The default value for IRV is '
 
 TieBreaker returns a list containing the winner, if the method is 'all' the list is empty, if 'none' the original @tiedchoices list is returned. If the TieBreaker is a tie there will be multiple elements.
 
-=head1 Precedence
+=head1 Breaking Ties With Precedence
 
 Since many existing Elections Rules call for Random, and Vote::Count does not accept Random as the result will be different bewtween runs, Precedence allows the Administrators of an election to randomly or arbitrarily determine who will win ties before running Vote::Count.
 
@@ -202,6 +202,13 @@ The Precedence list takes the choices of the election one per line. Choices defe
    PrecedenceFile => '/path/to/precedencefile');
 
 A compound Tie Breaker can be created with a precedence list and any other methods that create an ordered list (Top Count, Approval, Borda), that can then be used for a new Precdence File. This is slight different than using Precedence as a fall back as the methods are normally checked against the current state, this variant only used the initial state.
+
+=head2 Precedence (Method)
+
+Returns a RankCount object from the Precedence List. Takes a HashRef of an Active set as an optional argument, defaults to the Current Active Set.
+
+  my $RankCountByPrecedence = $Election->Precedence();
+  my $RankCountByPrecedence = $Election->Precedence( $active );
 
 =head2 CreatePrecedenceRandom
 
@@ -341,27 +348,40 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
 # 3. fallback (implied)
 # will untie a list according to tiebreaker and precedence fallback.
 
-sub UnTieList ( $I, %args ) { # $method, @tied
+sub Precedence ( $I, $active=undef ) {
+  $active = $I->Active() unless defined $active;
+  return Vote::Count::RankCount->newFromList( $I->_precedence_sort( keys( $active->%* )) );
+}
+
+sub precedence { Precedence( @_ ) }
+
+sub _shortuntie ( $tied, $rc ) {
+
+}
+
+sub UnTieList ( $I, %args ) { # $ranking, @tied
   no warnings 'uninitialized';
   unless ( $I->TieBreakerFallBackPrecedence() or  $I->TieBreakMethod eq 'precedence'  ) {
     croak
 "TieBreakerFallBackPrecedence must be enabled or TieBreakMethod must be precedence to use UnTieList [UnTieActive and BottomRunOff call it]";
   }
-  my $method1 = $args{method1} ;
-  my $method2 = $args{method2} || undef;
-  my @tied = $args{tied}->@*;
-  # my $method = lc($I->TieBreakMethod());
-  return $I->_precedence_sort( @tied ) if ( $method1 eq 'precedence' );
-
+  my $ranking1 = $args{ranking1} ;
+  my $ranking2 = $args{ranking2} || 'precedence';
+  my @tied =  $args{tied}->@* ;
+  my %tieactive =  map { $_ => 1} @tied;
+  my @ordered = ();
+  # my $ranking = lc($I->TieBreakMethod());
+  return $I->_precedence_sort( @tied ) if ( $ranking1 eq 'precedence' );
+  my $RC1 = $I->$ranking1( \%tieactive )->HashByRank();
+  my $RC2 = $I->$ranking2( \%tieactive )->HashByRank();
   # return @tied if scalar( @tied ) <= 1;
-  # given ( lc $method ) {
+  # given ( lc $ranking ) {
   #   when ( 'topcount ') { $method = 'TopCount'}
   #   when ( 'borda') { $method = 'Borda'}
   #   when ( 'approval' ) { $method = 'Approval'}
   #   default { warn "tiebreaker $method is not supported for UntieList, use precedence, borda, topcount or approval"}
   # }
   # my $ranked = $I->$method( )
-  my @ordered = ();
 
   # my %stilltied = map { $_ => 1 } @tied;
   # while ( keys %stilltied ) {
@@ -370,16 +390,21 @@ sub UnTieList ( $I, %args ) { # $method, @tied
   # my %active  = ( map { $_ => 1 } @tied );
   # # method should be topcount borda or approval which all take argument of active.
   # my $RC = $I->$method(\%active)->HashByRank();
-
-  # for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
-  #   my @l = @{ $RC->{$level} };
-  #   my @suborder = ();
-  #   if ( 1 == $RC->{$level}->@* ) { @suborder = @l }
-  #   else {
-  #     @suborder = $I->_precedence_sort( @l );
-  #   }
-  #   push @ordered, @suborder;
-  # }
+my $RC = $RC1;
+  for my $level ( sort { $a <=> $b } ( keys $RC->%* ) ) {
+    my @l = @{ $RC->{$level} };
+if( $args{dump}) {
+  warn "level $level -- tied @l";
+}
+    my @suborder = ();
+    if ( 1 == $RC->{$level}->@* ) { @suborder = @l }
+    elsif ( $ranking2 eq 'precedence' ) {
+      @suborder = $I->_precedence_sort( @l );
+    } else {
+      @suborder = $I->UntieList( ranking1 => $ranking2, ranking2 => 'precedence', tied => [ @l ] );
+    }
+    push @ordered, @suborder;
+  }
   return @ordered;
 }
 

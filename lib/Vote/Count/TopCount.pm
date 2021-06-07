@@ -120,6 +120,8 @@ sub TopCount ( $self, $active = undef ) {
   }
 }
 
+sub topcount { TopCount(@_) }
+
 =head2 TopChoice
 
 Returns the Top Choice on a specific ballot from the last TopCount operation. The ballot is identified by it's key in the ballotset.

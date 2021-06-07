@@ -105,6 +105,8 @@ sub Approval ( $self, $active = undef, $cutoff = 0 ) {
   }
 }
 
+sub approval { Approval(@_) }
+
 sub _non_approval_rcv_do ( $I, $ballots ) {
   my $active = $I->Active();
   my %nonapproval = ( map { $_ => 0 } keys( $active->%* ) );

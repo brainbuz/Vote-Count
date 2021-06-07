@@ -191,6 +191,8 @@ BORDALOOPACTIVE:
   return Vote::Count::RankCount->Rank($BordaCounted);
 }
 
+sub borda { Borda(@_) }
+
 1;
 
 #FOOTER

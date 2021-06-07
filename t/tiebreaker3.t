@@ -31,10 +31,10 @@ subtest 'UnTieList' => sub {
     TieBreakerFallBackPrecedence => 1,
   );
 
-  is_deeply( [$E->UnTieList( method1 => 'precedence', tied => ['VANILLA'])], ['VANILLA'], 'precedence with 1 just returned it');
+  is_deeply( [$E->UnTieList( ranking1 => 'precedence', tied => ['VANILLA'])], ['VANILLA'], 'precedence with 1 just returned it');
   # $E->TieBreakMethod( 'approval');
   is_deeply( [
-    $E->UnTieList( method1 => 'Approval', tied => ['CHOCOLATE'] ) ],
+    $E->UnTieList( ranking1 => 'Approval', tied => ['CHOCOLATE'] ) ],
     ['CHOCOLATE'],
     'approval with 1 just returned it');
 
@@ -42,7 +42,7 @@ subtest 'UnTieList' => sub {
   my %args = ();
 
   $E->TieBreakMethod( 'precedence');
-  %args = ( 'method1' => 'precedence', 'tied' => \@tied );
+  %args = ( 'ranking1' => 'precedence', 'tied' => \@tied );
   is_deeply(
     [ $E->UnTieList( %args )],
     [ qw( CARAMEL RUMRAISIN CHERRY CHOCOLATE STRAWBERRY)],
@@ -50,24 +50,27 @@ subtest 'UnTieList' => sub {
 
   # $E->TieBreakMethod( 'Approval');
   is_deeply(
-    [ $E->UnTieList( method1 => 'Approval', tied => \@tied )],
+    [ $E->UnTieList( ranking1 => 'Approval', tied => \@tied )],
     [ qw( CHERRY CHOCOLATE CARAMEL RUMRAISIN STRAWBERRY)],
     'approval tiebreaker with sub-resolution by precedence');
 
   is_deeply(
-    [ $E->UnTieList( method1 => 'Approval', tied => ['CHOCCHUNK', 'STRAWBERRY'] )],
+    [ $E->UnTieList( ranking1 => 'Approval', tied => ['CHOCCHUNK', 'STRAWBERRY'] )],
     [ qw( STRAWBERRY CHOCCHUNK )],
     'approval resolves 2 choices');
 
   is_deeply(
-    [ $E->UnTieList( method1 => 'Approval', tied => ['STRAWBERRY', 'CHOCCHUNK'] )],
+    [ $E->UnTieList( ranking1 => 'Approval', tied => ['STRAWBERRY', 'CHOCCHUNK'] )],
     [ qw( STRAWBERRY CHOCCHUNK )],
     'approval resolved same 2 choices with order switched');
 
   # $E->TieBreakMethod( 'TopCount');
+  my %tie = map { $_ => 1 } ( qw/CHERRY CHOCOLATE CARAMEL RUMRAISIN STRAWBERRY/);
+  note $E->TopCount(\%tie)->RankTable();
+  note $E->Approval(\%tie)->RankTable();
   is_deeply(
-    [ $E->UnTieList( method1 => 'TopCount', tied => \@tied )],
-    [ qw( STRAWBERRY CHERRY CHOCOLATE CARAMEL RUMRAISIN)],
+    [ $E->UnTieList( ranking1 => 'TopCount', tied => \@tied , dump => 1 )],
+    [ qw( CHERRY CHOCOLATE CARAMEL RUMRAISIN STRAWBERRY )],
     'topcount tiebreaker with sub-resolution by precedence');
 
   # p $E->TopCount()->RankTable();
