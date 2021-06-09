@@ -26,7 +26,7 @@ subtest 'Exceptions' => sub {
     dies {
       my $z =
         Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'), );
-      $z->UntieActive( 1, 2 );
+      $z->UnTieActive( ranking1 => 'topcount' );
     },
     qr/TieBreakerFallBackPrecedence/,
     "Precedence must be method or fallback to use UntieActive"
@@ -36,7 +36,7 @@ subtest 'Exceptions' => sub {
     dies {
       my $z =
         Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'), );
-      $z->UnTieList( 'TopCount', 'BANANA', 'FUDGE' );
+      $z->UnTieList( ranking1 => 'TopCount', tied => [ 'BANANA', 'FUDGE' ] );
     },
     qr/TieBreakerFallBackPrecedence/,
     "Precedence must be method or fallback to use UnTieList"
