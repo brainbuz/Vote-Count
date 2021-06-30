@@ -17,7 +17,7 @@ use List::Util qw( min max sum);
 use Carp;
 use Try::Tiny;
 
-our $VERSION = '2.00';
+our $VERSION='2.00';
 
 =head1 NAME
 
@@ -218,7 +218,7 @@ This optional argument enables or disables using precedence as a fallback, gener
 
 =head1 UnTieList
 
-Sort a list in an order determined by a ranking method, sorted in Descending Order. The ranking must be a method that returns a RankCount object: Borda, TopCount, Precedence and Approval. If the tie is not resolved it will fallback to Precedence.
+Sort a list in an order determined by a ranking method, sorted in Descending Order. The ranking must be a method that returns a RankCount object: Borda, TopCount, Precedence and Approval. If the tie is not resolved it will fall back to Precedence.
 
   my @orderedlosers = $Election->UnTieList(
     'ranking1' => $Election->TieBreakMethod(), 'tied' => \@unorderedlosers );
@@ -228,11 +228,11 @@ A second method may be provided.
   my @orderedlosers = $Election->UnTieList(
     'ranking1' => 'TopCount', 'ranking2' => 'Borda', 'tied' => \@unorderedlosers );
 
-The Rankings are generated at the beginning and used for all resolutions. Precedence must be enabled by either setting the TieBreakMethod to Precedence or setting TieBreakerFallBackPrecedence to a true value.
+This method requires that Precedence be enabled either by having enabled TieBreakerFallBackPrecedence or by setting the TieBreakMethod to Precedence.
 
 =head1 UnTieActive
 
-Produces a precedence list of all the active choices in the election. Takes the same arguments as UnTieList.
+Produces a precedence list of all the active choices in the election. Takes the same ranking1 and ranking2 arguments as UnTieList.
 
   my @untiedset = $Election->UnTieActive( 'ranking1' => 'TopCount', 'ranking2' => 'Approval');
 
@@ -390,8 +390,14 @@ sub UnTieList ( $I, %args ) {
 
   my @ordered = ();
   return $I->_precedence_sort(@tied) if ( lc($ranking1) eq 'precedence' );
-  my $RC1 = $I->$ranking1( \%tieactive )->HashByRank();
-  my $RC2 = $I->$ranking2( \%tieactive )->HashWithOrder();
+  my $RC1 = try { $I->$ranking1( \%tieactive )->HashByRank() }
+    catch {
+      croak "Unable to rank choices by ${\ do { $ranking1 ? $ranking1 : 'missing method'} }."
+      };
+  my $RC2 = try {$I->$ranking2( \%tieactive )->HashWithOrder()}
+    catch {
+      croak "Unable to rank choices by ${\ do { $ranking2 ? $ranking2 : 'missing method'} }."
+      };
   for my $level ( sort { $a <=> $b } ( keys $RC1->%* ) ) {
     my @l = @{ $RC1->{$level} };
     my @suborder = ();
@@ -408,7 +414,8 @@ sub UnTieList ( $I, %args ) {
 }
 
 sub UnTieActive ( $I, %ARGS ) {
-  $I->UnTieList( %ARGS, 'tied' => [ $I->GetActiveList() ], );
+  $ARGS{'tied'} = [ $I->GetActiveList() ];
+  $I->UnTieList( %ARGS );
 }
 
 1;

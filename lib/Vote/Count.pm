@@ -89,7 +89,7 @@ with
   'Vote::Count::Common',
   'Vote::Count::Approval',
   'Vote::Count::Borda',
-  # 'Vote::Count::BottomRunOff',
+  'Vote::Count::BottomRunOff',
   'Vote::Count::Floor',
   'Vote::Count::IRV',
   'Vote::Count::Log',
@@ -111,7 +111,7 @@ __PACKAGE__->meta->make_immutable;
 
 =item *
 
-L<Vote::Count>
+L<Vote::Count - a tool kit for preferential ballots>
 
 =item *
 
@@ -207,7 +207,7 @@ L<Vote::Count::Method::WIGM>
 
 =item *
 
-L<Vote::Count::MultiMember>
+L<Vote::Count::MultiMember - Overview of Multi Member and Proportional Elections and Vote::Count support for them.>
 
 =item *
 
