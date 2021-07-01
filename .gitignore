@@ -1,5 +1,6 @@
 startlib
 .*
+!.github
 *ERR
 *LOG
 pod.html

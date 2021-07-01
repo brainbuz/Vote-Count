@@ -283,6 +283,7 @@ sub CreatePrecedenceRandom ( $I, $outfile = '/tmp/precedence.txt' ) {
   my @precedence =
     ( map { $randomized{$_} } sort { $a <=> $b } ( keys %randomized ) );
   path($outfile)->spew( join( "\n", @precedence ) . "\n" );
+  $I->PrecedenceFile( $outfile );
   return @precedence;
 }
 
@@ -376,7 +377,6 @@ sub _shortuntie ( $I, $RC, @tied ) {
 }
 
 sub UnTieList ( $I, %args ) {
-open my $lg, '>>', '/tmp/vc.debug';
   no warnings 'uninitialized';
   unless ( $I->TieBreakerFallBackPrecedence()
     or lc($I->TieBreakMethod) eq 'precedence' )
@@ -389,21 +389,16 @@ open my $lg, '>>', '/tmp/vc.debug';
   my @tied      = $args{tied}->@*;
   my %tieactive = map { $_ => 1 } @tied;
 
-say $lg qq/****\nranking 1 $ranking1 ranking2 $ranking2 tied @tied/;
   my @ordered = ();
   return $I->_precedence_sort(@tied) if ( lc($ranking1) eq 'precedence' );
   my $RC1 = try { $I->$ranking1( \%tieactive )->HashByRank() }
     catch {
       my $mthstr = $ranking1 ? $ranking1 : "missing ranking1 . methods $ranking1 ? $ranking2 ";
-say $lg "croaking \@ranking1 Unable to rank choices by $mthstr.";
       croak "Unable to rank choices by $mthstr."
       };
-say $lg qq/. trying ranking2 $ranking2/;
-  return $I->_precedence_sort(@tied) if ( lc($ranking2) eq 'precedence' );
   my $RC2 = try {$I->$ranking2( \%tieactive )->HashWithOrder() }
     catch {
       my $mthstr = $ranking2 ? $ranking2 : "missing ranking2 . methods $ranking1 ? $ranking2 ";
-say $lg "croaking \@ranking2 Unable to rank choices by $mthstr.";
       croak "Unable to rank choices by $mthstr."
       };
   for my $level ( sort { $a <=> $b } ( keys $RC1->%* ) ) {
