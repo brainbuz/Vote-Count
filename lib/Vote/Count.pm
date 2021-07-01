@@ -17,7 +17,7 @@ use Vote::Count::Matrix;
 
 no warnings 'experimental';
 
-our $VERSION='2.00';
+our $VERSION = '2.00';
 
 =head1 NAME
 
@@ -56,7 +56,7 @@ has 'PairMatrix' => (
   builder => '_buildmatrix',
 );
 
-sub _buildmatrix ( $self ) {
+sub _buildmatrix ($self) {
   my $tiebreak =
     defined( $self->TieBreakMethod() )
     ? $self->TieBreakMethod()
@@ -78,10 +78,18 @@ sub BUILD {
   $self->{'LogD'} .= localtime->cdate . "\n";
   # Terse Log
   $self->{'LogT'} = '';
-  # Force build of Active, Methods that deal with it often go to $self->{'Active'}
-  # make sure it is built before this happens, Active has to be built after
-  # loading ballotset.
+# Force build of Active, Methods that deal with it often go to $self->{'Active'}
+# make sure it is built before this happens, Active has to be built after
+# loading ballotset.
   $self->GetActive();
+  # Perform a validation for tiebreaker.
+  if ( defined $self->TieBreakMethod ) {
+    if ( lc( $self->TieBreakMethod ) eq 'precedence' ) {
+      unless ( defined $self->PrecedenceFile() ) {
+        die 'Precedence File must be defined when setting TieBreakMethod to Precedence';
+      }
+    }
+  }
 }
 
 # load the roles providing the underlying ops.

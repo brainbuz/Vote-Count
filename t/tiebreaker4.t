@@ -20,6 +20,8 @@ use Vote::Count::ReadBallots 'read_ballots';
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
+unlink '/tmp/vc.debug';
+
 subtest 'Exceptions' => sub {
 
   like(
@@ -41,6 +43,17 @@ subtest 'Exceptions' => sub {
     qr/TieBreakerFallBackPrecedence/,
     "Precedence must be method or fallback to use UnTieList"
   );
+
+  like(
+    dies {
+      my $z =
+        Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'),
+          TieBreakMethod => 'Precedence');
+    },
+    qr/Precedence File must be defined/,
+    "Using Precedence without specifying Precedence file is fatal"
+  );
+
   like(
     dies {
       my $ties = Vote::Count->new(
@@ -53,4 +66,36 @@ subtest 'Exceptions' => sub {
      "undefined tiebreak method is fatal when tiebreaker is called."
   );
 };
+
+subtest 'bad untie methods' => sub {
+
+  for my $A (
+    { ranking1 => undef, test => 'missing', tested => 'ranking1 undef'},
+    { ranking1 => 'bucklin', ranking2 => '', test => 'bucklin', tested => 'ranking1 is unavailable ranking' },
+    { ranking1 => 'borda', ranking2 => 'bucklin', test => 'bucklin', tested => 'ranking2 is unavailable ranking' }
+  ) {
+    my $z = Vote::Count->new(
+        BallotSet => read_ballots('t/data/ties1.txt'),
+        TieBreakerFallBackPrecedence => 1 );
+    like(
+      dies { $z->UnTieActive( ranking1 => $A->{'ranking1'}, ranking2 => $A->{'ranking2'} ) },
+      qr/$A->{'test'}/,
+      "Tested ${\ $A->{'tested'} } -- RegexMatch /${\ $A->{'test'} }/"
+    );
+  }
+
+  for my $B (
+    { ranking1 => 'borda', ranking2 => undef, tested => 'ranking2 undef which should live' },
+  ) {
+    my $z = Vote::Count->new(
+        BallotSet => read_ballots('t/data/ties1.txt'),
+        TieBreakerFallBackPrecedence => 1 );
+    ok(
+      lives { $z->UnTieActive( ranking1 => $B->{'ranking1'}, ranking2 => $B->{'ranking2'} ) },
+      "Tested ${\ $B->{'tested'} }"
+    );
+  }
+};
+
+
 done_testing;

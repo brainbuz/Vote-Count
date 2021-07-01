@@ -376,27 +376,35 @@ sub _shortuntie ( $I, $RC, @tied ) {
 }
 
 sub UnTieList ( $I, %args ) {
+open my $lg, '>>', '/tmp/vc.debug';
   no warnings 'uninitialized';
   unless ( $I->TieBreakerFallBackPrecedence()
-    or $I->TieBreakMethod eq 'precedence' )
+    or lc($I->TieBreakMethod) eq 'precedence' )
   {
     croak
 "TieBreakerFallBackPrecedence must be enabled or TieBreakMethod must be precedence to use UnTieList [UnTieActive and BottomRunOff call it]";
   }
-  my $ranking1  = $args{ranking1};
-  my $ranking2  = $args{ranking2} || 'precedence';
+  my $ranking1  = $args{ranking1} ;
+  my $ranking2  = $args{ranking2} || 'Precedence';
   my @tied      = $args{tied}->@*;
   my %tieactive = map { $_ => 1 } @tied;
 
+say $lg qq/****\nranking 1 $ranking1 ranking2 $ranking2 tied @tied/;
   my @ordered = ();
   return $I->_precedence_sort(@tied) if ( lc($ranking1) eq 'precedence' );
   my $RC1 = try { $I->$ranking1( \%tieactive )->HashByRank() }
     catch {
-      croak "Unable to rank choices by ${\ do { $ranking1 ? $ranking1 : 'missing method'} }."
+      my $mthstr = $ranking1 ? $ranking1 : "missing ranking1 . methods $ranking1 ? $ranking2 ";
+say $lg "croaking \@ranking1 Unable to rank choices by $mthstr.";
+      croak "Unable to rank choices by $mthstr."
       };
-  my $RC2 = try {$I->$ranking2( \%tieactive )->HashWithOrder()}
+say $lg qq/. trying ranking2 $ranking2/;
+  return $I->_precedence_sort(@tied) if ( lc($ranking2) eq 'precedence' );
+  my $RC2 = try {$I->$ranking2( \%tieactive )->HashWithOrder() }
     catch {
-      croak "Unable to rank choices by ${\ do { $ranking2 ? $ranking2 : 'missing method'} }."
+      my $mthstr = $ranking2 ? $ranking2 : "missing ranking2 . methods $ranking1 ? $ranking2 ";
+say $lg "croaking \@ranking2 Unable to rank choices by $mthstr.";
+      croak "Unable to rank choices by $mthstr."
       };
   for my $level ( sort { $a <=> $b } ( keys $RC1->%* ) ) {
     my @l = @{ $RC1->{$level} };
