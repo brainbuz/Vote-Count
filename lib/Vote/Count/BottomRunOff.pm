@@ -3,10 +3,10 @@ use Moose::Role;
 
 use 5.024;
 no warnings 'experimental';
-use feature ( 'signatures');
+use feature ('signatures');
 use Carp;
 
-our $VERSION='2.00';
+our $VERSION = '2.00';
 
 =head1 NAME
 
@@ -16,9 +16,7 @@ Vote::Count::BottomRunOff
 
 =head2 Description
 
-This Module is incomplete and should not be used for the time being.
-
-Bottom RunOff is an elimination method which takes the two lowest choices, usually by Top Count, but alternately by another method such as Approval or Borda, the choice which would lose a runoff is eliminated.
+Bottom RunOff is an elimination method which takes the two lowest choices, the choice which would lose a runoff is eliminated.
 
 =head1 Synopsis
 
@@ -35,44 +33,36 @@ The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence m
   my $result = $Election->BottomRunOff( 'Approval');
   my $result = $Election->BottomRunOff( 'Borda', 'TopCount' );
 
-The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff is formatted as a table.
+The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff is the totals for the two choices in the runoff.
 
 =cut
 
-sub BottomRunOff ( $Election, $method1='TopCount', $method2='precedence' ) {
+sub BottomRunOff ( $Election )
+{
 
-  my @ranked = $Election->UnTieActive( $method1, $method2 )->OrderedList();
-# warn "method1 $method1, method2 $method2" ;
-# warn $Election->$method1->RankTable();
-# # warn "ranked @ranked" ;
-carp qq/
-&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-DEBUGGERY
-method1 $method1, method2 $method2
-${\ $Election->$method1->RankTable() }
-ranked @ranked
-&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-/;
+  my @ranked = $Election->UnTieActive(
+    'ranking1' => 'TopCount',
+    'ranking2' => 'Precedence'
+  );
+#   carp qq/
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# DEBUGGERY
+# ${\ $Election->TopCount->RankTable() }
+# ranked @ranked
+# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+# /;
 
-# warn "last2 $ranked[-2],  $ranked[-1]";
-
-# my $eliminate = pop @ranked;
-# my $continuing = pop @ranked;
-  # my ( $continuing, $eliminate ) = ( $ranked[-2], $ranked[-1] );
-  # my ( $continuing, $eliminate ) = $Election->UnTieList( $method1, $ranked[-1], $ranked[-2]);
-
-  # my %choices = ( $ranked[-2] => 1, $ranked[-1] => 1 );
-  # my $tc = $Election->TopCount( \%choices );
-  # my $continuing = $Election->TopChoice();
-  # delete $choices{$continuing};
-  # my ($eliminate ) = keys %choices;
-  # $Election->logt( "Bottom Runoff: Defeat $eliminate" );
-  # $Election->logv( $tc->RankTable() );
-
+  my $pairing =
+    $Election->PairMatrix()->GetPairResult( $ranked[-2], $ranked[-1] );
+  my $continuing = $pairing->{'winner'};
+  my $eliminate  = $pairing->{'loser'};
+  # pairing should never be a tie because precedence must be enabled,
+  # there should be no ties in the Matrix.
+  my $runoffmsg = qq/Elimination Runoff: *$continuing* $pairing->{$continuing} > $eliminate $pairing->{$eliminate}/;
   return {
-    # eliminate => $eliminate,
-    # continuing => $continuing,
-    # runoff => "Elimination Runoff:\n${\ $tc->RankTable }"
+    eliminate  => $eliminate,
+    continuing => $continuing,
+    runoff     => $runoffmsg
   };
 }
 

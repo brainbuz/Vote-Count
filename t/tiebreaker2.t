@@ -183,7 +183,6 @@ subtest 'Precedence method to return RankCount Object' => sub {
     'removed member from active set and sorted by precedence');
 };
 
-
 subtest 'changing tiebreakers and generating precedence' => sub {
   my $A = Vote::Count::Charge->new(
     Seats     => 5,

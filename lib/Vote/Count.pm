@@ -61,12 +61,15 @@ sub _buildmatrix ($self) {
     defined( $self->TieBreakMethod() )
     ? $self->TieBreakMethod()
     : 'none';
-  return Vote::Count::Matrix->new(
+  my %args = (
     BallotSet      => $self->BallotSet(),
     Active         => $self->Active(),
     TieBreakMethod => $tiebreak,
     LogTo          => $self->LogTo() . '_matrix',
   );
+  $args{'PrecedenceFile'} = $self->PrecedenceFile() if $self->PrecedenceFile();
+  $args{'TieBreakerFallBackPrecedence'} = $self->TieBreakerFallBackPrecedence();
+  return Vote::Count::Matrix->new( %args  );
 }
 
 sub BUILD {
