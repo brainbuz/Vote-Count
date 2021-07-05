@@ -10,13 +10,13 @@ use Moose::Role;
 no warnings 'experimental';
 use Path::Tiny 0.108;
 
-our $VERSION='2.00';
+our $VERSION='2.01';
 
 =head1 NAME
 
 Vote::Count::Log
 
-=head1 VERSION 2.00
+=head1 VERSION 2.01
 
 =cut
 

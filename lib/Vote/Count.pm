@@ -8,6 +8,7 @@ use feature qw /postderef signatures/;
 package Vote::Count;
 use namespace::autoclean;
 use Moose;
+use MooseX::StrictConstructor;
 
 use Data::Dumper;
 use Time::Piece;
@@ -17,13 +18,13 @@ use Vote::Count::Matrix;
 
 no warnings 'experimental';
 
-our $VERSION = '2.00';
+our $VERSION='2.01';
 
 =head1 NAME
 
 Vote::Count - a tool kit for preferential ballots
 
-=head1 VERSION 2.00
+=head1 VERSION 2.01
 
 =head2 A Toolkit for Resolving Preferential Ballots.
 

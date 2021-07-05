@@ -196,7 +196,6 @@ subtest 'changing tiebreakers and generating precedence' => sub {
   );
   my $B = Vote::Count->new(
     BallotSet      => read_ballots('t/data/data1.txt'),
-    Seats          => 2,
     VoteValue      => 1000000,
     TieBreakMethod => 'grandjunction',
     PrecedenceFile => 't/data/tiebreakerprecedence1.txt',
@@ -209,7 +208,6 @@ subtest 'changing tiebreakers and generating precedence' => sub {
   );
   my $C = Vote::Count->new(
     BallotSet      => read_ballots('t/data/data1.txt'),
-    Seats          => 4,
   );
   $C->CreatePrecedenceRandom();
   $C->TieBreakMethod( 'precedence');

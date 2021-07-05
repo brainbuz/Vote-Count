@@ -9,7 +9,8 @@ use Test2::Tools::Exception qw/dies lives/;
 use File::Temp qw/tempfile tempdir/;
 # use Test::Exception;
 use Carp;
-use Data::Dumper;
+# use Data::Dumper;
+use Data::Printer;
 
 use Path::Tiny;
 # use Storable 'dclone';
@@ -22,6 +23,7 @@ no warnings 'experimental';
 
 unlink '/tmp/vc.debug';
 
+=pod
 subtest 'Exceptions' => sub {
 
   like(
@@ -96,6 +98,21 @@ subtest 'bad untie methods' => sub {
     );
   }
 };
+=cut
 
+todo 'test precedence with matrix and pairmatrix' => sub {
+  my $t3 = Vote::Count->new(
+    BallotSet => read_ballots('t/data/ties3.txt'),
+    PrecedenceFile => 't/data/ties3precedence.txt',
+    TieBreakMethod => 'Precedence',
+    TieBreakerFallBackPrecedence => 1,
+  );
+  # use Carp::Always;
+  note $t3->PairMatrix()->MatrixTable();
+  # p $t3->{'PairMatrix'};
+  note $t3->PairMatrix()->TieBreakerFallBackPrecedence();
+
+};
+ok 1;
 
 done_testing;

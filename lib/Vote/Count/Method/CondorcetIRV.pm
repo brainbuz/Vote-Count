@@ -9,13 +9,13 @@ use Moose;
 extends 'Vote::Count';
 with 'Vote::Count::BottomRunOff';
 
-our $VERSION='2.00';
+our $VERSION='2.01';
 
 =head1 NAME
 
 Vote::Count::Method::CondorcetIRV
 
-=head1 VERSION 2.00
+=head1 VERSION 2.01
 
 =cut
 

@@ -17,13 +17,13 @@ use List::Util qw( min max sum);
 use Carp;
 use Try::Tiny;
 
-our $VERSION='2.00';
+our $VERSION='2.01';
 
 =head1 NAME
 
 Vote::Count::TieBreaker
 
-=head1 VERSION 2.00
+=head1 VERSION 2.01
 
 =head1 Synopsis
 
@@ -370,10 +370,10 @@ sub TieBreaker ( $I, $tiebreaker, $active, @tiedchoices ) {
     'terse'   => $terse,
     'verbose' => $ranked->RankTable(),
   };
-  if ( @highchoice > 1 ) {
-    if ( $I->TieBreakerFallBackPrecedence() ) {
-      return ( $I->TieBreakerPrecedence(@tiedchoices)->{'winner'} );
-    }
+  if ( @highchoice > 1 && $I->TieBreakerFallBackPrecedence() ) {
+    my $winner = $I->TieBreakerPrecedence(@tiedchoices)->{'winner'};
+    $I->{'last_tiebreaker'}{'terse'} .= "\nWinner by Precedence: $winner";
+    return ( $winner );
   }
   return (@highchoice);
 }
