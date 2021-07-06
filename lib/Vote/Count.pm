@@ -50,29 +50,6 @@ Overview of Preferential Ballots for Multi-Member Elections and their implementa
 
 =cut
 
-has 'PairMatrix' => (
-  is      => 'ro',
-  isa     => 'Object',
-  lazy    => 1,
-  builder => '_buildmatrix',
-);
-
-sub _buildmatrix ($self) {
-  my $tiebreak =
-    defined( $self->TieBreakMethod() )
-    ? $self->TieBreakMethod()
-    : 'none';
-  my %args = (
-    BallotSet      => $self->BallotSet(),
-    Active         => $self->Active(),
-    TieBreakMethod => $tiebreak,
-    LogTo          => $self->LogTo() . '_matrix',
-  );
-  $args{'PrecedenceFile'} = $self->PrecedenceFile() if $self->PrecedenceFile();
-  $args{'TieBreakerFallBackPrecedence'} = $self->TieBreakerFallBackPrecedence();
-  return Vote::Count::Matrix->new( %args  );
-}
-
 sub BUILD {
   my $self = shift;
   # Verbose Log

@@ -21,9 +21,6 @@ use Vote::Count::ReadBallots 'read_ballots';
 use feature qw /postderef signatures/;
 no warnings 'experimental';
 
-unlink '/tmp/vc.debug';
-
-=pod
 subtest 'Exceptions' => sub {
 
   like(
@@ -98,21 +95,42 @@ subtest 'bad untie methods' => sub {
     );
   }
 };
-=cut
 
-todo 'test precedence with matrix and pairmatrix' => sub {
+subtest 'test precedence with matrix and pairmatrix' => sub {
   my $t3 = Vote::Count->new(
     BallotSet => read_ballots('t/data/ties3.txt'),
     PrecedenceFile => 't/data/ties3precedence.txt',
-    TieBreakMethod => 'Precedence',
-    TieBreakerFallBackPrecedence => 1,
+    TieBreakMethod => 'approval',
+    TieBreakerFallBackPrecedence => 0,
   );
-  # use Carp::Always;
-  note $t3->PairMatrix()->MatrixTable();
-  # p $t3->{'PairMatrix'};
-  note $t3->PairMatrix()->TieBreakerFallBackPrecedence();
+
+  ok( !$t3->PairMatrix()->GetPairWinner( 'CHOCOLATE', 'CHERRY'),
+    'without precedence CHOCOLATE and CHERRY tie ' .
+      $t3->PairMatrix()->GetPairWinner( 'CHOCOLATE', 'CHERRY'));
+  $t3->TieBreakerFallBackPrecedence(1);
+  $t3->UpdatePairMatrix();
+  is( $t3->PairMatrix()->GetPairWinner( 'CHOCOLATE', 'CHERRY'),
+      'CHOCOLATE',
+      'with precedence fallback CHOCOLATE wins');
+
+  is( $t3->PairMatrix()->GetPairWinner( 'ROCKYROAD', 'RUMRAISIN'),
+    'ROCKYROAD', 'ROCKYROAD defeats RUMRAISIN when approval is first tiebreaker');
+  $t3->TieBreakMethod('Precedence');
+  $t3->UpdatePairMatrix();
+  is( $t3->PairMatrix()->GetPairWinner( 'ROCKYROAD', 'RUMRAISIN'),
+    'RUMRAISIN', 'RUMRAISIN is the winner when the tiebreaker is changed to precedence');
+
+  my $t4 = Vote::Count->new(
+  BallotSet => read_ballots('t/data/ties3.txt'),
+  PrecedenceFile => 't/data/ties3revprecedence.txt',
+  TieBreakMethod => 'approval',
+  TieBreakerFallBackPrecedence => 1,
+  );
+  is( $t4->PairMatrix()->GetPairWinner( 'CHOCOLATE', 'CHERRY'),
+    'CHERRY',
+    'precedence fallback set at object creation, with reversed file: CHERRY wins');
+
 
 };
-ok 1;
 
 done_testing;

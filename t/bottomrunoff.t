@@ -86,18 +86,12 @@ is_deeply(  $R,
  { eliminate => 'CHOCOLATE', continuing => 'MINTCHIP', runoff => $etable },
  'Now getting down to the more popular choices, checking all values again' );
 
-# # Add some tests for ties in the matrix resolved by precedence.
-# my $R = $Tweedles->BottomRunOff();
-# my $meta = $Tweedles->PairMatrix()->meta;
-# for my $attr ( $meta->get_all_attributes ) {
-#     note $attr->name;
-# }
-# note $Tweedles->PairMatrix()->PrecedenceFile;
-# ok 1;
-# p $R;
-# is_deeply(  $R,
-#  { eliminate => 'ROCKYROAD', continuing => 'RUMRAISIN', runoff => $etable },
-#  'Eliminated some other weak choices still had the same bottom runoff'
-#  );
+# Add some tests for ties in the matrix resolved by precedence.
+my $R = $Tweedles->BottomRunOff();
+$etable = q/Elimination Runoff: *TWEEDLE_THREE* 50 > TWEEDLE_DO 50/;
+is_deeply(  $R,
+ { continuing => 'TWEEDLE_THREE', eliminate => 'TWEEDLE_DO', runoff => $etable },
+ 'check a tie that can only resolve by precedence, which is done through matrix'
+ );
 
 done_testing;

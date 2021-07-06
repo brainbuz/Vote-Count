@@ -106,6 +106,10 @@ The winner is the last choice remaining.
 
 The Tie Breaking will be logged to the verbose log, any number of tied choices may be provided.
 
+=head2 Changing Tie Breakers
+
+When Changing Tie Breakers or Precedence Files, the PairMatrix is not automatically updated. To update the PairMatrix it is necessary to call the UpdatePairMatrix Method.
+
 =cut
 
 has 'TieBreakMethod' => (
@@ -264,6 +268,8 @@ To apply Top Count > Approval > Precedence you need to start with a random Prece
   path( 'topapproveprecedence.txt')->spew( "@newbreaker" );
   $Election->PrecedenceFile( 'topapproveprecedence.txt' );
 
+
+
 =cut
 
 sub _precedence_sort ( $I, @list ) {
@@ -273,7 +279,6 @@ sub _precedence_sort ( $I, @list ) {
     %ordered = $I->{'PRECEDENCEORDER'}->%*;
   }
   else {
-warn "Precedence file ${\ $I->PrecedenceFile() }";
     for ( split /\n/, path( $I->PrecedenceFile() )->slurp() ) {
       $_ =~ s/\s//g;    #strip out any accidental white space
       $ordered{$_} = ++$start;
