@@ -6,7 +6,7 @@ no warnings 'experimental';
 use feature ('signatures');
 use Carp;
 
-our $VERSION='2.01';
+our $VERSION = '2.01';
 
 =head1 NAME
 
@@ -23,34 +23,35 @@ Bottom RunOff is an elimination method which takes the two lowest choices, the c
   my $eliminate = $Election->BottomRunOff();
   # log the pairing result
   $Election->logd( $eliminate->{'runoff'} );
-  $Election->logv( "eliminated ${\ $eliminate->{'eliminate'} }."
+  # log elimination in the short log too.
+  $Election->logt( "eliminated ${\ $eliminate->{'eliminate'} }.");
+  # Perform the elimination
   $Election->Defeat( $eliminate->{'eliminate'} );
 
-=head1 BottomRunOff ($method)
+=head1 BottomRunOff
 
-The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence must be true or BottomRunOff will die. It takes a parameter of method, which is the method used to rank the active choices. The default method is 'TopCount', 'Approval' is a common alternative, any method which returns a RankCount object could be used. A second sorting method may also be specified, which must also return a RankCount object.
+The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence must be true or BottomRunOff will die. Takes an optional named parameter of an active set.
 
-  my $result = $Election->BottomRunOff( 'Approval');
-  my $result = $Election->BottomRunOff( 'Borda', 'TopCount' );
+  my $result = $Election->BottomRunOff();
+  my $result = $Election->BottomRunOff( 'active' => $active );
 
-The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff is the totals for the two choices in the runoff.
+Orders the Choices according to Top Count and uses Precedence to resolve any equal rankings. Then conducts a runoff between the two lowest choices in the order.
+
+The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff describes the totals for the two choices in the runoff.
 
 =cut
 
-sub BottomRunOff ( $Election )
-{
+sub BottomRunOff ( $Election, %args ) {
+  # IRV segregates its active set so BottomRunOff needs to accept one
+  my $active = defined $args{'active'}
+          ? $args{'active'}
+          : $Election->GetActive ;
 
-  my @ranked = $Election->UnTieActive(
+  my @ranked = $Election->UnTieList(
     'ranking1' => 'TopCount',
-    'ranking2' => 'Precedence'
+    'ranking2' => 'Precedence',
+    'tied'     => [ keys $active->%* ],
   );
-#   carp qq/
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# DEBUGGERY
-# ${\ $Election->TopCount->RankTable() }
-# ranked @ranked
-# &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-# /;
 
   my $pairing =
     $Election->PairMatrix()->GetPairResult( $ranked[-2], $ranked[-1] );
@@ -58,7 +59,8 @@ sub BottomRunOff ( $Election )
   my $eliminate  = $pairing->{'loser'};
   # pairing should never be a tie because precedence must be enabled,
   # there should be no ties in the Matrix.
-  my $runoffmsg = qq/Elimination Runoff: *$continuing* $pairing->{$continuing} > $eliminate $pairing->{$eliminate}/;
+  my $runoffmsg =
+qq/Elimination Runoff: *$continuing* $pairing->{$continuing} > $eliminate $pairing->{$eliminate}/;
   return {
     eliminate  => $eliminate,
     continuing => $continuing,

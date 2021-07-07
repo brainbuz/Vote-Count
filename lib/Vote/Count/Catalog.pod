@@ -56,7 +56,7 @@ SmithSet IRV: L<Vote::Count::Method::CondorcetIRV>
 
 =item *
 
-BTR IRV: L<Vote::Count::Method::CondorcetIRV>
+BTR IRV: L<Vote::Count::IRV>
 
 =back
 
@@ -91,6 +91,10 @@ SmithSet IRV: L<Vote::Count::Method::CondorcetIRV>
 =item *
 
 MinMax (Winning Votes and Margin) L<Vote::Count::Method::MinMax>
+
+=item *
+
+BTR IRV: L<Vote::Count::IRV>
 
 =back
 

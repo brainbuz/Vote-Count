@@ -87,11 +87,31 @@ is_deeply(  $R,
  'Now getting down to the more popular choices, checking all values again' );
 
 # Add some tests for ties in the matrix resolved by precedence.
-my $R = $Tweedles->BottomRunOff();
+$R = $Tweedles->BottomRunOff();
 $etable = q/Elimination Runoff: *TWEEDLE_THREE* 50 > TWEEDLE_DO 50/;
 is_deeply(  $R,
  { continuing => 'TWEEDLE_THREE', eliminate => 'TWEEDLE_DO', runoff => $etable },
  'check a tie that can only resolve by precedence, which is done through matrix'
  );
+
+subtest 'synopsis' => sub {
+  my $Election = $Tweedles;
+# begin synopsis
+  my $eliminate = $Election->BottomRunOff();
+  # log the pairing result
+  $Election->logd( $eliminate->{'runoff'} );
+  # log elimination in the short log too.
+  $Election->logt( "eliminated ${\ $eliminate->{'eliminate'} }.");
+  # Perform the elimination
+  $Election->Defeat( $eliminate->{'eliminate'} );
+# end synopsis
+  pass( 'No exceptions in synopsis block');
+  like( $Election->logt,
+    qr/eliminated TWEEDLE_DO./,
+    'Check terse log for elimination'
+  );
+};
+
+note 'coverage of passing an active set is in the irv btr tests';
 
 done_testing;

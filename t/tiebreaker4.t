@@ -118,7 +118,7 @@ subtest 'test precedence with matrix and pairmatrix' => sub {
   $t3->TieBreakMethod('Precedence');
   $t3->UpdatePairMatrix();
   is( $t3->PairMatrix()->GetPairWinner( 'ROCKYROAD', 'RUMRAISIN'),
-    'RUMRAISIN', 'RUMRAISIN is the winner when the tiebreaker is changed to precedence');
+    'RUMRAISIN', 'RUMRAISIN will continue when the tiebreaker is changed to precedence');
 
   my $t4 = Vote::Count->new(
   BallotSet => read_ballots('t/data/ties3.txt'),
