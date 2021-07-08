@@ -11,7 +11,7 @@ use Test2::Tools::Class;
 # use Test2::Tools::Exception qw/dies lives/;
 use File::Temp qw/tempfile tempdir/;
 # use Data::Dumper;
-use Data::Printer;
+# use Data::Printer;
 
 use Path::Tiny;
 # use Storable 'dclone';
@@ -83,6 +83,7 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
   my $ties = Vote::Count->new(
     BallotSet                    => read_ballots('t/data/ties1.txt'),
     TieBreakerFallBackPrecedence => 1,
+    TieBreakMethod => 'grandjunction',
   );
   ok( $ties->TieBreakerFallBackPrecedence(), 'fallback precedence is set' );
   is( $ties->PrecedenceFile(),
@@ -93,7 +94,9 @@ subtest 'TieBreakerFallBackPrecedence' => sub {
     'GrandJunction Method goes to fallback.' );
   note('Verify fallback with the tied TWEEDLES set');
   my $tweedles =
-    Vote::Count->new( BallotSet => read_ballots('t/data/tweedles.txt'), );
+    Vote::Count->new(
+      BallotSet => read_ballots('t/data/tweedles.txt'),
+      TieBreakMethod => 'grandjunction');
   $tweedles->TieBreakerFallBackPrecedence(1);
   for my $method (qw /borda topcount approval grandjunction borda_all/) {
     is(

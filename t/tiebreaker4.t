@@ -26,7 +26,9 @@ subtest 'Exceptions' => sub {
   like(
     dies {
       my $z =
-        Vote::Count->new( BallotSet => read_ballots('t/data/ties1.txt'), );
+        Vote::Count->new(
+          BallotSet => read_ballots('t/data/ties1.txt'),
+          TieBreakMethod => 'approval');
       $z->UnTieActive( ranking1 => 'topcount' );
     },
     qr/TieBreakerFallBackPrecedence/,
@@ -75,7 +77,8 @@ subtest 'bad untie methods' => sub {
   ) {
     my $z = Vote::Count->new(
         BallotSet => read_ballots('t/data/ties1.txt'),
-        TieBreakerFallBackPrecedence => 1 );
+        PrecedenceFile => 't/data/tiebreakerprecedence1.txt',
+        TieBreakMethod => 'precedence'  );
     like(
       dies { $z->UnTieActive( ranking1 => $A->{'ranking1'}, ranking2 => $A->{'ranking2'} ) },
       qr/$A->{'test'}/,
@@ -88,6 +91,7 @@ subtest 'bad untie methods' => sub {
   ) {
     my $z = Vote::Count->new(
         BallotSet => read_ballots('t/data/ties1.txt'),
+        TieBreakMethod => 'borda',
         TieBreakerFallBackPrecedence => 1 );
     ok(
       lives { $z->UnTieActive( ranking1 => $B->{'ranking1'}, ranking2 => $B->{'ranking2'} ) },

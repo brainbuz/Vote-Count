@@ -54,8 +54,11 @@ sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
   $self->_IRVDO( active => $active, tiebreaker => $tiebreaker );
 }
 
-sub RunBTRIRV ( $self ) {
-  $self->_IRVDO( 'btr' => 1 );
+sub RunBTRIRV ( $self, %args ) {
+  my $ranking2 = $args{'ranking2'} ? $args{'ranking2'} : 'precedence';
+$self->logd( qq/ranking2 is $ranking2 args were @{[ %args ]} /) if $self->Debug;
+
+  $self->_IRVDO( 'btr' => 1, ranking2 => $ranking2 );
 }
 
 # RunIRV needed a new argument and was a long established method,
@@ -89,6 +92,9 @@ IRVLOOP:
       return $majority;
     }
     elsif ( $args{'btr'}) {
+
+$self->logd( qq/ranking2 is $args{ranking2} active is were @{[ keys %{$active} ]} /) if $self->Debug;
+
       my $br = $self->BottomRunOff( active => $active );
       $self->logd( $br->{'runoff'});
       $self->logv( "Eliminating: ${\ $br->{'eliminate'} }" );

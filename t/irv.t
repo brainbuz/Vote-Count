@@ -190,34 +190,6 @@ subtest 'Range Ballot' => sub {
     $expecttenr, 'Ran IRV on converted Tennessee Range BallotSet' );
 };
 
-subtest 'btr irv' => sub {
-  my $B = Vote::Count->new(
-    BallotSet => read_ballots('t/data/data2.txt'),
-    PrecedenceFile => 't/data/data2precedence.txt',
-    TieBreakMethod => 'Precedence',);
-  path('/tmp/TN.precedence')->spew( "KNOXVILLE\nCHATTANOOGA\nNASHVILLE\nMEMPHIS\n");
-  my $TN =   Vote::Count->new(
-    BallotSet => read_range_ballots('t/data/tennessee.range.json'),
-    PrecedenceFile => '/tmp/TN.precedence',
-    TieBreakMethod => 'Precedence',
-    );
-  my $expectB = {
-    threshold => 8,
-    votes     => 15,
-    winner    => "MINTCHIP",
-    winvotes  => 8
-  };
-  my $expectTN = {
-    threshold => 51,
-    votes     => 100,
-    winner    => "NASHVILLE",
-    winvotes  => 58
-  };
-  is_deeply( try { $B->RunBTRIRV() },
-    $expectB, 'Expected results from BTR IRV' );
-
-  is_deeply( try { $TN->RunBTRIRV() },
-    $expectTN, 'With BTR IRV Nashville wins Tennessee on the Range Ballot' );
-};
+note 'coverage of BTR IRV is in bottomrunoff.t';
 
 done_testing();

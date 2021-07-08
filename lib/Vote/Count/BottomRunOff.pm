@@ -5,6 +5,8 @@ use 5.024;
 no warnings 'experimental';
 use feature ('signatures');
 use Carp;
+use Data::Dumper;
+use Data::Printer;
 
 our $VERSION = '2.01';
 
@@ -47,14 +49,20 @@ sub BottomRunOff ( $Election, %args ) {
           ? $args{'active'}
           : $Election->GetActive ;
 
+  my $ranking2 = $args{'ranking2'} ? $args{'ranking2'} : 'Precedence';
   my @ranked = $Election->UnTieList(
     'ranking1' => 'TopCount',
-    'ranking2' => 'Precedence',
+    'ranking2' => $ranking2,
     'tied'     => [ keys $active->%* ],
   );
 
+$Election->logd( "Ranked is @{[ @ranked ]}") if $Election->Debug;
+
   my $pairing =
     $Election->PairMatrix()->GetPairResult( $ranked[-2], $ranked[-1] );
+$Election->logd( "pairing result " . Dumper $pairing ) if $Election->Debug;
+
+
   my $continuing = $pairing->{'winner'};
   my $eliminate  = $pairing->{'loser'};
   # pairing should never be a tie because precedence must be enabled,

@@ -23,7 +23,7 @@ use feature qw /postderef signatures/;
 no warnings 'experimental';
 
 use Data::Printer;
-# use Carp::Always;
+use Carp::Always;
 
 my $B1 =  Vote::Count->new(
   BallotSet => read_ballots('t/data/biggerset1.txt'),
@@ -32,6 +32,8 @@ my $B1 =  Vote::Count->new(
 my $B2 = Vote::Count->new(
   BallotSet => read_ballots( 't/data/biggerset1.txt'),
   PrecedenceFile => 't/data/biggerset1precedence.txt',
+  TieBreakMethod => 'grandjunction',
+  Debug => 1,
   TieBreakerFallBackPrecedence => 1 );
 
 my $Tweedles = Vote::Count->new(
@@ -61,9 +63,20 @@ is_deeply(  $R,
  'Eliminated some other weak choices still had the same bottom runoff'
  );
 $B2->Defeat( 'ROCKYROAD');
+
+my @t = $B2->UnTieActive( ranking1 => 'topcount', ranking2 => 'precedence');
+note "@t";
+note $B2->TopCount->RankTable;
+note $B2->Approval->RankTable;
+
 $R = $B2->BottomRunOff();
 is( $R->{eliminate}, 'RUMRAISIN', 'Eliminated last defeated choice check elimination');
 is( $R->{continuing}, 'STRAWBERRY', ' - then check continuing');
+
+$R = $B2->BottomRunOff( ranking2 => 'Approval');
+is( $R->{continuing}, 'CARAMEL', 'Approval as ranking2 had different pair');
+is( $R->{eliminate}, 'RUMRAISIN', 'Approval as ranking2 had different pair check other member');
+
 $B2->Defeat( 'STRAWBERRY');
 $B2->Defeat( 'RUMRAISIN');
 $R = $B2->BottomRunOff();
@@ -112,6 +125,5 @@ subtest 'synopsis' => sub {
   );
 };
 
-note 'coverage of passing an active set is in the irv btr tests';
 
 done_testing;

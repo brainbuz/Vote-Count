@@ -18,7 +18,7 @@ use Vote::Count::Matrix;
 
 no warnings 'experimental';
 
-our $VERSION='2.01';
+our $VERSION = '2.01';
 
 =head1 NAME
 
@@ -50,6 +50,27 @@ Overview of Preferential Ballots for Multi-Member Elections and their implementa
 
 =cut
 
+# This should be in tiebreaker's BUILD but
+# I've found role's BUILD unreliable.
+sub _tiebreakvalidation ( $self ) {
+  if ( defined $self->TieBreakMethod ) {
+    if ( lc( $self->TieBreakMethod ) eq 'precedence' ) {
+      unless ( defined $self->PrecedenceFile() ) {
+        die
+'Precedence File must be defined when setting TieBreakMethod to Precedence';
+      }
+    }
+  }
+  if ( $self->TieBreakerFallBackPrecedence ) {
+    no warnings 'uninitialized';
+    my $tb = $self->TieBreakMethod;
+    if ( $tb eq 'none' or $tb eq 'all' or !defined($tb) ) {
+      die
+"FATAL: TieBreakerFallBackPrecedence will not be triggered if the TieBreakMethod is none, all or undefined.\n";
+    }
+  }
+}
+
 sub BUILD {
   my $self = shift;
   # Verbose Log
@@ -63,14 +84,7 @@ sub BUILD {
 # make sure it is built before this happens, Active has to be built after
 # loading ballotset.
   $self->GetActive();
-  # Perform a validation for tiebreaker.
-  if ( defined $self->TieBreakMethod ) {
-    if ( lc( $self->TieBreakMethod ) eq 'precedence' ) {
-      unless ( defined $self->PrecedenceFile() ) {
-        die 'Precedence File must be defined when setting TieBreakMethod to Precedence';
-      }
-    }
-  }
+  $self->_tiebreakvalidation();
 }
 
 # load the roles providing the underlying ops.

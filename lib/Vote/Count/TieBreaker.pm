@@ -225,7 +225,7 @@ Creates a Predictable Psuedo Random Precedence file, and returns the list. Rando
 
 =head2 TieBreakerFallBackPrecedence
 
-This optional argument enables or disables using precedence as a fallback, generates /tmp/precedence.txt if no PrecedenceFile is specified. Default is off (0).
+This optional argument enables or disables using precedence as a fallback, generates /tmp/precedence.txt using CreatePrecedenceRandom if no PrecedenceFile is specified. Default is off (0).
 
 =head2 UnTieList
 

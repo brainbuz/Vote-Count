@@ -121,4 +121,19 @@ is( $wda->{'RUMRAISIN'},
     undef,
     'a choice removed by withdrawalist isnt in active set') ;
 
+for my $badcase ( 'none', 'all', undef ) {
+  my $case =
+    defined $badcase ? $badcase : 'tiebreakmethod undefined';
+  like(
+    dies {
+      my $z =
+        Vote::Count->new(
+          BallotSet => read_ballots('t/data/ties1.txt'),
+          TieBreakerFallBackPrecedence => 1 );
+    },
+    qr/FATAL: TieBreakerFallBackPrecedence will not be/,
+    "Incompatible with TieBreakerFallBackPrecedence: $case"
+  );
+}
+
 done_testing();
