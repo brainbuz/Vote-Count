@@ -56,8 +56,6 @@ sub RunIRV ( $self, $active = undef, $tiebreaker = undef ) {
 
 sub RunBTRIRV ( $self, %args ) {
   my $ranking2 = $args{'ranking2'} ? $args{'ranking2'} : 'precedence';
-$self->logd( qq/ranking2 is $ranking2 args were @{[ %args ]} /) if $self->Debug;
-
   $self->_IRVDO( 'btr' => 1, ranking2 => $ranking2 );
 }
 
@@ -92,12 +90,10 @@ IRVLOOP:
       return $majority;
     }
     elsif ( $args{'btr'}) {
-
-$self->logd( qq/ranking2 is $args{ranking2} active is were @{[ keys %{$active} ]} /) if $self->Debug;
-
-      my $br = $self->BottomRunOff( active => $active );
-      $self->logd( $br->{'runoff'});
-      $self->logv( "Eliminating: ${\ $br->{'eliminate'} }" );
+      my $br = $self->BottomRunOff(
+        'active' => $active, 'ranking2' => $args{'ranking2'} );
+      $self->logv( $br->{'runoff'});
+      $self->logt( "Eliminating: ${\ $br->{'eliminate'} }" );
       delete $active->{ $br->{'eliminate'} };
     }
     else { #--
@@ -108,7 +104,7 @@ $self->logd( qq/ranking2 is $args{ranking2} active is were @{[ keys %{$active} ]
         $self->logt( "Tied: @bottom" );
         return { tie => 1, tied => \@bottom, winner => 0 };
       }
-      $self->logv( "Eliminating: @bottom" );
+      $self->logt( "Eliminating: @bottom" );
       for my $b (@bottom) {
         delete $active->{$b};
       }

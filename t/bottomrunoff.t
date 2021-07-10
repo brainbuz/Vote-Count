@@ -65,9 +65,9 @@ is_deeply(  $R,
 $B2->Defeat( 'ROCKYROAD');
 
 my @t = $B2->UnTieActive( ranking1 => 'topcount', ranking2 => 'precedence');
-note "@t";
-note $B2->TopCount->RankTable;
-note $B2->Approval->RankTable;
+# note "@t";
+# note $B2->TopCount->RankTable;
+# note $B2->Approval->RankTable;
 
 $R = $B2->BottomRunOff();
 is( $R->{eliminate}, 'RUMRAISIN', 'Eliminated last defeated choice check elimination');
@@ -123,6 +123,96 @@ subtest 'synopsis' => sub {
     qr/eliminated TWEEDLE_DO./,
     'Check terse log for elimination'
   );
+};
+
+
+
+subtest 'btr irv' => sub {
+  my $A = Vote::Count->new(
+    BallotSet => read_ballots('t/data/data2.txt'),
+    PrecedenceFile => 't/data/data2precedence.txt',
+    TieBreakMethod => 'Precedence',);
+  my $TN =   Vote::Count->new(
+    BallotSet => read_range_ballots('t/data/tennessee.range.json'),
+    PrecedenceFile => '/tmp/TN.precedence',
+    TieBreakMethod => 'Precedence',
+    );
+  my $expectA = {
+    threshold => 8,
+    votes     => 15,
+    winner    => "MINTCHIP",
+    winvotes  => 8
+  };
+  my $expectTN = {
+    threshold => 51,
+    votes     => 100,
+    winner    => "NASHVILLE",
+    winvotes  => 58
+  };
+  is_deeply( $A->RunBTRIRV(),
+    $expectA, 'Expected results from BTR IRV' );
+
+  is_deeply( $TN->RunBTRIRV(),
+    $expectTN, 'With BTR IRV Nashville wins Tennessee on the Range Ballot' );
+
+};
+
+
+
+subtest 'Testing the runoffs between no 2nd ranking and approval 2nd on data that produces different pairings' => sub {
+
+my $C1 = Vote::Count->new(
+  BallotSet => read_ballots('t/data/ties3.txt'),
+  TieBreakMethod => 'precedence',
+  PrecedenceFile => 't/data/ties3precedence.txt',
+  Debug => 0,
+  );
+
+my $C2 = Vote::Count->new(
+  BallotSet => read_ballots('t/data/ties3.txt'),
+  TieBreakMethod => 'precedence',
+  PrecedenceFile => 't/data/ties3precedence.txt',
+  Debug => 0,
+);
+
+my $expectC = {
+  threshold => 8,
+  votes     => 14,
+  winner    => "MINTCHIP",
+  winvotes  => 8,
+};
+  is_deeply( $C1->RunBTRIRV(),
+    $expectC, 'Expected results from BTR IRV *No* second ranking' );
+ my @rounds1 = $C1->logv =~ m/(Elimination Runoff:.*)/g;
+ is_deeply( $C2->RunBTRIRV( ranking2 => 'Approval'),
+    $expectC, 'BTR IRV *WITH* second ranking does not change result with this data' );
+ my @rounds2 = $C2->logv =~ m/(Elimination Runoff:.*)/g;
+#
+
+my @GRP = (
+  [ 1, '*CHOCOLATE* 6 > CHERRY 6', '*STRAWBERRY* 4 > CARAMEL 4', 0 ],
+  [ 2, '*CHOCOLATE* 6 > CARAMEL 4', '*CHERRY* 6 > STRAWBERRY 4', 0 ],
+  [ 3, '*CHOCOLATE* 6 > STRAWBERRY 0', '*CHOCOLATE* 6 > CHERRY 6', 0],
+  [ 4, '*BUBBLEGUM* 8 > CHOCOLATE 4', '*BUBBLEGUM* 8 > CHOCOLATE 4', 1 ],
+  [ 5, '*CHOCCHUNK* 4 > BUBBLEGUM 4', '*CHOCCHUNK* 4 > BUBBLEGUM 4', 1],
+  [ 6, '*MINTCHIP* 6 > CHOCCHUNK 4', '*PISTACHIO* 4 > CHOCCHUNK 4', 0],
+  [ 7, '*ROCKYROAD* 5 > PISTACHIO 4', '*RUMRAISIN* 4 > PISTACHIO 4', 0],
+);
+# my @rounds = $C->logv =~ m/(Elimination Runoff:.*)/g;
+
+  for my $grp (@GRP) {
+    my ( $round, $index, $noapp, $app, $same ) =
+     ( $grp->[0], $grp->[0] -1, $grp->[1], $grp->[2], $grp->[3]);
+    if ( $same ) {
+      is ( $noapp, $app,
+      "Round $round: Both Orders were the same: $app");
+    }
+    else {    is( $rounds1[$index], "Elimination Runoff: $noapp",
+      "Round $round: No Approval as second $noapp");
+    is( $rounds2[$index], "Elimination Runoff: $app",
+      "Round $round: Approval second sorting value $app");}
+  }
+  note( 'after round 7 all the pairings were the same');
 };
 
 

@@ -56,13 +56,8 @@ sub BottomRunOff ( $Election, %args ) {
     'tied'     => [ keys $active->%* ],
   );
 
-$Election->logd( "Ranked is @{[ @ranked ]}") if $Election->Debug;
-
   my $pairing =
     $Election->PairMatrix()->GetPairResult( $ranked[-2], $ranked[-1] );
-$Election->logd( "pairing result " . Dumper $pairing ) if $Election->Debug;
-
-
   my $continuing = $pairing->{'winner'};
   my $eliminate  = $pairing->{'loser'};
   # pairing should never be a tie because precedence must be enabled,

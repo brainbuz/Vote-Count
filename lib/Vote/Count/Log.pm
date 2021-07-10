@@ -52,13 +52,19 @@ Logged events are not written until WriteLog is called. A fatal runtime error, w
 
 When logging from your methods, use logt for events that produce a summary, use logv for events that should be in the full transcript such as round counts, and finally debug is for events that may be helpful in debugging but which should not be in the transcript. Events written to logt will be included in the verbose log and all events in the verbose log will be in the debug log.
 
+The logx methods will return the current log if called without any message to log.
+
 =head2 logt
 
-Record message to the terse (.brief)
+Record message to the terse (.brief) log.
 
 =head2 logv
 
+Record message to the more verbose (.full) log.
+
 =head2 logd
+
+Record message to the debug (.debug) log.
 
 =head1 Debug Flag
 
