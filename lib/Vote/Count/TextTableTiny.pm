@@ -258,7 +258,7 @@ Vote::Count::TextTableTiny
 
 =head1 SYNOPSIS
 
- Don't use this module. It is a fork from a pending Pull Request, and will be withdrawn when the PR merges.
+Don't use this module. It is a fork from a pending Pull Request, and will be withdrawn when the PR merges.
 
 =head1 REPOSITORY
 

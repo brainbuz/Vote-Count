@@ -116,7 +116,7 @@ SSD: I<unimplemented>
 
 =item *
 
-Kemmeny-Young: I<unimplemented>
+Kemeny-Young: I<unimplemented>
 
 =back
 

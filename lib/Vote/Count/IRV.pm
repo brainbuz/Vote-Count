@@ -153,9 +153,7 @@ An optional value to RunIRV is to specify tiebreaker, see L<Vote::Count::TieBrea
 =head2 RunIRV
 
   $Election->RunIRV();
-
   $Election->RunIRV( $active )
-
   $Election->RunIRV( $active, 'approval' )
 
 Runs IRV on the provided Ballot Set. Takes an optional parameter of $active which is a hashref for which the keys are the currently active choices.
@@ -168,13 +166,18 @@ Returns results in a hashref which will be the results of  Vote::Count::TopCount
 
 Supports the Vote::Count logt, logv, and logd methods for providing details of the method.
 
+=head1 Bottom Two Runoff IRV
+
+B<Bottom Two Runoff IRV> is the simplest modification to IRV which meets the Condorcet Winner Criteria. Instead of eliminating the low choice, the lowest two choices enter a virtual runoff, eliminating the loser. This is the easiest possible Hand Count Condorcet method, there will always be fewer pairings than choices. As a Condorcet method it fails Later No Harm.
+
+BTR IRV will only eliminate a member of the Smith Set when both members of the runoff are in it, so it can never eliminate the final member of the Smith Set, and is thus Smith compliant.
+
 =head2 RunBTRIRV
 
-This is the simplest modification to IRV which meets the Condorcet Winner Criteria. Instead of eliminating the low choice, the lowest two choices enter a virtual runoff, eliminating the loser. This is the easiest possible Hand Count Condorcet method, there will always be fewer pairings than choices. This method fails LNH, when there is no Condorcet Winner LNH can come into play for each runoff. BTR IRV will only eliminate a member of the Smith Set when both members of the runoff are in it, so it can never eliminate the final member of the Smith Set. BTR IRV meets both Condorcet Criteria and the Smith Criteria.
-
   my $result = $Election->RunBTRIRV();
+  my $result = $Election->RunBTRIRV( 'ranking2' => 'Approval');
 
-RunBTRIRV has no optional arguments. Choices are ordered by TopCount, ties for position are decided by Precedence. It is mandatory that either the TieBreakMethod is Precedence or TieBreakerFallBackPrecedence is True. See UnTieList in L<Vote::Count::TieBreaker>.
+Choices are ordered by TopCount, ties for position are decided by Precedence. It is mandatory that either the TieBreakMethod is Precedence or TieBreakerFallBackPrecedence is True. The optional ranking2 option will use a second method before Precedence, see UnTieList in L<Vote::Count::TieBreaker|Vote::Count::TieBreaker/UnTieList>.
 
 The returned values and logging are the same as for RunIRV.
 
