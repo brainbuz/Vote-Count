@@ -40,11 +40,11 @@ An overview of Preferential Voting and an introduction to Vote::Count. Read this
 
 The core methods of Vote::Count are documented in this Module.
 
-=head2 L<CATALOG|Catalog>
+=head2 L<CATALOG|Vote::Count::Catalog>
 
 Catalog of Preferential Voting Methods implemented by Vote::Count and the Modules providing them.
 
-=head2 L<MULTIMEMBER|MultiMember>
+=head2 L<MULTIMEMBER|Vote::Count::MultiMember>
 
 Overview of Preferential Ballots for Multi-Member Elections and their implementation in Vote::Count.
 
@@ -114,7 +114,7 @@ __PACKAGE__->meta->make_immutable;
 
 =item *
 
-L<Vote::Count - a tool kit for preferential ballots>
+L<Vote::Count|<Vote::Count>
 
 =item *
 
@@ -130,7 +130,7 @@ L<Vote::Count::BottomRunOff>
 
 =item *
 
-L<Vote::Count::Catalog>
+L<Vote::Count::Catalog> - Catalog of Common Methods and their Vote::Count Implementation.
 
 =item *
 
@@ -210,11 +210,11 @@ L<Vote::Count::Method::WIGM>
 
 =item *
 
-L<Vote::Count::MultiMember - Overview of Multi Member and Proportional Elections and Vote::Count support for them.>
+L<Vote::Count::MultiMember> - Overview of Multi Member and Proportional Elections and L<Vote::Count> support for them.
 
 =item *
 
-L<Vote::Count::Overview>
+L<Vote::Count::Overview> - Overview of Preferential Voting and Introduction to L<Vote::Count>.
 
 =item *
 

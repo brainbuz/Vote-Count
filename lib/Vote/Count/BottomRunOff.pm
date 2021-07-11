@@ -36,10 +36,13 @@ The TieBreakMethod must either be 'precedence' or TieBreakerFallBackPrecedence m
 
   my $result = $Election->BottomRunOff();
   my $result = $Election->BottomRunOff( 'active' => $active );
+  my $result = $Election->BottomRunOff( 'ranking2' => $othermethod );
 
 Orders the Choices according to Top Count and uses Precedence to resolve any equal rankings. Then conducts a runoff between the two lowest choices in the order.
 
 The returned value is a hashref with the keys: B<eliminate>, B<continuing>, and B<runoff>, runoff describes the totals for the two choices in the runoff.
+
+The optional values are B<ranking2> and B<active>. See UnTieList in L<Vote::Count::TieBreaker|Vote::Count::TieBreaker/UnTieList>, the B<ranking1> passed to it is always B<TopCount>.  B<active> is used to provide a hashref to override the current active list.
 
 =cut
 

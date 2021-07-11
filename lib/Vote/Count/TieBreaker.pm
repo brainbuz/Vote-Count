@@ -37,9 +37,9 @@ Vote::Count::TieBreaker
 
 # ABSTRACT: TieBreaker object for Vote::Count. Toolkit for vote counting.
 
-=head TieBreakMethods
+=head1 TieBreakMethods
 
-=head TieBreakMethod argement to new
+=head2 TieBreakMethod argement to new
 
   'approval'
   'topcount' [ of just tied choices ]
@@ -225,7 +225,9 @@ Creates a Predictable Psuedo Random Precedence file, and returns the list. Rando
 
 =head2 TieBreakerFallBackPrecedence
 
-This optional argument enables or disables using precedence as a fallback, generates /tmp/precedence.txt using CreatePrecedenceRandom if no PrecedenceFile is specified. Default is off (0).
+This optional argument enables or disables using precedence as a fallback if the primary tiebreaker cannot break the tie. Generates /tmp/precedence.txt using CreatePrecedenceRandom if no PrecedenceFile is specified. Default is off (0).
+
+TieBreakMethod must be defined and may not be all or none.
 
 =head2 UnTieList
 
@@ -249,26 +251,27 @@ Produces a precedence list of all the active choices in the election. Passes the
 
 =head1 TopCount > Approval > Precedence
 
-Top Count > Approval > Precedence produces a fully resolveable Tie Breaker that will almost never fall back to Precedence. It makes sense to the voters and limits Later Harm by putting Top Count first. The Precedence order should be determined before counting, the old fashioned coffee can is great for this.
+Top Count > Approval > Precedence produces a fully resolveable Tie Breaker that will almost never fall back to Precedence. It makes sense to the voters and limits Later Harm by putting Top Count first. The Precedence order should be determined before counting, the old fashioned coffee can is great for this, or use CreatePrecedenceRandom.
 
 To apply Top Count > Approval > Precedence you need to start with a random Precedence File, Untie the choices, and switch Precedence Files:
 
   use Path::Tiny;
-  # create your official initial precedence file
   my $Election = Vote::Count->new(
-    BallotSet => read_ballots('our_ballots.txt'),
-    PrecedenceFile => 'our_official_initial_precedence.txt',
+    BallotSet      => read_ballots($ballots),
+    PrecedenceFile => $initial,
     TieBreakMethod => 'Precedence',
-    );
+  );
   # Create the new Precedence
-  my @newbreaker = $Election->UnTieList( 'ranking1' => 'TopCount', 'ranking2' => 'Approval');
-  local $" = ' > '; # set list separator to >
-  $Election->logv( "Setting Tie Break Order to: @newbreaker");
-  local $" = "\n" ; # set list separator to new line.
-  path( 'topapproveprecedence.txt')->spew( "@newbreaker" );
-  $Election->PrecedenceFile( 'topapproveprecedence.txt' );
-
-
+  my @newbreaker = $Election->UnTieActive(
+    'ranking1' => 'TopCount',
+    'ranking2' => 'Approval'
+  );
+  local $" = ' > ';    # set list separator to >
+  $Election->logv("Setting Tie Break Order to: @newbreaker");
+  local $" = "\n";     # set list separator to new line.
+  path($newprecedence)->spew("@newbreaker");
+  $Election->PrecedenceFile($newprecedence);
+  $Election->UpdatePairMatrix();
 
 =cut
 

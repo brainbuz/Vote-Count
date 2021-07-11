@@ -125,8 +125,6 @@ subtest 'synopsis' => sub {
   );
 };
 
-
-
 subtest 'btr irv' => sub {
   my $A = Vote::Count->new(
     BallotSet => read_ballots('t/data/data2.txt'),
@@ -134,7 +132,7 @@ subtest 'btr irv' => sub {
     TieBreakMethod => 'Precedence',);
   my $TN =   Vote::Count->new(
     BallotSet => read_range_ballots('t/data/tennessee.range.json'),
-    PrecedenceFile => '/tmp/TN.precedence',
+    PrecedenceFile => 't/data/tennessee_precedence.txt',
     TieBreakMethod => 'Precedence',
     );
   my $expectA = {
@@ -154,7 +152,6 @@ subtest 'btr irv' => sub {
 
   is_deeply( $TN->RunBTRIRV(),
     $expectTN, 'With BTR IRV Nashville wins Tennessee on the Range Ballot' );
-
 };
 
 
