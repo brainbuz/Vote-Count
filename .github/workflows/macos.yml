@@ -4,7 +4,7 @@ name: MacOS
 # Controls when the action will run.
 on:
   push:
-    branches: [ master, stv, btr ]
+    branches: [ master, stv, btr, development ]
   pull_request:
     branches: [ master ]
 
