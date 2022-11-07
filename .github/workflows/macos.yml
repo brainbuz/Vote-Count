@@ -31,7 +31,7 @@ jobs:
 #          - '5.8' # dzil not available
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
