@@ -6,7 +6,7 @@ on:
   # Triggers the workflow on push or pull request events but only for the
   # listed branches
   push:
-    branches: [ master, stv, btr ]
+    branches: [ master, stv, btr, development ]
   pull_request:
     branches: [ master ]
 
