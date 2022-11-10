@@ -9,7 +9,7 @@ requires "Exporter" => "0";
 requires "Exporter::Easy" => "0";
 requires "List::Util" => "1.63";
 requires "Math::BigInt" => "1.999837";
-requires "Math::BigInt::GMP" => "1.6011";
+requires "Math::BigInt::GMP" => "1.6005";
 requires "Math::BigRat" => "0.2624";
 requires "Mojo::Template" => "0";
 requires "Moose" => "0";
@@ -58,6 +58,9 @@ on 'configure' => sub {
 
 on 'develop' => sub {
   requires "Test2::Bundle::More" => "0";
+  requires "Test2::Tools::Exception" => "0";
+  requires "Test2::Tools::Warnings" => "0";
   requires "Test2::V0" => "0";
+  requires "Test::Exception" => "0";
   requires "Test::Pod" => "0";
 };
