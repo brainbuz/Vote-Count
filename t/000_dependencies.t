@@ -28,7 +28,7 @@ use ok 'Cpanel::JSON::XS 4.32';
 use ok 'List::Util 1.63';
 use ok 'Math::BigRat 0.2624';
 use ok 'Math::BigInt 1.999837';
-use ok 'Math::BigInt::GMP 1.6011';
+use ok 'Math::BigInt::GMP 1.6005';
 use ok 'Storable 3.25';
 use ok 'Ref::Util 0.204';
 
