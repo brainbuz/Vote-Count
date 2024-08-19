@@ -31,7 +31,7 @@ jobs:
       - name: perl -V
         run: perl -V
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Dependencies install-with-cpm
         uses: perl-actions/install-with-cpm@stable
