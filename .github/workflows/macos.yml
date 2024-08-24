@@ -47,4 +47,4 @@ jobs:
 
       - name: Run Tests
         run: |
-          prove -lv t/*.t
+          export MACARM=true; prove -lv t/*.t
